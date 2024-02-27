@@ -161,9 +161,9 @@ ggplot(polygon_camps, aes(fill = ras_name)) +
 # Scatter plot with site_status
 ggplot(polygon_camps, aes(x = ras_name, y = N_INDVID, color = Site_Statu)) +
   geom_point() +
-  labs(title = "Comparison between ras_name and N_INDVID",
-       x = "ras_name",
-       y = "N_INDVID") +
+  labs(title = "Comparison between estimated and survey iom populations",
+       x = "Estimated population",
+       y = "Iom surveyed population") +
   theme_minimal()
 ```
 ```{r}
@@ -205,4 +205,66 @@ plot3 <- ggplot(polygon_camps, aes(x = N_HH, y = ras_name, color = ras_name)) +
 grid.arrange(plot1, plot2, plot3, ncol = 2)
 ```
 
-#
+#World POP
+
+```{r}
+World_pop <- rast('D:/EAGLE/Master_Thesis_Hannes/1/world_pop/nga_ppp_2020.tif')
+```
+
+```{r}
+# Read the raster file into R
+world_pop_raster <- rast(World_pop)
+# Display information about the raster
+print(world_pop_raster)
+```
+```{r}
+# Check the extent of the raster
+# Check the extent of the raster
+extent_worldpop <- terra::ext(world_pop_raster)
+print(extent_worldpop)
+
+# Check summary information about the polygons
+summary(polygon_camps)
+
+# Create a SpatialPolygons object from the extent
+extent_poly <- SpatialPolygons(
+  list(
+    Polygons(
+      list(
+        Polygon(
+          cbind(
+            c(extent_worldpop[1], extent_worldpop[1], extent_worldpop[2], extent_worldpop[2], extent_worldpop[1]),
+            c(extent_worldpop[3], extent_worldpop[4], extent_worldpop[4], extent_worldpop[3], extent_worldpop[3])
+          )
+        )
+      ),
+      ID = "1"
+    )
+  )
+)
+
+# Check if the polygons overlap with the raster extent
+overlap <- over(polygon_camps, extent_poly)
+print(overlap)
+
+```
+
+
+
+```{r}
+# Get values from the raster
+raster_values <- raster::getValues(world_pop_raster)
+
+# Print the values
+print(raster_values)
+```
+
+```{r}
+
+# Call function
+
+polygon_camps <- extract_sum(world_pop_raster, polygon_camps,"Name")
+
+```
+
+
