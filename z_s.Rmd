@@ -9,4 +9,102 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Zonal statistics for each of the global EO population datasets
+
+```{r}
+install.packages("D:/EAGLE/Master_Thesis_Hannes/1/R/packages/exactextractr_0.10.0.tar.gz", repos = NULL, type = "source")
+```
+
+
+```{r}
+# List of packages to install
+#packages_to_install <- c("exactextracter")
+
+# Install the packages
+#install.packages(packages_to_install)
+```
+
+
+```{r}
+library(sf)
+library(ggplot2)
+library(raster)
+library(exactextractr)
+library(terra)
+```
+
+
+#Zonal statistics for each of the global EO population datasets
+
+#Loading the data of camps
+
+```{r}
+url <- "data_camps/idp_camps_224.shp"
+sf_data <- st_read(url) 
+```
+```{r}
+ghsl_raster_path<-"D:/EAGLE/Master_Thesis_Hannes/1/ghsl_pop_2020_mollweid_100m/merged_ghsl.tif"
+# Read the raster file into R
+ghsl_raster <- raster(ghsl_raster_path)
+
+```
+
+```{r}
+# Display information about the raster
+print(ghsl_raster)
+```
+```{r}
+# Plot the raster
+plot(ghsl_raster)
+```
+```{r}
+# function
+
+# weighted sum per polygon (using the size of the pixel covered by the polygon "coverage_fraction")
+
+extract_sum  <-  function(raster, polygon, field){
+
+  polygon $id_tmp <- as.data.frame(polygon)[,field]
+
+  v.exact <- exactextractr::exact_extract(raster, polygon, include_cols = 'id_tmp', max_cells_in_memory=3e+10)
+
+  x <- do.call("rbind",v.exact)
+
+  x[,"ras_name"] <- x[, "value"] * x$coverage_fraction
+
+  x_sum <- x %>%
+
+    dplyr::group_by(id_tmp)%>%
+
+    dplyr::summarise_at("ras_name", sum, na.rm = TRUE)
+
+polygon <- polygon %>%
+
+    left_join(x_sum, by = "id_tmp")
+
+  rm(x,v.exact,x_sum)
+
+  return(polygon)
+
+}
+```
+
+
+```{r}
+# Data
+sf_data <- st_read(url) 
+polygon_camps <-sf_data
+
+```
+
+
+```{r}
+raster_population <- rast('D:/EAGLE/Master_Thesis_Hannes/1/ghsl_pop_2020_mollweid_100m/merged_ghsl.tif')
+```
+
+```{r}
+# Call function
+
+polygon_camps <- extract_sum(raster_population, polygon_camps,"Name")
+
+```
+
