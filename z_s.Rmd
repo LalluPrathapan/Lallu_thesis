@@ -30,6 +30,8 @@ library(ggplot2)
 library(raster)
 library(exactextractr)
 library(terra)
+library(dplyr)
+library(gridExtra)
 ```
 
 
@@ -41,6 +43,7 @@ library(terra)
 url <- "data_camps/idp_camps_224.shp"
 sf_data <- st_read(url) 
 ```
+# 1. GHSL DATA
 ```{r}
 ghsl_raster_path<-"D:/EAGLE/Master_Thesis_Hannes/1/ghsl_pop_2020_mollweid_100m/merged_ghsl.tif"
 # Read the raster file into R
@@ -108,3 +111,98 @@ polygon_camps <- extract_sum(raster_population, polygon_camps,"Name")
 
 ```
 
+
+#Difference in the population
+```{r}
+# Assuming you have a column named "N_INDVID" in the polygon_camps data frame
+# Adjust the column name if needed
+
+# Subtract N_INDVID from ras_name
+polygon_camps$ghsl_difference <- polygon_camps$N_INDVID - polygon_camps$ras_name
+
+# View the resulting data frame with the new "difference" column
+print(polygon_camps)
+
+```
+#Writing the output of the ghsl extract
+
+```{r}
+
+library(sf)
+
+# Convert the data frame to an sf object
+sf_polygon_camps <- st_as_sf(polygon_camps)
+
+# Remove Z (3D) coordinates
+sf_polygon_camps <- st_zm(sf_polygon_camps, drop = TRUE)
+
+# Export the sf object to a shapefile
+st_write(sf_polygon_camps,
+ "ghsl_output/polygon_camps_justghsl.shp")
+
+```
+
+
+```{r}
+library(ggplot2)
+
+# Assuming you have a column named "ras_name" in the polygon_camps data frame
+# Change the column name if you used a different name in the code
+
+# Define the ggplot object
+ggplot(polygon_camps, aes(fill = ras_name)) +
+  geom_sf() +  # Plot the polygons
+  scale_fill_viridis_c() +  # Choose a color scale (you can change to your preference)
+  labs(title = "Zonal Statistics of GHSL Values for Camps") +
+  theme_minimal()
+
+```
+```{r}
+# Scatter plot with site_status
+ggplot(polygon_camps, aes(x = ras_name, y = N_INDVID, color = Site_Statu)) +
+  geom_point() +
+  labs(title = "Comparison between ras_name and N_INDVID",
+       x = "ras_name",
+       y = "N_INDVID") +
+  theme_minimal()
+```
+```{r}
+# Scatter plot with different colors based on Shelt_type
+ggplot(polygon_camps, aes(x = ras_name, y = N_INDVID, color = Shelt_type)) +
+  geom_point() +
+  labs(title = "Comparison between ras_name and N_INDVID",
+       x = "ras_name",
+       y = "N_INDVID") +
+  theme_minimal()
+```
+
+```{r}
+# Scatter plot comparing N_INDIVID and N_HH
+plot1 <- ggplot(polygon_camps, aes(x = N_INDVID, y = N_HH, color = ras_name)) +
+  geom_point() +
+  labs(title = "Comparison between N_INDVID and N_HH",
+       x = "N_INDVID",
+       y = "N_HH") +
+  theme_minimal()
+
+# Scatter plot comparing N_INDIVID and ras_name
+plot2 <- ggplot(polygon_camps, aes(x = N_INDVID, y = ras_name, color = ras_name)) +
+  geom_point() +
+  labs(title = "Comparison between N_INDVID and ras_name",
+       x = "N_INDVID",
+       y = "ras_name") +
+  theme_minimal()
+
+# Scatter plot comparing N_HH and ras_name
+plot3 <- ggplot(polygon_camps, aes(x = N_HH, y = ras_name, color = ras_name)) +
+  geom_point() +
+  labs(title = "Comparison between N_HH and ras_name",
+       x = "N_HH",
+       y = "ras_name") +
+  theme_minimal()
+
+# Arrange the plots in a grid
+grid.arrange(plot1, plot2, plot3, ncol = 2)
+```
+
+#
