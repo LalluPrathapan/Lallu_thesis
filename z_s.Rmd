@@ -74,13 +74,13 @@ extract_sum  <-  function(raster, polygon, field){
 
   x <- do.call("rbind",v.exact)
 
-  x[,"wrld_pp_ncn_n"] <- x[, "value"] * x$coverage_fraction
+  x[,"gpw"] <- x[, "value"] * x$coverage_fraction
 
   x_sum <- x %>%
 
     dplyr::group_by(id_tmp)%>%
 
-    dplyr::summarise_at("wrld_pp_ncn_n", sum, na.rm = TRUE)
+    dplyr::summarise_at("gpw", sum, na.rm = TRUE)
 
 polygon <- polygon %>%
 
@@ -120,7 +120,7 @@ polygon_camps <- extract_sum(raster_population, polygon_camps,"Name")
 # Adjust the column name if needed
 
 # Subtract N_INDVID from ras_name
-polygon_camps$ghsl_difference <- polygon_camps$N_INDVID - polygon_camps$ras_name
+polygon_camps$ghsl_difference <- polygon_camps$N_INDVID - polygon_camps$ghsl
 
 # View the resulting data frame with the new "difference" column
 print(polygon_camps)
@@ -140,7 +140,7 @@ sf_polygon_camps <- st_zm(sf_polygon_camps, drop = TRUE)
 
 # Export the sf object to a shapefile
 st_write(sf_polygon_camps,
- "ghsl_output/polygon_camps_justghsl.shp")
+ "ghsl_output/polygon_camps_ghsl.shp")
 
 ```
 GHSL some plot visualisation
@@ -152,7 +152,7 @@ library(ggplot2)
 # Change the column name if you used a different name in the code
 
 # Define the ggplot object
-ggplot(polygon_camps, aes(fill = ras_name)) +
+ggplot(polygon_camps, aes(fill = ghsl)) +
   geom_sf() +  # Plot the polygons
   scale_fill_viridis_c() +  # Choose a color scale (you can change to your preference)
   labs(title = "Zonal Statistics of GHSL Values for Camps") +
@@ -161,7 +161,7 @@ ggplot(polygon_camps, aes(fill = ras_name)) +
 ```
 ```{r}
 # Scatter plot with site_status
-ggplot(polygon_camps, aes(x = ras_name, y = N_INDVID, color = Site_Statu)) +
+ggplot(polygon_camps, aes(x = ghsl, y = N_INDVID, color = Site_Statu)) +
   geom_point() +
   labs(title = "Comparison between estimated and survey iom populations",
        x = "Estimated population",
@@ -170,7 +170,7 @@ ggplot(polygon_camps, aes(x = ras_name, y = N_INDVID, color = Site_Statu)) +
 ```
 ```{r}
 # Scatter plot with different colors based on Shelt_type
-ggplot(polygon_camps, aes(x = ras_name, y = N_INDVID, color = Shelt_type)) +
+ggplot(polygon_camps, aes(x = ghsl, y = N_INDVID, color = Shelt_type)) +
   geom_point() +
   labs(title = "Comparison between ras_name and N_INDVID",
        x = "ras_name",
@@ -180,7 +180,7 @@ ggplot(polygon_camps, aes(x = ras_name, y = N_INDVID, color = Shelt_type)) +
 
 ```{r}
 # Scatter plot comparing N_INDIVID and N_HH
-plot1 <- ggplot(polygon_camps, aes(x = N_INDVID, y = N_HH, color = ras_name)) +
+plot1 <- ggplot(polygon_camps, aes(x = N_INDVID, y = N_HH, color = ghsl)) +
   geom_point() +
   labs(title = "Comparison between N_INDVID and N_HH",
        x = "N_INDVID",
@@ -188,19 +188,19 @@ plot1 <- ggplot(polygon_camps, aes(x = N_INDVID, y = N_HH, color = ras_name)) +
   theme_minimal()
 
 # Scatter plot comparing N_INDIVID and ras_name
-plot2 <- ggplot(polygon_camps, aes(x = N_INDVID, y = ras_name, color = ras_name)) +
+plot2 <- ggplot(polygon_camps, aes(x = N_INDVID, y = ghsl, color = ghsl)) +
   geom_point() +
   labs(title = "Comparison between N_INDVID and ras_name",
        x = "N_INDVID",
-       y = "ras_name") +
+       y = "ghsl") +
   theme_minimal()
 
 # Scatter plot comparing N_HH and ras_name
-plot3 <- ggplot(polygon_camps, aes(x = N_HH, y = ras_name, color = ras_name)) +
+plot3 <- ggplot(polygon_camps, aes(x = N_HH, y = ghsl, color = ghsl)) +
   geom_point() +
   labs(title = "Comparison between N_HH and ras_name",
        x = "N_HH",
-       y = "ras_name") +
+       y = "ghsl") +
   theme_minimal()
 
 # Arrange the plots in a grid
@@ -227,7 +227,7 @@ polygon_camps <- extract_sum(World_pop,polygon_camps,"Name")
 # Adjust the column name if needed
 
 # Subtract N_INDVID from ras_name
-polygon_camps$world_pop_difference <- polygon_camps$N_INDVID - polygon_camps$ras_name.x
+polygon_camps$world_pop_difference <- polygon_camps$N_INDVID - polygon_camps$wp_c
 
 # View the resulting data frame with the new "difference" column
 print(polygon_camps)
@@ -247,14 +247,14 @@ sf_polygon_camps2 <- st_zm(sf_polygon_camps2, drop = TRUE)
 
 # Export the sf object to a shapefile
 st_write(sf_polygon_camps2,
- "world_pop_output/polygon_camps_2.shp")
+ "world_pop_output/wp_c.shp")
 
 ```
 
 #World pop constrained plots
 ```{r}
 # Define the ggplot object
-ggplot(polygon_camps, aes(fill = ras_name.y)) +
+ggplot(polygon_camps, aes(fill = wp_c)) +
   geom_sf() +  # Plot the polygons
   scale_fill_viridis_c() +  # Choose a color scale (you can change to your preference)
   labs(title = "Zonal Statistics of GHSL Values for Camps") +
@@ -264,7 +264,7 @@ ggplot(polygon_camps, aes(fill = ras_name.y)) +
 
 ```{r}
 # Scatter plot with site_status
-ggplot(polygon_camps, aes(x = ras_name.y, y = N_INDVID, color = Site_Statu)) +
+ggplot(polygon_camps, aes(x = wp_c, y = N_INDVID, color = Site_Statu)) +
   geom_point() +
   labs(title = "Comparison between estimated_worldpop and survey iom populations",
        x = "Estimated population_worldpop",
@@ -273,10 +273,8 @@ ggplot(polygon_camps, aes(x = ras_name.y, y = N_INDVID, color = Site_Statu)) +
 ```
 
 
-
-
-
 #3.World POP(unconstrained)
+
 ```{r}
 World_pop_unconstr <- rast('D:/EAGLE/Master_Thesis_Hannes/1/world_pop_build/nga_ppp_2020_constrained.tif')
 print(World_pop_unconstr)
@@ -296,7 +294,7 @@ polygon_camps <- extract_sum(World_pop_unconstr,polygon_camps,"Name")
 # Adjust the column name if needed
 
 # Subtract N_INDVID from ras_name
-polygon_camps$wppu_diff <- polygon_camps$N_INDVID - polygon_camps$wrld_pp_ncn_n
+polygon_camps$wp_uc_diff <- polygon_camps$N_INDVID - polygon_camps$wp_uc
 
 # View the resulting data frame with the new "difference" column
 print(polygon_camps)
@@ -324,7 +322,7 @@ st_write(poly_camp3,
 
 ```{r}
 # Define the ggplot object
-ggplot(polygon_camps, aes(fill = wrld_pp_ncn_n)) +
+ggplot(polygon_camps, aes(fill = wp_uc)) +
   geom_sf() +  # Plot the polygons
   scale_fill_viridis_c() +  # Choose a color scale (you can change to your preference)
   labs(title = "Zonal Statistics of worldpop constrained Values for Camps") +
@@ -333,7 +331,7 @@ ggplot(polygon_camps, aes(fill = wrld_pp_ncn_n)) +
 
 ```{r}
 # Scatter plot with site_status
-ggplot(polygon_camps, aes(x = wrld_pp_ncn_n, y = N_INDVID, color = Site_Statu)) +
+ggplot(polygon_camps, aes(x = wp_uc, y = N_INDVID, color = Site_Statu)) +
   geom_point() +
   labs(title = "Comparison between estimated_worldpop_unconstrained and survey iom populations",
        x = "Estimated population_worldpop_unconstrained",
@@ -348,18 +346,21 @@ ggplot(polygon_camps, aes(x = wrld_pp_ncn_n, y = N_INDVID, color = Site_Statu)) 
 gpw <- rast('D:/EAGLE/Master_Thesis_Hannes/1/gpw/gpw-v4-population-count-rev11_2020_30_sec_tif/gpw_v4_population_count_rev11_2020_30_sec.tif')
 print(gpw)
 ```
+
+
 ```{r}
 # Call function
 
 polygon_camps <- extract_sum(gpw,polygon_camps,"Name")
 ```
+
 #Difference in the survery_population and gpw_population
 ```{r}
 # Assuming you have a column named "N_INDVID" in the polygon_camps data frame
 # Adjust the column name if needed
 
 # Subtract N_INDVID from ras_name
-polygon_camps$gpw_difference <- polygon_camps$N_INDVID - polygon_camps$gpw
+polygon_camps$gpw_diff <- polygon_camps$N_INDVID - polygon_camps$gpw
 
 # View the resulting data frame with the new "difference" column
 print(polygon_camps)
@@ -377,7 +378,7 @@ poly_camp4 <- st_zm(poly_camp4, drop = TRUE)
 
 # Export the sf object to a shapefile
 st_write(poly_camp4,
- "gpw/polygon_gpw.shp")
+ "gpw/polygon_gpw1.shp")
 
 
 
@@ -386,7 +387,7 @@ st_write(poly_camp4,
 
 ```{r}
 # Define the ggplot object
-ggplot(polygon_camps, aes(fill = wrld_pp_ncn_n)) +
+ggplot(polygon_camps, aes(fill = gpw)) +
   geom_sf() +  # Plot the polygons
   scale_fill_viridis_c() +  # Choose a color scale (you can change to your preference)
   labs(title = "Zonal Statistics of worldpop constrained Values for Camps") +
