@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-
+#Packages install
 ```{r}
 install.packages("D:/EAGLE/Master_Thesis_Hannes/1/R/packages/exactextractr_0.10.0.tar.gz", repos = NULL, type = "source")
 ```
@@ -22,7 +22,7 @@ install.packages("D:/EAGLE/Master_Thesis_Hannes/1/R/packages/exactextractr_0.10.
 # Install the packages
 #install.packages(packages_to_install)
 ```
-
+#Packages library
 
 ```{r}
 library(sf)
@@ -59,6 +59,8 @@ print(ghsl_raster)
 # Plot the raster
 plot(ghsl_raster)
 ```
+#The extract function
+
 ```{r}
 # function
 
@@ -72,13 +74,13 @@ extract_sum  <-  function(raster, polygon, field){
 
   x <- do.call("rbind",v.exact)
 
-  x[,"ras_name"] <- x[, "value"] * x$coverage_fraction
+  x[,"wrld_pp_ncn_n"] <- x[, "value"] * x$coverage_fraction
 
   x_sum <- x %>%
 
     dplyr::group_by(id_tmp)%>%
 
-    dplyr::summarise_at("ras_name", sum, na.rm = TRUE)
+    dplyr::summarise_at("wrld_pp_ncn_n", sum, na.rm = TRUE)
 
 polygon <- polygon %>%
 
@@ -204,8 +206,7 @@ plot3 <- ggplot(polygon_camps, aes(x = N_HH, y = ras_name, color = ras_name)) +
 # Arrange the plots in a grid
 grid.arrange(plot1, plot2, plot3, ncol = 2)
 ```
-
-#World POP
+#2.World POP(constrained)
 
 ```{r}
 World_pop <- rast('D:/EAGLE/Master_Thesis_Hannes/1/world_pop/nga_ppp_2020.tif')
@@ -256,14 +257,88 @@ ggplot(polygon_camps, aes(x = ras_name.y, y = N_INDVID, color = Site_Statu)) +
        y = "Iom surveyed population") +
   theme_minimal()
 ```
+
+#Difference in the survery_population and world_pop
+```{r}
+# Assuming you have a column named "N_INDVID" in the polygon_camps data frame
+# Adjust the column name if needed
+
+# Subtract N_INDVID from ras_name
+polygon_camps$world_pop_difference <- polygon_camps$N_INDVID - polygon_camps$ras_name.x
+
+# View the resulting data frame with the new "difference" column
+print(polygon_camps)
+
+```
+
+
+
+#3.World POP(unconstrained)
+```{r}
+World_pop_unconstr <- rast('D:/EAGLE/Master_Thesis_Hannes/1/world_pop_build/nga_ppp_2020_constrained.tif')
+print(World_pop_unconstr)
+
 ```
 
 ```{r}
-# Create a scatter plot
-ggplot(your_data, aes(x = ras_name, y = ras_name.x)) +
-  geom_point() +
-  labs(title = "Scatter Plot of ras_name and ras_name.x",
-       x = "ras_name",
-       y = "ras_name.x")
+# Call function
+
+polygon_camps <- extract_sum(World_pop_unconstr,polygon_camps,"Name")
+
 ```
 
+#Difference in the survery_population and world_pop
+```{r}
+# Assuming you have a column named "N_INDVID" in the polygon_camps data frame
+# Adjust the column name if needed
+
+# Subtract N_INDVID from ras_name
+polygon_camps$wrld_pp_un_diff <- polygon_camps$N_INDVID - polygon_camps$wrld_pp_ncn_n
+
+# View the resulting data frame with the new "difference" column
+print(polygon_camps)
+```
+
+
+
+#Writing the output of the worldpop unconstrained extract
+
+```{r}
+# Convert the data frame to an sf object
+poly_camp3<- st_as_sf(polygon_camps)
+
+# Remove Z (3D) coordinates
+poly_camp3 <- st_zm(poly_camp3, drop = TRUE)
+
+# Export the sf object to a shapefile
+st_write(poly_camps3,
+ "world_pop_uncons_output/pol_cmp_3.shp")
+
+
+
+```
+
+
+#4. GPW_V4
+
+```{r}
+
+gpw <- rast('D:/EAGLE/Master_Thesis_Hannes/1/gpw/gpw-v4-population-count-rev11_2020_30_sec_tif/gpw_v4_population_count_rev11_2020_30_sec.tif')
+print(gpw)
+```
+```{r}
+# Call function
+
+polygon_camps <- extract_sum(gpw,polygon_camps,"Name")
+```
+#Difference in the survery_population and gpw_population
+```{r}
+# Assuming you have a column named "N_INDVID" in the polygon_camps data frame
+# Adjust the column name if needed
+
+# Subtract N_INDVID from ras_name
+polygon_camps$gpw_difference <- polygon_camps$N_INDVID - polygon_camps$gpw
+
+# View the resulting data frame with the new "difference" column
+print(polygon_camps)
+```
