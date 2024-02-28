@@ -382,7 +382,26 @@ st_write(poly_camp4,
 
 
 ```
+#Gpw plots
 
+```{r}
+# Define the ggplot object
+ggplot(polygon_camps, aes(fill = wrld_pp_ncn_n)) +
+  geom_sf() +  # Plot the polygons
+  scale_fill_viridis_c() +  # Choose a color scale (you can change to your preference)
+  labs(title = "Zonal Statistics of worldpop constrained Values for Camps") +
+  theme_minimal()
+```
+
+```{r}
+# Scatter plot with site_status
+ggplot(polygon_camps, aes(x = gpw, y = N_INDVID, color = Site_Statu)) +
+  geom_point() +
+  labs(title = "Comparison between estimated_gpw and survey iom populations",
+       x = "Estimated population_gpw",
+       y = "Iom surveyed population") +
+  theme_minimal()
+```
 
 
 
