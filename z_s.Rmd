@@ -143,7 +143,7 @@ st_write(sf_polygon_camps,
  "ghsl_output/polygon_camps_justghsl.shp")
 
 ```
-
+GHSL some plot visualisation
 
 ```{r}
 library(ggplot2)
@@ -221,6 +221,20 @@ print(World_pop)
 polygon_camps <- extract_sum(World_pop,polygon_camps,"Name")
 
 ```
+#Difference in the survery_population and world_pop
+```{r}
+# Assuming you have a column named "N_INDVID" in the polygon_camps data frame
+# Adjust the column name if needed
+
+# Subtract N_INDVID from ras_name
+polygon_camps$world_pop_difference <- polygon_camps$N_INDVID - polygon_camps$ras_name.x
+
+# View the resulting data frame with the new "difference" column
+print(polygon_camps)
+
+```
+
+
 
 #Writing the output of the worldpop unconstrained extract
 
@@ -237,7 +251,7 @@ st_write(sf_polygon_camps2,
 
 ```
 
-
+#World pop constrained plots
 ```{r}
 # Define the ggplot object
 ggplot(polygon_camps, aes(fill = ras_name.y)) +
@@ -258,18 +272,7 @@ ggplot(polygon_camps, aes(x = ras_name.y, y = N_INDVID, color = Site_Statu)) +
   theme_minimal()
 ```
 
-#Difference in the survery_population and world_pop
-```{r}
-# Assuming you have a column named "N_INDVID" in the polygon_camps data frame
-# Adjust the column name if needed
 
-# Subtract N_INDVID from ras_name
-polygon_camps$world_pop_difference <- polygon_camps$N_INDVID - polygon_camps$ras_name.x
-
-# View the resulting data frame with the new "difference" column
-print(polygon_camps)
-
-```
 
 
 
@@ -287,13 +290,13 @@ polygon_camps <- extract_sum(World_pop_unconstr,polygon_camps,"Name")
 
 ```
 
-#Difference in the survery_population and world_pop
+#Difference in the survery_population and world_pop unconstrained
 ```{r}
 # Assuming you have a column named "N_INDVID" in the polygon_camps data frame
 # Adjust the column name if needed
 
 # Subtract N_INDVID from ras_name
-polygon_camps$wrld_pp_un_diff <- polygon_camps$N_INDVID - polygon_camps$wrld_pp_ncn_n
+polygon_camps$wppu_diff <- polygon_camps$N_INDVID - polygon_camps$wrld_pp_ncn_n
 
 # View the resulting data frame with the new "difference" column
 print(polygon_camps)
@@ -311,13 +314,32 @@ poly_camp3<- st_as_sf(polygon_camps)
 poly_camp3 <- st_zm(poly_camp3, drop = TRUE)
 
 # Export the sf object to a shapefile
-st_write(poly_camps3,
- "world_pop_uncons_output/pol_cmp_3.shp")
+st_write(poly_camp3,
+ "world_pop_uncons_output/polygon_wpun.shp")
 
 
 
 ```
+#World pop unconstrained plots
 
+```{r}
+# Define the ggplot object
+ggplot(polygon_camps, aes(fill = wrld_pp_ncn_n)) +
+  geom_sf() +  # Plot the polygons
+  scale_fill_viridis_c() +  # Choose a color scale (you can change to your preference)
+  labs(title = "Zonal Statistics of worldpop constrained Values for Camps") +
+  theme_minimal()
+```
+
+```{r}
+# Scatter plot with site_status
+ggplot(polygon_camps, aes(x = wrld_pp_ncn_n, y = N_INDVID, color = Site_Statu)) +
+  geom_point() +
+  labs(title = "Comparison between estimated_worldpop_unconstrained and survey iom populations",
+       x = "Estimated population_worldpop_unconstrained",
+       y = "Iom surveyed population") +
+  theme_minimal()
+```
 
 #4. GPW_V4
 
@@ -342,3 +364,34 @@ polygon_camps$gpw_difference <- polygon_camps$N_INDVID - polygon_camps$gpw
 # View the resulting data frame with the new "difference" column
 print(polygon_camps)
 ```
+
+
+#Writing the output of the gpw
+
+```{r}
+# Convert the data frame to an sf object
+poly_camp4<- st_as_sf(polygon_camps)
+
+# Remove Z (3D) coordinates
+poly_camp4 <- st_zm(poly_camp4, drop = TRUE)
+
+# Export the sf object to a shapefile
+st_write(poly_camp4,
+ "gpw/polygon_gpw.shp")
+
+
+
+```
+
+
+
+
+#Removing unnecessary attributes// only run if needed
+```{r}
+attributes_to_remove <- c("wrld_pp_un_diff")
+
+# Remove specified attributes
+polygon_camps <- polygon_camps %>%
+  select(-one_of(attributes_to_remove))
+```
+
