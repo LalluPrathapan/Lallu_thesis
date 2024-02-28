@@ -209,62 +209,61 @@ grid.arrange(plot1, plot2, plot3, ncol = 2)
 
 ```{r}
 World_pop <- rast('D:/EAGLE/Master_Thesis_Hannes/1/world_pop/nga_ppp_2020.tif')
+print(World_pop)
 ```
 
-```{r}
-# Read the raster file into R
-world_pop_raster <- rast(World_pop)
-# Display information about the raster
-print(world_pop_raster)
-```
-```{r}
-# Check the extent of the raster
-# Check the extent of the raster
-extent_worldpop <- terra::ext(world_pop_raster)
-print(extent_worldpop)
-
-# Check summary information about the polygons
-summary(polygon_camps)
-
-# Create a SpatialPolygons object from the extent
-extent_poly <- SpatialPolygons(
-  list(
-    Polygons(
-      list(
-        Polygon(
-          cbind(
-            c(extent_worldpop[1], extent_worldpop[1], extent_worldpop[2], extent_worldpop[2], extent_worldpop[1]),
-            c(extent_worldpop[3], extent_worldpop[4], extent_worldpop[4], extent_worldpop[3], extent_worldpop[3])
-          )
-        )
-      ),
-      ID = "1"
-    )
-  )
-)
-
-# Check if the polygons overlap with the raster extent
-overlap <- over(polygon_camps, extent_poly)
-print(overlap)
-
-```
-
-
-
-```{r}
-# Get values from the raster
-raster_values <- raster::getValues(world_pop_raster)
-
-# Print the values
-print(raster_values)
-```
 
 ```{r}
 
 # Call function
 
-polygon_camps <- extract_sum(world_pop_raster, polygon_camps,"Name")
+polygon_camps <- extract_sum(World_pop,polygon_camps,"Name")
 
 ```
 
+#Writing the output of the worldpop unconstrained extract
+
+```{r}
+# Convert the data frame to an sf object
+sf_polygon_camps2 <- st_as_sf(polygon_camps)
+
+# Remove Z (3D) coordinates
+sf_polygon_camps2 <- st_zm(sf_polygon_camps2, drop = TRUE)
+
+# Export the sf object to a shapefile
+st_write(sf_polygon_camps2,
+ "world_pop_output/polygon_camps_2.shp")
+
+```
+
+
+```{r}
+# Define the ggplot object
+ggplot(polygon_camps, aes(fill = ras_name.y)) +
+  geom_sf() +  # Plot the polygons
+  scale_fill_viridis_c() +  # Choose a color scale (you can change to your preference)
+  labs(title = "Zonal Statistics of GHSL Values for Camps") +
+  theme_minimal()
+
+```
+
+```{r}
+# Scatter plot with site_status
+ggplot(polygon_camps, aes(x = ras_name.y, y = N_INDVID, color = Site_Statu)) +
+  geom_point() +
+  labs(title = "Comparison between estimated_worldpop and survey iom populations",
+       x = "Estimated population_worldpop",
+       y = "Iom surveyed population") +
+  theme_minimal()
+```
+```
+
+```{r}
+# Create a scatter plot
+ggplot(your_data, aes(x = ras_name, y = ras_name.x)) +
+  geom_point() +
+  labs(title = "Scatter Plot of ras_name and ras_name.x",
+       x = "ras_name",
+       y = "ras_name.x")
+```
 
