@@ -403,6 +403,21 @@ ggplot(polygon_camps, aes(x = gpw, y = N_INDVID, color = Site_Statu)) +
        y = "Iom surveyed population") +
   theme_minimal()
 ```
+#Writing out the whole GHSL, Worldpop(cns),worldpop(uncons),gpw
+```{r}
+ #Convert the data frame to an sf object
+camp_poly_pop<- st_as_sf(polygon_camps)
+
+# Remove Z (3D) coordinates
+camp_poly_pop <- st_zm(camp_poly_pop, drop = TRUE)
+
+# Export the sf object to a shapefile
+st_write(camp_poly_pop,
+ "all_pop_output/camp_poly_pop.shp")
+
+
+```
+
 
 
 
