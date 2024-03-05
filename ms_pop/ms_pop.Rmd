@@ -1,0 +1,256 @@
+---
+title: "ms_pop"
+author: "Lallu Nikerthil Prathapan"
+date: "3/1/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(sf)
+library(ggplot2)
+library(raster)
+library(exactextractr)
+library(terra)
+library(dplyr)
+library(gridExtra)
+library(vroom)
+
+```
+
+
+```{r}
+
+url <- "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/data_camps/idp_camps_224.shp"
+sf_data <- st_read(url) 
+head(sf_data)
+
+```
+
+```{r}
+
+gpw <- rast('D:/EAGLE/Master_Thesis_Hannes/1/gpw/gpw-v4-population-count-rev11_2020_30_sec_tif/gpw_v4_population_count_rev11_2020_30_sec.tif')
+print(gpw)
+```
+
+
+
+
+
+```{r}
+# Extract unique camp names from the 'Name' attribute
+CAMPS <- unique(sf_data$Name)
+head(CAMPS)
+```
+
+```{r}
+building_path <- "D:/EAGLE/Master_Thesis_Hannes/1/microsoft/nigeria.geojsonl/nigeria.geojsonl"
+```
+
+
+# # Function to read and process GeoJSON data in chunks
+
+```{r}
+read_and_process_geojson <- function(file, chunk_size, process_function, shelter_data) {
+  data <- vroom(file, delim = "\n", col_names = FALSE)
+
+  num_chunks <- ceiling(nrow(data) / chunk_size)
+
+  result_sf <- st_sf()
+
+  for (i in 1:num_chunks) {
+    start_row <- (i - 1) * chunk_size + 1
+    end_row <- min(i * chunk_size, nrow(data))
+
+    chunk <- st_read(sfheaders::sf_read(data[start_row:end_row, 1]))
+    
+    # Process the chunk using your custom function
+    processed_chunk <- process_function(chunk, shelter_data)
+    
+    # Append the processed chunk to the result_sf
+    result_sf <- rbind(result_sf, processed_chunk)
+  }
+
+  return(result_sf)
+}
+```
+
+# Function to process each chunk (replace this with your custom processing logic)
+```{r}
+
+process_chunk <- function(chunk, shelter_data) {
+  # Perform spatial intersection (clipping) with the shelter data
+  clipped_chunk <- st_intersection(chunk, shelter_data)
+  return(clipped_chunk)
+}
+
+# Use the function to read and process GeoJSON in chunks
+chunk_size <- 1000
+result_sf <- read_and_process_geojson(building_path, chunk_size, process_chunk, sf_data)
+
+# Further processing on the result_sf if needed
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+
+
+# Specify the path to the zipped GeoJSON Lines file
+zip_path <- "D:/EAGLE/Master_Thesis_Hannes/1/microsoft/nigeria.geojsonl.zip"
+geojson_path <- "D:/EAGLE/Master_Thesis_Hannes/1/microsoft/nigeria.geojsonl/nigeria.geojsonl"
+
+# Unzip the file
+#unzip(zip_path, exdir = geojson_path)
+
+# Read the GeoJSON file
+microsoft_footprints_gdf <- st_read(geojson_path)
+microsoft_footprints_gdf <- st_transform(microsoft_footprints_gdf, crs = UTM)
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+# Define constants
+UTM <- 32636
+WGS84 <- 4326
+INPUT <- "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/data_camps"
+OUTPUT <- "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/output"
+
+```
+
+
+```{r}
+# Define a function to perform spatial join with raster data
+sjoin_polygon_raster <- function(poly_gdf, raster_data, idx, name) {
+  poly_gdf <- st_as_sf(poly_gdf, crs = st_crs(raster_data))
+  poly_gdf <- raster::extract(raster_data, poly_gdf)
+  poly_gdf <- data.frame(poly_gdf, st_coordinates(poly_gdf))
+  names(poly_gdf) <- c(names(poly_gdf)[1:ncol(poly_gdf)], "X", "Y")
+  
+  poly_gdf <- poly_gdf %>%
+    group_by(!!sym(idx)) %>%
+    summarise(across(starts_with(name), sum, na.rm = TRUE),
+              X = mean(X), Y = mean(Y))
+  
+  poly_gdf <- st_as_sf(poly_gdf, coords = c("X", "Y"), crs = st_crs(raster_data))
+  
+  return(poly_gdf)
+}
+```
+
+```{r}
+
+# Specify the path to the zipped GeoJSON Lines file
+zip_path <- "D:/EAGLE/Master_Thesis_Hannes/1/microsoft/nigeria.geojsonl.zip"
+geojson_path <- "D:/EAGLE/Master_Thesis_Hannes/1/microsoft/nigeria.geojsonl"
+
+# Unzip the file
+#unzip(zip_path, exdir = geojson_path)
+
+# Read the GeoJSON file
+microsoft_footprints_gdf <- st_read(geojson_path)
+microsoft_footprints_gdf <- st_transform(microsoft_footprints_gdf, crs = UTM)
+
+```
+
+
+
+
+
+```{r}
+# Iterate over each camp name
+for (CAMP in CAMPS) {
+  # Filter the data for the current camp
+  camp <- sf_data[sf_data$Name == CAMP, ]
+  
+  # Transform camp to UTM for spatial operations
+  camp <- st_transform(camp, crs = UTM)
+  
+  # Load GPW population data as a raster
+  gpw <- rast('D:/EAGLE/Master_Thesis_Hannes/1/gpw/gpw-v4-population-count-rev11_2020_30_sec_tif/gpw_v4_population_count_rev11_2020_30_sec.tif')
+  
+  # Transform GPW raster to UTM for spatial operations
+  gpw_raster <- projectRaster(gpw, crs = "+proj=utm +zone=36 +datum=WGS84")
+  
+  # Use GPW data for population within the larger tile
+  grids_gdf <- sjoin_polygon_raster(camp, gpw_raster, 'idx', 'grid')
+# Assuming you have a column 'building_area' in your building footprints data
+  # Merge with building footprints data
+  grids_gdf <- merge(grids_gdf, microsoft_footprints_gdf, by = 'tile_idx', all.x = TRUE)
+  
+  # Estimate population from building footprints using building area as a proxy
+  grids_gdf$building_population <- grids_gdf$building_area * some_conversion_factor  # Adjust based on your data
+  
+  # Merge the results with the original camp dataset
+  camp <- merge(camp, grids_gdf, by = 'tile_idx', all.x = TRUE)
+  
+  # Transform camp back to EPSG 4326 for saving results
+  camp <- st_transform(camp, crs = WGS84)
+  
+  # Save the modified camp dataset
+  write_sf(camp, file.path(OUTPUT, paste0(CAMP, '_camp_with_grids_output_', WGS84, '.geojson')), driver = 'GeoJSON')
+}
+}
+
+```
