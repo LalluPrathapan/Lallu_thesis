@@ -24,77 +24,39 @@ library(vroom)
 
 ```{r}
 
-url <- "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/data_camps/idp_camps_224.shp"
-sf_data <- st_read(url) 
-head(sf_data)
+url_ms <- "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camp_poly_pop.shp"
+camps_full <- st_read(url_ms) 
+head(camps_full)
 
+```
+
+
+
+# Reading the ms building for the camps
+```{r}
+building_path <- "D:/EAGLE/Master_Thesis_Hannes/1/microsoft/ms_buildings_nigeria_IDP_camps_224.gpkg"
+
+ms_buil_clp<-st_read(building_path)
+head(ms_buil_clp)
+```
+
+
+```{r}
+# Calculate the building area for each building
+ms_buil_clp$Building_Area <- st_area(ms_buil_clp$geom)
 ```
 
 ```{r}
-
-gpw <- rast('D:/EAGLE/Master_Thesis_Hannes/1/gpw/gpw-v4-population-count-rev11_2020_30_sec_tif/gpw_v4_population_count_rev11_2020_30_sec.tif')
-print(gpw)
+# Clean and validate building geometries
+ms_buil_clp <- st_make_valid(ms_buil_clp)
 ```
-
-
-
 
 
 ```{r}
-# Extract unique camp names from the 'Name' attribute
-CAMPS <- unique(sf_data$Name)
-head(CAMPS)
+# Merge the building data with the camp data based on spatial intersection
+merged_data <- st_intersection(camps_full, ms_buil_clp)
+
 ```
-
-```{r}
-building_path <- "D:/EAGLE/Master_Thesis_Hannes/1/microsoft/nigeria.geojsonl/nigeria.geojsonl"
-```
-
-
-# # Function to read and process GeoJSON data in chunks
-
-```{r}
-read_and_process_geojson <- function(file, chunk_size, process_function, shelter_data) {
-  data <- vroom(file, delim = "\n", col_names = FALSE)
-
-  num_chunks <- ceiling(nrow(data) / chunk_size)
-
-  result_sf <- st_sf()
-
-  for (i in 1:num_chunks) {
-    start_row <- (i - 1) * chunk_size + 1
-    end_row <- min(i * chunk_size, nrow(data))
-
-    chunk <- st_read(sfheaders::sf_read(data[start_row:end_row, 1]))
-    
-    # Process the chunk using your custom function
-    processed_chunk <- process_function(chunk, shelter_data)
-    
-    # Append the processed chunk to the result_sf
-    result_sf <- rbind(result_sf, processed_chunk)
-  }
-
-  return(result_sf)
-}
-```
-
-# Function to process each chunk (replace this with your custom processing logic)
-```{r}
-
-process_chunk <- function(chunk, shelter_data) {
-  # Perform spatial intersection (clipping) with the shelter data
-  clipped_chunk <- st_intersection(chunk, shelter_data)
-  return(clipped_chunk)
-}
-
-# Use the function to read and process GeoJSON in chunks
-chunk_size <- 1000
-result_sf <- read_and_process_geojson(building_path, chunk_size, process_chunk, sf_data)
-
-# Further processing on the result_sf if needed
-```
-
-
 
 
 
