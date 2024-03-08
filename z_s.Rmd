@@ -32,6 +32,8 @@ library(exactextractr)
 library(terra)
 library(dplyr)
 library(gridExtra)
+library(tidyr)
+
 ```
 
 
@@ -116,8 +118,7 @@ polygon_camps <- extract_sum(raster_population, polygon_camps,"Name")
 
 #Difference in the population
 ```{r}
-# Assuming you have a column named "N_INDVID" in the polygon_camps data frame
-# Adjust the column name if needed
+
 
 # Subtract N_INDVID from ras_name
 polygon_camps$ghsl_difference <- polygon_camps$N_INDVID - polygon_camps$ghsl
@@ -148,8 +149,7 @@ GHSL some plot visualisation
 ```{r}
 library(ggplot2)
 
-# Assuming you have a column named "ras_name" in the polygon_camps data frame
-# Change the column name if you used a different name in the code
+
 
 # Define the ggplot object
 ggplot(polygon_camps, aes(fill = ghsl)) +
@@ -190,7 +190,7 @@ plot1 <- ggplot(polygon_camps, aes(x = N_INDVID, y = N_HH, color = ghsl)) +
 # Scatter plot comparing N_INDIVID and ras_name
 plot2 <- ggplot(polygon_camps, aes(x = N_INDVID, y = ghsl, color = ghsl)) +
   geom_point() +
-  labs(title = "Comparison between N_INDVID and ras_name",
+  labs(title = "Comparison between N_INDVID and ghsl",
        x = "N_INDVID",
        y = "ghsl") +
   theme_minimal()
@@ -198,7 +198,7 @@ plot2 <- ggplot(polygon_camps, aes(x = N_INDVID, y = ghsl, color = ghsl)) +
 # Scatter plot comparing N_HH and ras_name
 plot3 <- ggplot(polygon_camps, aes(x = N_HH, y = ghsl, color = ghsl)) +
   geom_point() +
-  labs(title = "Comparison between N_HH and ras_name",
+  labs(title = "Comparison between N_HH and ghsl",
        x = "N_HH",
        y = "ghsl") +
   theme_minimal()
@@ -290,8 +290,7 @@ polygon_camps <- extract_sum(World_pop_unconstr,polygon_camps,"Name")
 
 #Difference in the survery_population and world_pop unconstrained
 ```{r}
-# Assuming you have a column named "N_INDVID" in the polygon_camps data frame
-# Adjust the column name if needed
+
 
 # Subtract N_INDVID from ras_name
 polygon_camps$wp_uc_diff <- polygon_camps$N_INDVID - polygon_camps$wp_uc
@@ -419,14 +418,58 @@ st_write(camp_poly_pop,
 ```
 
 
+```{r}
+# Select relevant columns
+selected_columns <- polygon_camps %>%
+  select(id_tmp, ghsl, wp_c, wp_uc, gpw, N_INDVID) %>%
+  gather(key = "Variable", value = "Value", -id_tmp)
+
+# Plot
+ggplot(selected_columns, aes(x = id_tmp, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge", alpha = 0.8) +
+  labs(title = "Comparison of Population Variables",
+       x = "Camp ID",
+       y = "Population",
+       fill = "Variable") +
+  theme_minimal() +
+  theme(axis.text.x
+```
+
+
+#load the data with all the population output to an new variable
+```{r}
+output_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camp_poly_pop.shp")
+
+output_poly<-st_read(output_path) 
+```
+
+#calculating the shape_area of the camp from the geometries of camp_polygons
+
+```{r}
+
+```
+
+
+
+# loading the data from all the building stats
+
+```{r}
+build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/kml_gee/all_build_stats/all_build_stats.shp")
+build_stats_inc<-st_read(build_stat_path)
+head(build_stats_inc)
+```
+
+
+
+
 
 
 #Removing unnecessary attributes// only run if needed
 ```{r}
-attributes_to_remove <- c("wrld_pp_un_diff")
+#attributes_to_remove <- c("wrld_pp_un_diff")
 
 # Remove specified attributes
-polygon_camps <- polygon_camps %>%
-  select(-one_of(attributes_to_remove))
+#polygon_camps <- polygon_camps %>%
+ # select(-one_of(attributes_to_remove))
 ```
 
