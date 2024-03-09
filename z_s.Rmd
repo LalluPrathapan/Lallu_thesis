@@ -33,7 +33,7 @@ library(terra)
 library(dplyr)
 library(gridExtra)
 library(tidyr)
-
+library(units)
 ```
 
 
@@ -441,17 +441,10 @@ ggplot(selected_columns, aes(x = id_tmp, y = Value, fill = Variable)) +
 output_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camp_poly_pop.shp")
 
 output_poly<-st_read(output_path) 
+head(output_poly)
 ```
 
-#calculating the shape_area of the camp from the geometries of camp_polygons
-
-```{r}
-
-```
-
-
-
-# loading the data from all the building stats
+#5 loading the data from all the building stats
 
 ```{r}
 build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/kml_gee/all_build_stats/all_build_stats.shp")
@@ -460,16 +453,77 @@ head(build_stats_inc)
 ```
 
 
+#calculating the shape_area of the camp from the geometries of camp_polygons
 
+```{r}
+
+# Calculate the shape area for each camp polygon
+build_stats_inc$cal_Shape_Area <-st_area(build_stats_inc$geometry)
+
+# Print or view the results
+print(build_stats_inc[, c("Name", "cal_Shape_Area","Site_Ar")])
+
+# Remove 'units' from the columns
+build_stats_inc$cal_Shape_Area <- as.numeric(build_stats_inc$cal_Shape_Area)
+build_stats_inc$Site_Ar <- as.numeric(build_stats_inc$Site_Ar)
+
+# Calculate the difference between 'Calculated_Shape_Area' and 'Site_Ar'
+build_stats_inc$Area_Diff <- build_stats_inc$Site_Ar-build_stats_inc$cal_Shape_Area
+
+print(build_stats_inc[, c("Name", "cal_Shape_Area","Site_Ar","Area_Diff")])
+```
+
+# write out the output with the polygon shapearea for surety
+
+```{r}
+
+
+# Export the sf object to a shapefile
+st_write(build_stats_inc,
+ "all_pop_output/build_stat_inc.shp")
+```
+
+#plot site area of the camps from survey and site area calculated from the digitized
+
+```{r}
+# Create a scatter plot
+ggplot(build_stats_inc, aes(x = Site_Ar, y = cal_Shape_Area)) +
+  geom_point(aes(color = "cal_Shape_Area"), size = 3) +
+  geom_point(aes(color = "Site Area"), size = 1) +
+  scale_color_manual(values = c("cal_Shape_Area" = "blue", "Site Area" = "red")) +
+  labs(title = "Survey_Site Area vs. Calculated Shape Area",
+       x = "Survey_Site Area",
+       y = "Calculated Shape Area")
+```
+
+
+#Categorising the urban, periurban, rural, hamlet from GRD3
+
+```{r}
+grd3_path<-"D:/EAGLE/Master_Thesis_Hannes/1/grd3_settlementextent/nga_stlext_grid3_v02_-3462370684766222297/nga_stlext_grid3_v02.shp"
+grd3<-st_read(grd3_path)
+head(grd3)
+```
+
+
+#joining grd3 data to the camp_polygon dataset so far
+#now trying to clip it
+```{r}
+# Perform a spatial intersection between camp_polygons and grid3_data
+clipped_data <- st_intersection(grd3,build_stats_inc )
+
+# Print the clipped_data to inspect the results
+head(clipped_data)
+```
 
 
 
 #Removing unnecessary attributes// only run if needed
 ```{r}
-#attributes_to_remove <- c("wrld_pp_un_diff")
+#attributes_to_remove <- c("Shape_Area");
 
 # Remove specified attributes
-#polygon_camps <- polygon_camps %>%
- # select(-one_of(attributes_to_remove))
+#build_stats_inc <- build_stats_inc %>%
+# select(-one_of(attributes_to_remove))
 ```
 
