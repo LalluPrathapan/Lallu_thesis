@@ -1,0 +1,85 @@
+---
+title: "urban_rural_grd3"
+author: "Lallu Nikerthil Prathapan"
+date: "3/10/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Packages library
+
+```{r}
+library(sf)
+library(ggplot2)
+library(raster)
+library(exactextractr)
+library(terra)
+library(dplyr)
+library(gridExtra)
+library(tidyr)
+library(units)
+```
+
+
+
+#5 loading the data from all the building stats
+
+```{r}
+build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/kml_gee/all_build_stats/all_build_stats.shp")
+build_stats_inc<-st_read(build_stat_path)
+head(build_stats_inc)
+```
+
+
+
+#Categorising the urban, periurban, rural, hamlet from GRD3
+#as data was so big did the clipping in qgis and expprted the clipped data here
+
+```{r}
+grd3_path<-"D:/EAGLE/Master_Thesis_Hannes/1/grd3_settlementextent/clipped/clipped_grd3.shp"
+grd3<-st_read(grd3_path)
+head(grd3)
+```
+
+
+#joining grd3 data to the camp_polygon dataset so far
+#now trying to clip it
+```{r}
+# Perform a spatial intersection between camp_polygons and grid3_data
+
+clipped_data <- st_intersection(grd3,build_stats_inc )
+
+```
+
+
+
+#Keeping only the dou1 an dou2 column for the urban to rural classifications in the data
+
+```{r}
+# Select only two columns from the clipped_data
+selected_columns <- clipped_data[, c("dou_level1", "dou_level2")]
+print(selected_columns)
+```
+# I removed all the other attributes from the grd3 after merging the data with the camp data so far using the code below
+#!!!! Run once only
+#Removing unnecessary attributes// only run if needed
+```{r}
+attributes_to_remove <- c("country","iso","is_fp","prob_fp","mgrs","pcode","date");
+
+# Remove specified attributes
+clipped_data<- clipped_data%>%select(-one_of(attributes_to_remove))
+
+```
+
+#now clipped data have urban classification, population from GHSL, Worlpop(constrained, unconstrained), GPW and the building data from google, microsoft, vida-google-microsoft, osm.
+
+# writing out this data remembering now there is 226 number because of the repetation of  BN_S023, B0_S259,BO_S350
+
+
+```{r}
+# Write out the entire clipped_data to a GeoPackage (or other supported formats)
+st_write(clipped_data, "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/everything/all_merg.shp")
+```
