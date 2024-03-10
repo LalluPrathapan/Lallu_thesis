@@ -460,21 +460,25 @@ head(build_stats_inc)
 
 ```{r}
 
-# Calculate the shape area for each camp polygon
-build_stats_inc$cal_Shape_Area <-st_area(build_stats_inc$geometry)
+#Calculate the shape area for each camp polygon
+ # build_stats_inc$cal_Shp_area <-st_area(build_stats_inc$geometry)
 
 # Print or view the results
-print(build_stats_inc[, c("Name", "cal_Shape_Area","Site_Ar")])
+print(build_stats_inc[,c("Name", "cal_Shp_area","Site_Ar")])
 
 # Remove 'units' from the columns
-build_stats_inc$cal_Shape_Area <- as.numeric(build_stats_inc$cal_Shape_Area)
+build_stats_inc$cal_Shp_area <- as.numeric(build_stats_inc$cal_Shp_area)
 build_stats_inc$Site_Ar <- as.numeric(build_stats_inc$Site_Ar)
 
 # Calculate the difference between 'Calculated_Shape_Area' and 'Site_Ar'
-build_stats_inc$Area_Diff <- build_stats_inc$Site_Ar-build_stats_inc$cal_Shape_Area
+build_stats_inc$Area_Diff <- build_stats_inc$Site_Ar-build_stats_inc$cal_Shp_area
 
-print(build_stats_inc[, c("Name", "cal_Shape_Area","Site_Ar","Area_Diff")])
+print(build_stats_inc[, c("Name", "cal_Shp_area","Site_Ar","Area_Diff")])
 ```
+
+
+
+
 
 # write out the output with the polygon shapearea for surety
 
@@ -514,11 +518,46 @@ head(grd3)
 #now trying to clip it
 ```{r}
 # Perform a spatial intersection between camp_polygons and grid3_data
+
 clipped_data <- st_intersection(grd3,build_stats_inc )
 
-# Print the clipped_data to inspect the results
-head(clipped_data)
 ```
+
+#things done to retain the geometry
+
+```{r}
+# Retain the original geometry
+geom_var_dup<-build_stats_inc
+clipped_data <- st_sf(geometry = geom_var_dup$geometry, st_drop_geometry(clipped_data))
+```
+
+
+
+
+```{r}
+# Extract the unique identifiers for both datasets
+unique_ids_clipped <- clipped_data$Name
+unique_ids_build_stats <- build_stats_inc$Name
+
+# Find the common unique identifiers
+common_ids <- intersect(unique_ids_clipped, unique_ids_build_stats)
+
+# Filter the datasets based on the common unique identifiers
+clipped_data <- clipped_data[clipped_data$common_id %in% common_ids, ]
+build_stats_inc <- build_stats_inc[build_stats_inc$common_id %in% common_ids, ]
+
+# Retain the original geometry
+clipped_data <- st_set_geometry(clipped_data, build_stats_inc$geometry)
+
+# Print the clipped_data to inspect the results
+str(clipped_data)
+
+
+
+```
+
+
+
 
 #Keeping only the dou1 an dou2 column for the urban to rural classifications in the data
 
@@ -539,3 +578,12 @@ clipped_data<- clipped_data%>%select(-one_of(attributes_to_remove))
 ```
 
 #now clipped data have urban classification, population from GHSL, Worlpop(constrained, unconstrained), GPW and the building data from google, microsoft, vida-google-microsoft, osm.
+
+# writing out this data remembering now there is 226 number because of the repetation of  BN_S023, B0_S259,BO_S350
+
+
+```{r}
+# Write out the entire clipped_data to a GeoPackage (or other supported formats)
+st_write(clipped_data, "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/everything/all_merg.shp")
+```
+
