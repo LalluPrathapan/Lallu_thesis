@@ -61,7 +61,8 @@ print(ghsl_raster)
 # Plot the raster
 plot(ghsl_raster)
 ```
-#The extract function
+
+#!!!!!!The extract function!!!!!!!!!!!!!!!
 
 ```{r}
 # function
@@ -500,7 +501,7 @@ ggplot(build_stats_inc, aes(x = Site_Ar, y = cal_Shape_Area)) +
 #Categorising the urban, periurban, rural, hamlet from GRD3
 
 ```{r}
-grd3_path<-"D:/EAGLE/Master_Thesis_Hannes/1/grd3_settlementextent/nga_stlext_grid3_v02_-3462370684766222297/nga_stlext_grid3_v02.shp"
+grd3_path<-"D:/EAGLE/Master_Thesis_Hannes/1/grd3_settlementextent/clipped/clipped_grd3.shp"
 grd3<-st_read(grd3_path)
 head(grd3)
 ```
@@ -516,14 +517,21 @@ clipped_data <- st_intersection(grd3,build_stats_inc )
 head(clipped_data)
 ```
 
+#Keeping only the dou1 an dou2 column for the urban to rural classifications in the data
 
+```{r}
+# Select only two columns from the clipped_data
+selected_columns <- clipped_data[, c("dou_level1", "dou_level2")]
+print(selected_columns)
+```
+# I removed all the other attributes from the grd3 after merging the data with the camp data so far
 
 #Removing unnecessary attributes// only run if needed
 ```{r}
-#attributes_to_remove <- c("Shape_Area");
+attributes_to_remove <- c("country","iso","is_fp","prob_fp","mgrs","pcode","date");
 
 # Remove specified attributes
-#build_stats_inc <- build_stats_inc %>%
-# select(-one_of(attributes_to_remove))
+clipped_data<- clipped_data%>%select(-one_of(attributes_to_remove))
+
 ```
 
