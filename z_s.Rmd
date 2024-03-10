@@ -461,7 +461,7 @@ head(build_stats_inc)
 ```{r}
 
 #Calculate the shape area for each camp polygon
- # build_stats_inc$cal_Shp_area <-st_area(build_stats_inc$geometry)
+build_stats_inc$cal_Shp_area <-st_area(build_stats_inc$geometry)
 
 # Print or view the results
 print(build_stats_inc[,c("Name", "cal_Shp_area","Site_Ar")])
@@ -494,19 +494,48 @@ st_write(build_stats_inc,
 
 ```{r}
 # Create a scatter plot
-ggplot(build_stats_inc, aes(x = Site_Ar, y = cal_Shape_Area)) +
-  geom_point(aes(color = "cal_Shape_Area"), size = 3) +
+ggplot(build_stats_inc, aes(x = Site_Ar, y = cal_Shp_area)) +
+  geom_point(aes(color = "cal_Shp_area"), size = 3) +
   geom_point(aes(color = "Site Area"), size = 1) +
-  scale_color_manual(values = c("cal_Shape_Area" = "blue", "Site Area" = "red")) +
+  scale_color_manual(values = c("cal_Shp_area" = "blue", "Site Area" = "red")) +
   labs(title = "Survey_Site Area vs. Calculated Shape Area",
        x = "Survey_Site Area",
        y = "Calculated Shape Area")
 ```
 
+#plot to check the problem of high population and less area
+
+```{r}
+# Create a scatter plot
+ggplot(build_stats_inc, aes(x = N_INDVI, y = cal_Shp_area)) +
+  geom_point() +
+  labs(title = "N_INDVID vs. Calculated Shape Area",
+       x = "N_INDVID",
+       y = "Calculated Shape Area")
+```
+
+```{r}
+# Filter camps with high N_INDVID and small cal_Shape_area
+check_hipop_lessarea <- build_stats_inc %>%
+  filter(N_INDVI > 100)
+
+# Print or view the selected camps
+print(selected_camps[, c("Name", "N_INDVI", "cal_Shp_area","Site_Ar")])
+```
 
 
-
-
+# the camp values(BO_S294 has the high population of 224 with less area of 342 sq m)
+#  Name N_INDVI cal_Shp_area
+<!-- 1  AD_S018    75.0   25822.0515 -->
+<!-- 2  BO_S294   224.0     342.7668 -->
+<!-- 3  AD_S003  1234.0  104062.6921 -->
+<!-- 4  BO_S012  3375.0   17558.3622 -->
+<!-- 5  BO_S015  1259.0   39288.4634 -->
+<!-- 6  BO_S113  5708.0  256595.9877 -->
+<!-- 7  BO_S114   739.0   10824.5435 -->
+<!-- 8  BO_S160  2500.0  143393.6697 -->
+<!-- 9  BO_S162  1260.0   40156.3581 -->
+<!-- 10 BO_S203  9223.0  575925.1669 -->
 
 
 
