@@ -89,6 +89,28 @@ st_write(clipped_data, "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/everythin
 
 ```{r}
 smod_path<-("D:/EAGLE/Master_Thesis_Hannes/1/ghsl_settlement_extent/merged/mrgd_smod.tif")
-smod<-raster(smod_path)
+smod<-rast(smod_path)
+print(smod)
+plot(smod)
+```
+
+```{r}
+# # Extract raster values for camp polygons
+# extracted_values <- raster::extract(smod, build_stats_inc)
+# 
+# # Add the extracted values to the camp_polygons data frame
+# build_stats_inc$extracted_values <- extracted_values
+
+# Print or view the updated camp_polygons data frame
+print(build_stats_inc[, c("Name", "extracted_values")])
+```
+
+
+
+
+```{r}
+# Call function
+
+build_stats_inc<- extract_sum(smod, build_stats_inc,"Name")
 ```
 
