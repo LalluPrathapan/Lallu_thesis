@@ -83,3 +83,12 @@ clipped_data<- clipped_data%>%select(-one_of(attributes_to_remove))
 # Write out the entire clipped_data to a GeoPackage (or other supported formats)
 st_write(clipped_data, "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/everything/all_merg.shp")
 ```
+
+
+#******************GHSL SMOD*********************
+
+```{r}
+smod_path<-("D:/EAGLE/Master_Thesis_Hannes/1/ghsl_settlement_extent/merged/mrgd_smod.tif")
+smod<-raster(smod_path)
+```
+
