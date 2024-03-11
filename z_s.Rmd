@@ -517,7 +517,7 @@ ggplot(build_stats_inc, aes(x = N_INDVI, y = cal_Shp_area)) +
 ```{r}
 # Filter camps with high N_INDVID and small cal_Shape_area
 check_hipop_lessarea <- build_stats_inc %>%
-  filter(N_INDVI > 100)
+  filter(N_INDVI > 50)
 
 # Print or view the selected camps
 print(selected_camps[, c("Name", "N_INDVI", "cal_Shp_area","Site_Ar")])
