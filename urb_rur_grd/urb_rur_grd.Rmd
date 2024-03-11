@@ -67,10 +67,10 @@ print(selected_columns)
 #!!!! Run once only
 #Removing unnecessary attributes// only run if needed
 ```{r}
-attributes_to_remove <- c("country","iso","is_fp","prob_fp","mgrs","pcode","date");
+attributes_to_remove <- c("smod.x","smod.y","smod");
 
 # Remove specified attributes
-clipped_data<- clipped_data%>%select(-one_of(attributes_to_remove))
+build_stats_inc<- build_stats_inc%>%select(-one_of(attributes_to_remove))
 
 ```
 
@@ -104,7 +104,22 @@ plot(smod)
 # Print or view the updated camp_polygons data frame
 print(build_stats_inc[, c("Name", "extracted_values")])
 ```
-
+  
+#The classed in smod (urban classification)
+#The settlement grid at level 2 represents these definitions on a layer grid. Each pixel is classified as follow:
+— Class 30: “Urban Centre grid cell”, if the cell belongs to an Urban Centre spatial entity;
+— Class 23: “Dense Urban Cluster grid cell”, if the cell belongs to a Dense Urban Cluster spatial entity;
+— Class 22: “Semi-dense Urban Cluster grid cell”, if the cell belongs to a Semi-dense Urban Cluster 
+spatial entity;
+— Class 21: “Suburban or per-urban grid cell”, if the cell belongs to an Urban Cluster cells at first 
+hierarchical level but is not part of a Dense or Semi-dense Urban Cluster;
+— Class 13: “Rural cluster grid cell”, if the cell belongs to a Rural Cluster spatial entity;
+— Class 12: “Low Density Rural grid cell”, if the cell is classified as Rural grid cells at first hierarchical 
+level, has more than 50 inhabitant and is not part of a Rural Cluster;
+— Class 11: “Very low density rural grid cell”, if the cell is classified as Rural grid cells at first hierarchical 
+level, has less than 50 inhabitant and is not part of a Rural Cluster;
+— Class 10: “Water grid cell”, if the cell has 0.5 share covered by permanent surface water and is not 
+populated nor built.
 
 
 
