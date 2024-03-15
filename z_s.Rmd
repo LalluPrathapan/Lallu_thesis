@@ -17,15 +17,16 @@ install.packages("D:/EAGLE/Master_Thesis_Hannes/1/R/packages/exactextractr_0.10.
 
 ```{r}
 # List of packages to install
-#packages_to_install <- c("exactextracter")
+packages_to_install <- c("hrbrthemes")
 
 # Install the packages
-#install.packages(packages_to_install)
+install.packages(packages_to_install)
 ```
 #Packages library
 
 ```{r}
 library(sf)
+library(vctrs)
 library(ggplot2)
 library(raster)
 library(exactextractr)
@@ -34,6 +35,8 @@ library(dplyr)
 library(gridExtra)
 library(tidyr)
 library(units)
+library(viridis)
+library(hrbrthemes)
 ```
 
 
@@ -450,7 +453,7 @@ head(output_poly)
 #5 loading the data from all the building stats
 
 ```{r}
-build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/kml_gee/all_build_stats/all_build_stats.shp")
+build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/build_stat_inc/build_stat_inc.shp")
 build_stats_inc<-st_read(build_stat_path)
 head(build_stats_inc)
 ```
@@ -487,7 +490,7 @@ print(build_stats_inc[, c("Name", "cal_Shp_area","Site_Ar","Area_Diff")])
 
 # Export the sf object to a shapefile
 st_write(build_stats_inc,
- "all_pop_output/build_stat_inc.shp")
+ "all_pop_output/build_stat_inc/build_stat_inc_c.shp")
 ```
 
 #plot site area of the camps from survey and site area calculated from the digitized
@@ -539,6 +542,87 @@ print(selected_camps[, c("Name", "N_INDVI", "cal_Shp_area","Site_Ar")])
 
 
 
+#******plots****************
 
 
+
+
+#**box plots with jitter********
+```{r}
+# Create boxplot for N_INDVI, ghsl, wp_uc, wp_c, and gpw on the same graph
+combined_boxplot <- ggplot(build_stats_inc) +
+  geom_boxplot(aes(x = "N_INDVI", y = N_INDVI, fill = "N_INDVI"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "ghsl", y = ghsl, fill = "ghsl"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "wp_uc", y = wp_uc, fill = "wp_uc"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "wp_c", y = wp_c, fill = "wp_c"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "gpw", y = gpw, fill = "gpw"), alpha = 0.2, width = 0.5) +
+  geom_jitter(aes(x = "N_INDVI", y = N_INDVI), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "ghsl", y = ghsl), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "wp_uc", y = wp_uc), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "wp_c", y = wp_c), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "gpw", y = gpw), color = "grey", size = 0.2, alpha = 0.5) +
+  labs(title = "P opulation from IOM survey(N_INDVI), ghsl, wp_uc, wp_c, and gpw", x = NULL, y = "Value") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Display the combined plot
+print(combined_boxplot)
+```
+# Analysis of the plot
+#$
+
+
+#**violin plot***********
+
+```{r}
+# Create a new column indicating the variable name
+build_stats_inc$variable1 <- "ghsl"
+```
+
+```{r}
+# Create violin plot for ghsl
+ghsl_violin_plot <- ggplot(build_stats_inc, aes(x = "N_INDIV", y =ghsl, fill = "N_INDIV")) +
+  geom_violin(trim = FALSE, alpha = 0.8) +
+  geom_boxplot(width = 0.1, fill = "white", color = "black") +
+  geom_jitter(position = position_jitter(width = 0.2), color = "grey", size = 0.5, alpha = 0.5) +
+  labs(title = "Violin Plot of survey data", x = "N_INDIV", y = "Value") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5),
+        legend.position = "bottom") +
+  scale_fill_manual(values = c("N_INDIV" = "red"))
+
+# Display the ghsl violin plot
+print(ghsl_violin_plot)
+```
+```{r}
+# Combine boxplots and violin plots into a single graph
+combined_plot <- ggplot(build_stats_inc) +
+  # Boxplots
+  geom_boxplot(aes(x = "N_INDVI", y = N_INDVI, fill = "N_INDVI"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "ghsl", y = ghsl, fill = "ghsl"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "wp_uc", y = wp_uc, fill = "wp_uc"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "wp_c", y = wp_c, fill = "wp_c"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "gpw", y = gpw, fill = "gpw"), alpha = 0.2, width = 0.5) +
+  # Violin plots
+  geom_violin(aes(x = "N_INDVI", y = N_INDVI, fill = "N_INDVI"), alpha = 0.8) +
+  geom_violin(aes(x = "ghsl", y = ghsl, fill = "ghsl"), alpha = 0.8) +
+  geom_violin(aes(x = "wp_uc", y = wp_uc, fill = "wp_uc"), alpha = 0.8) +
+  geom_violin(aes(x = "wp_c", y = wp_c, fill = "wp_c"), alpha = 0.8) +
+  geom_violin(aes(x = "gpw", y = gpw, fill = "gpw"), alpha = 0.8) +
+  # Jitter points
+  geom_jitter(aes(x = "N_INDVI", y = N_INDVI), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "ghsl", y = ghsl), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "wp_uc", y = wp_uc), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "wp_c", y = wp_c), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "gpw", y = gpw), color = "grey", size = 0.2, alpha = 0.5) +
+  # Facet by variable
+  #facet_wrap(~ variable, scales = "free", ncol = 2) +
+  # Customize labels and themes
+  labs(title = "Population from IOM survey (N_INDVI), ghsl, wp_uc, wp_c, and gpw", x = NULL, y = "Value") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Display the combined plot
+print(combined_plot)
+```
 
