@@ -540,9 +540,83 @@ print(selected_camps[, c("Name", "N_INDVI", "cal_Shp_area","Site_Ar")])
 <!-- 9  BO_S162  1260.0   40156.3581 -->
 <!-- 10 BO_S203  9223.0  575925.1669 -->
 
+# loading the data for with calculated shape area 
 
+```{r}
+build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/build_stat_inc/build_stat_inc_c.shp")
+camps<-st_read(build_stat_path2)
+head(camps)
+```
+
+#!!Attributes removing code
+#!! Run only if needed
+```{r}
+# attributes_to_remove <- c("cl_Shp_r","Area_Dff");
+# 
+# # Remove specified attributes
+# data1<- data1%>%select(-one_of(attributes_to_remove))
+
+```
+
+
+#Population density 
+
+```{r}
+# Calculate population density
+
+camps$Site_Ar <- as.numeric(camps$Site_Ar)
+camps$N_INDVI <- as.numeric(camps$N_INDVI)
+camps$st_pp_d <- (camps$N_INDVI) / (camps$Site_Ar)
+
+# Print the result
+# Print or view the selected camps
+print(camps[, c("Name", "N_INDVI", "Site_Ar","st_pp_d")])
+
+```
 
 #******plots****************
+
+
+#BOX+VIOLIN plot for the IOM survey population for different Site Type informal camps
+
+
+
+```{r}
+# Load the required library
+library(ggplot2)
+
+# Create a boxplot for N_INDVI
+plot_camp_pop <- ggplot(camps) + 
+  geom_boxplot(aes(x = Sit_Stt, y = N_INDVI, fill = "N_INDVI"), alpha = 0.2, width = 0.5) +
+  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
+  scale_fill_viridis_d(name = "Site Population", alpha = 0.6) +
+  theme_ipsum()+
+  geom_jitter(aes(x = Sit_Stt, y = N_INDVI, fill = "N_INDVI",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "Refugee site population from IOM survey for different Site Status", x = "Site Status", y = "Site Population") +
+  geom_violin(aes(x = Sit_Stt, y = N_INDVI, fill = "N_INDVI"), alpha = 0.3) +
+  
+  theme(plot.title = element_text(size = 9),
+        axis.title.x = element_text(size = 6,hjust = 0.5),
+        axis.title.y=element_text(size = 6,hjust = 0.5),
+        axis.text.x = element_text(size=5),
+        axis.text.y=element_text(size = 5),
+        )+ guides(fill = FALSE)
+
+print(plot_camp_pop)
+  
+
+
+
+```
+
+#saving the plot 
+
+
+
+
+
+#BOX+VIOLIN plot for the calculated ghsl population for classified as formal and informal camps
 
 
 
@@ -550,24 +624,28 @@ print(selected_camps[, c("Name", "N_INDVI", "cal_Shp_area","Site_Ar")])
 #**box plots with jitter********
 ```{r}
 # Create boxplot for N_INDVI, ghsl, wp_uc, wp_c, and gpw on the same graph
-combined_boxplot <- ggplot(build_stats_inc) +
-  geom_boxplot(aes(x = "N_INDVI", y = N_INDVI, fill = "N_INDVI"), alpha = 0.2, width = 0.5) +
-  geom_boxplot(aes(x = "ghsl", y = ghsl, fill = "ghsl"), alpha = 0.2, width = 0.5) +
-  geom_boxplot(aes(x = "wp_uc", y = wp_uc, fill = "wp_uc"), alpha = 0.2, width = 0.5) +
-  geom_boxplot(aes(x = "wp_c", y = wp_c, fill = "wp_c"), alpha = 0.2, width = 0.5) +
-  geom_boxplot(aes(x = "gpw", y = gpw, fill = "gpw"), alpha = 0.2, width = 0.5) +
-  geom_jitter(aes(x = "N_INDVI", y = N_INDVI), color = "grey", size = 0.2, alpha = 0.5) +
-  geom_jitter(aes(x = "ghsl", y = ghsl), color = "grey", size = 0.2, alpha = 0.5) +
-  geom_jitter(aes(x = "wp_uc", y = wp_uc), color = "grey", size = 0.2, alpha = 0.5) +
-  geom_jitter(aes(x = "wp_c", y = wp_c), color = "grey", size = 0.2, alpha = 0.5) +
-  geom_jitter(aes(x = "gpw", y = gpw), color = "grey", size = 0.2, alpha = 0.5) +
-  labs(title = "P opulation from IOM survey(N_INDVI), ghsl, wp_uc, wp_c, and gpw", x = NULL, y = "Value") +
-  theme_minimal() +
+combined_boxplot <- ggplot(camps) +
+   geom_boxplot(aes(x = "Sit_Stt", y = N_INDVI, fill = "N_INDVI"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "Sit_Stt", y = ghsl, fill = "ghsl"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "Sit_Stt", y = wp_uc, fill = "wp_uc"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "Sit_Stt", y = wp_c, fill = "wp_c"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = "Sit_Stt", y = gpw, fill = "gpw"), alpha = 0.2, width = 0.5) +
+  geom_jitter(aes(x = "Sit_Stt", y = N_INDVI), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "Sit_Stt", y = ghsl), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "Sit_Stt", y = wp_uc), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "Sit_Stt", y = wp_c), color = "grey", size = 0.2, alpha = 0.5) +
+  geom_jitter(aes(x = "Sit_Stt", y = gpw), color = "grey", size = 0.2, alpha = 0.5) +
+  labs(title = "P opulation from IOM survey(N_INDVI), ghsl, wp_uc, wp_c, and gpw", x = "Sit_Stt", y = "Value") +
+   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
 
 # Display the combined plot
 print(combined_boxplot)
 ```
+
+
+
+
 # Analysis of the plot
 #$
 
@@ -581,7 +659,7 @@ build_stats_inc$variable1 <- "ghsl"
 
 ```{r}
 # Create violin plot for ghsl
-ghsl_violin_plot <- ggplot(build_stats_inc, aes(x = "N_INDIV", y =ghsl, fill = "N_INDIV")) +
+ghsl_violin_plot <- ggplot(camps, aes(x = "N_INDIV", y =ghsl, fill = "N_INDIV")) +
   geom_violin(trim = FALSE, alpha = 0.8) +
   geom_boxplot(width = 0.1, fill = "white", color = "black") +
   geom_jitter(position = position_jitter(width = 0.2), color = "grey", size = 0.5, alpha = 0.5) +
@@ -594,9 +672,11 @@ ghsl_violin_plot <- ggplot(build_stats_inc, aes(x = "N_INDIV", y =ghsl, fill = "
 # Display the ghsl violin plot
 print(ghsl_violin_plot)
 ```
+
+
 ```{r}
 # Combine boxplots and violin plots into a single graph
-combined_plot <- ggplot(build_stats_inc) +
+combined_plot <- ggplot(camps) +
   # Boxplots
   geom_boxplot(aes(x = "N_INDVI", y = N_INDVI, fill = "N_INDVI"), alpha = 0.2, width = 0.5) +
   geom_boxplot(aes(x = "ghsl", y = ghsl, fill = "ghsl"), alpha = 0.2, width = 0.5) +
