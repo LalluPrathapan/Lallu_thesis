@@ -450,7 +450,7 @@ output_poly<-st_read(output_path)
 head(output_poly)
 ```
 
-#5 loading the data from all the building stats
+#!!!5 loading the data from all the building stats
 
 ```{r}
 build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/build_stat_inc/build_stat_inc.shp")
@@ -786,5 +786,117 @@ ggsave("plots/box_gpw.png", plot =gpw_plot, width = 8, height = 6, dpi = 400)
 
 
 #**BUILDING DATA PLOTS*************
+
+#BOX+VIOLIN plot for number of households in Survey data  for different site status
+
+```{r}
+N_HHplot <- ggplot(camps) + 
+  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(N_HH), fill = "N_HH"), alpha = 0.2, width = 0.5) +
+  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
+  scale_fill_viridis_d(name = "Survey Household number", alpha = 0.6) +
+  theme_ipsum()+
+  geom_jitter(aes(x = Sit_Stt, y = as.numeric(N_HH), fill ="N_HH",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "Refugee site IOM surveyed household numbers", x = "Site Status", y = "Surveyed household number") +
+  geom_violin(aes(x = Sit_Stt, y = as.numeric(N_HH), fill = "N_HH"), alpha = 0.3) +
+  
+  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
+        axis.title.x = element_text(size = 6,hjust = 0.5),
+        axis.title.y=element_text(size = 6,hjust = 0.5),
+        axis.text.x = element_text(size=5),
+        axis.text.y=element_text(size = 5),
+        )+ guides(fill = FALSE)
+
+print(N_HHplot)
+```
+
+#saving the google building count plot 
+```{r}
+# Save the plot to a file
+ggsave("plots/N_HHplot.png", plot =N_HHplot, width = 8, height = 6, dpi = 400)
+```
+
+
+
+#BOX+VIOLIN plot for calculated buildings in Google building footprint data for different site status
+
+
+```{r}
+goog_plot <- ggplot(camps) + 
+  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(g_b_c), fill = "g_b_c"), alpha = 0.2, width = 0.5) +
+  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
+  scale_fill_viridis_d(name = "Calculated Building count form GOOGLE data", alpha = 0.6) +
+  theme_ipsum()+
+  geom_jitter(aes(x = Sit_Stt, y = as.numeric(g_b_c), fill ="g_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "Refugee site building count calculated from Google building data for different Site Status", x = "Site Status", y = "Calculated Google building count") +
+  geom_violin(aes(x = Sit_Stt, y = as.numeric(g_b_c), fill = "g_b_c"), alpha = 0.3) +
+  
+  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
+        axis.title.x = element_text(size = 6,hjust = 0.5),
+        axis.title.y=element_text(size = 6,hjust = 0.5),
+        axis.text.x = element_text(size=5),
+        axis.text.y=element_text(size = 5),
+        )+ guides(fill = FALSE)
+
+print(goog_plot)
+```
+
+#saving the google building count plot 
+```{r}
+# Save the plot to a file
+ggsave("plots/box_goog.png", plot =goog_plot, width = 8, height = 6, dpi = 400)
+```
+
+#BOX+VIOLIN plot for calculated buildings in OSM building footprint data for different site status
+
+```{r}
+osm_plot <- ggplot(camps) + 
+  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(osm_b_c), fill = "osm_b_c"), alpha = 0.2, width = 0.5) +
+  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
+  scale_fill_viridis_d(name = "Calculated Building count form Open Street Map data", alpha = 0.6) +
+  theme_ipsum()+
+  geom_jitter(aes(x = Sit_Stt, y = as.numeric(osm_b_c), fill ="osm_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "Refugee site building count calculated from Open Street map building data for different Site Status", x = "Site Status", y = "Calculated Open Street Map building count") +
+  geom_violin(aes(x = Sit_Stt, y = as.numeric(osm_b_c), fill = "osm_b_c"), alpha = 0.3) +
+  
+  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
+        axis.title.x = element_text(size = 6,hjust = 0.5),
+        axis.title.y=element_text(size = 6,hjust = 0.5),
+        axis.text.x = element_text(size=5),
+        axis.text.y=element_text(size = 5),
+        )+ guides(fill = FALSE)
+
+print(osm_plot)
+```
+#saving the OSM building count plot 
+```{r}
+# Save the plot to a file
+ggsave("plots/box_osm.png", plot =osm_plot, width = 8, height = 6, dpi = 400)
+```
+
+#BOX+VIOLIN plot for calculated buildings in Microsoft building footprint data for different site status
+
+```{r}
+msplot <- ggplot(camps) + 
+  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(ms_b_c), fill = "ms_b_c"), alpha = 0.2, width = 0.5) +
+  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
+  scale_fill_viridis_d(name = "Calculated Building count form Microsoft data", alpha = 0.6) +
+  theme_ipsum()+
+  geom_jitter(aes(x = Sit_Stt, y = as.numeric(ms_b_c), fill ="ms_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "Refugee site building count calculated from Microsoft building data for different Site Status", x = "Site Status", y = "Calculated Microsoft building count") +
+  geom_violin(aes(x = Sit_Stt, y = as.numeric(ms_b_c), fill = "ms_b_c"), alpha = 0.3) +
+  
+  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
+        axis.title.x = element_text(size = 6,hjust = 0.5),
+        axis.title.y=element_text(size = 6,hjust = 0.5),
+        axis.text.x = element_text(size=5),
+        axis.text.y=element_text(size = 5),
+        )+ guides(fill = FALSE)
+
+print(msplot)
+```
 
 
