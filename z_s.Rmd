@@ -452,8 +452,10 @@ head(output_poly)
 
 #!!!5 loading the data from all the building stats
 
+#****after forgetting ms data again loaded as all_build_stat_ms.shp
+
 ```{r}
-build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/build_stat_inc/build_stat_inc.shp")
+build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/build_stat_inc_ms/all_build_stat_ms.shp")
 build_stats_inc<-st_read(build_stat_path)
 head(build_stats_inc)
 ```
@@ -464,19 +466,19 @@ head(build_stats_inc)
 ```{r}
 
 #Calculate the shape area for each camp polygon
-build_stats_inc$cal_Shp_area <-st_area(build_stats_inc$geometry)
+build_stats_inc$cl_Shp_a <-st_area(build_stats_inc$geometry)
 
 # Print or view the results
-print(build_stats_inc[,c("Name", "cal_Shp_area","Site_Ar")])
+print(build_stats_inc[,c("Name", "cl_Shp_a","Site_Ar")])
 
 # Remove 'units' from the columns
-build_stats_inc$cal_Shp_area <- as.numeric(build_stats_inc$cal_Shp_area)
+build_stats_inc$cl_Shp_a <- as.numeric(build_stats_inc$cl_Shp_a)
 build_stats_inc$Site_Ar <- as.numeric(build_stats_inc$Site_Ar)
 
 # Calculate the difference between 'Calculated_Shape_Area' and 'Site_Ar'
-build_stats_inc$Area_Diff <- build_stats_inc$Site_Ar-build_stats_inc$cal_Shp_area
+build_stats_inc$Ar_diff <- build_stats_inc$Site_Ar-build_stats_inc$cl_Shp_a
 
-print(build_stats_inc[, c("Name", "cal_Shp_area","Site_Ar","Area_Diff")])
+print(build_stats_inc[, c("Name", "cl_Shp_a","Site_Ar","Ar_diff")])
 ```
 
 
@@ -490,17 +492,17 @@ print(build_stats_inc[, c("Name", "cal_Shp_area","Site_Ar","Area_Diff")])
 
 # Export the sf object to a shapefile
 st_write(build_stats_inc,
- "all_pop_output/build_stat_inc/build_stat_inc_c.shp")
+ "all_pop_output/build_stat_inc_ms/build_stat_inc_ms_c.shp")
 ```
 
 #plot site area of the camps from survey and site area calculated from the digitized
 
 ```{r}
 # Create a scatter plot
-ggplot(build_stats_inc, aes(x = Site_Ar, y = cal_Shp_area)) +
-  geom_point(aes(color = "cal_Shp_area"), size = 3) +
+ggplot(build_stats_inc, aes(x = Site_Ar, y = cl_Shp_a)) +
+  geom_point(aes(color = "cl_Shp_a"), size = 3) +
   geom_point(aes(color = "Site Area"), size = 1) +
-  scale_color_manual(values = c("cal_Shp_area" = "blue", "Site Area" = "red")) +
+  scale_color_manual(values = c("cl_Shp_a" = "blue", "Site Area" = "red")) +
   labs(title = "Survey_Site Area vs. Calculated Shape Area",
        x = "Survey_Site Area",
        y = "Calculated Shape Area")
@@ -510,7 +512,7 @@ ggplot(build_stats_inc, aes(x = Site_Ar, y = cal_Shp_area)) +
 
 ```{r}
 # Create a scatter plot
-ggplot(build_stats_inc, aes(x = N_INDVI, y = cal_Shp_area)) +
+ggplot(build_stats_inc, aes(x = N_INDVI, y = cl_Shp_a)) +
   geom_point() +
   labs(title = "N_INDVID vs. Calculated Shape Area",
        x = "N_INDVID",
@@ -523,7 +525,7 @@ check_hipop_lessarea <- camps %>%
   filter(N_INDVI >50,Site_Ar<1000)
 
 # Print or view the selected camps
-print(check_hipop_lessarea[, c("Name", "N_INDVI", "cl_Shp_","Site_Ar","Site_nm")])
+print(check_hipop_lessarea[, c("Name", "N_INDVI", "cl_Shp_a","Site_Ar","Site_nm")])
 ```
 
 
@@ -549,7 +551,7 @@ print(check_hipop_lessarea[, c("Name", "N_INDVI", "cl_Shp_","Site_Ar","Site_nm")
 # loading the data for with calculated shape area 
 
 ```{r}
-build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/build_stat_inc/build_stat_inc_c.shp")
+build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/build_stat_inc_ms/build_stat_inc_ms_c.shp")
 camps<-st_read(build_stat_path2)
 head(camps)
 ```
@@ -610,7 +612,7 @@ plot_camp_pop <- ggplot(camps) +
         axis.title.y=element_text(size = 6,hjust = 0.5),
         axis.text.x = element_text(size=5),
         axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)+
+        )+ guides(fill = FALSE)
   #median pointed code if needed
   #  stat_summary(
   #   aes(x = Sit_Stt, y = as.numeric(N_INDVI), fill = "N_INDVI"),
@@ -756,7 +758,7 @@ ggsave("plots/box_wp_c.png", plot = wp_c_plot, width = 8, height = 6, dpi = 400)
 #BOX+VIOLIN plot for the calculated GPW population for different site status
 
 ```{r}
-# Create a boxplot for wp_constrained
+# Create a boxplot forgpw
 gpw_plot <- ggplot(camps) + 
   geom_boxplot(aes(x = Sit_Stt, y = as.numeric(gpw), fill = "gpw"), alpha = 0.2, width = 0.5) +
   #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
@@ -910,14 +912,14 @@ ggsave("plots/box_ms.png", plot =msplot, width = 8, height = 6, dpi = 400)
 
 ```{r}
 vida_plot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(vid_b_c), fill = "vid_b_c"), alpha = 0.2, width = 0.5) +
+  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(vida_b_c), fill = "vida_b_c"), alpha = 0.2, width = 0.5) +
   #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
   scale_fill_viridis_d(name = "Calculated Building count form Vida Google-Microsoft data", alpha = 0.6) +
   theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(vid_b_c), fill ="vid_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  geom_jitter(aes(x = Sit_Stt, y = as.numeric(vida_b_c), fill ="vida_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
   coord_flip() +
   labs(title = "Refugee site building count calculated from Vida Google-Microsoft building data for different Site Status", x = "Site Status", y = "Calculated Microsoft building count") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(vid_b_c), fill = "vid_b_c"), alpha = 0.3) +
+  geom_violin(aes(x = Sit_Stt, y = as.numeric(vida_b_c), fill = "vida_b_c"), alpha = 0.3) +
   
   theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
         axis.title.x = element_text(size = 6,hjust = 0.5),
