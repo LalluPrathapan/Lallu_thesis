@@ -899,4 +899,41 @@ msplot <- ggplot(camps) +
 print(msplot)
 ```
 
+#saving the Microsoft building count plot 
+```{r}
+# Save the plot to a file
+ggsave("plots/box_ms.png", plot =msplot, width = 8, height = 6, dpi = 400)
+```
+
+
+#BOX+VIOLIN plot for calculated buildings in vida MS_gOOGLE data for different site status
+
+```{r}
+vida_plot <- ggplot(camps) + 
+  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(vid_b_c), fill = "vid_b_c"), alpha = 0.2, width = 0.5) +
+  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
+  scale_fill_viridis_d(name = "Calculated Building count form Vida Google-Microsoft data", alpha = 0.6) +
+  theme_ipsum()+
+  geom_jitter(aes(x = Sit_Stt, y = as.numeric(vid_b_c), fill ="vid_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "Refugee site building count calculated from Vida Google-Microsoft building data for different Site Status", x = "Site Status", y = "Calculated Microsoft building count") +
+  geom_violin(aes(x = Sit_Stt, y = as.numeric(vid_b_c), fill = "vid_b_c"), alpha = 0.3) +
+  
+  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
+        axis.title.x = element_text(size = 6,hjust = 0.5),
+        axis.title.y=element_text(size = 6,hjust = 0.5),
+        axis.text.x = element_text(size=5),
+        axis.text.y=element_text(size = 5),
+        )+ guides(fill = FALSE)
+
+print(vida_plot)
+```
+
+
+#saving the vida building count plot 
+```{r}
+# Save the plot to a file
+ggsave("plots/box_vida.png", plot =vida_plot, width = 8, height = 6, dpi = 400)
+```
+
 
