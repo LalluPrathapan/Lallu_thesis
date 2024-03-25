@@ -1,0 +1,41 @@
+---
+title: "Total_nga_pop"
+author: "Lallu Nikerthil Prathapan"
+date: "3/25/2024"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+
+library(sf)
+library(vctrs)
+library(ggplot2)
+library(raster)
+library(exactextractr)
+library(terra)
+library(dplyr)
+library(gridExtra)
+library(tidyr)
+library(units)
+library(viridis)
+library(hrbrthemes)
+library(corrplot)
+library(cowplot)
+```
+
+```{r}
+nga_ghsl_mgd<-"D:/EAGLE/Master_Thesis_Hannes/1/ghsl_pop_2020_mollweid_100m/merged_ghsl.tif"
+```
+
+```{r}
+nga_adm_path<-"D:/EAGLE/Master_Thesis_Hannes/1/ADM_MOLL/ADM_MOL.shp"
+adm<-st_read(nga_adm_path)
+```
+```{r}
+
+```
+
