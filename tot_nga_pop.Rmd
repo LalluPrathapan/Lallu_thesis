@@ -8,7 +8,7 @@ output: html_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 ```
-
+#Packages
 ```{r}
 
 library(sf)
@@ -25,10 +25,12 @@ library(viridis)
 library(hrbrthemes)
 library(corrplot)
 library(cowplot)
+library(scales) 
 ```
 
 ```{r}
-nga_ghsl_mgd<-"D:/EAGLE/Master_Thesis_Hannes/1/ghsl_pop_2020_mollweid_100m/merged_ghsl.tif"
+nga_ghsl_mgd<-rast("D:/EAGLE/Master_Thesis_Hannes/1/ghsl_pop_2020_mollweid_100m/merged_ghsl.tif")
+
 ```
 
 ```{r}
@@ -37,5 +39,220 @@ adm<-st_read(nga_adm_path)
 ```
 ```{r}
 
+# function
+
+# weighted sum per polygon (using the size of the pixel covered by the polygon "coverage_fraction")
+
+extract_sum  <-  function(raster, polygon, field){
+
+  polygon $id_tmp <- as.data.frame(polygon)[,field]
+
+  v.exact <- exactextractr::exact_extract(raster, polygon, include_cols = 'id_tmp', max_cells_in_memory=3e+10)
+
+  x <- do.call("rbind",v.exact)
+
+  x[,"nga_pop"] <- x[, "value"] * x$coverage_fraction
+
+  x_sum <- x %>%
+
+    dplyr::group_by(id_tmp)%>%
+
+    dplyr::summarise_at("nga_pop", sum, na.rm = TRUE)
+
+polygon <- polygon %>%
+
+    left_join(x_sum, by = "id_tmp")
+
+  rm(x,v.exact,x_sum)
+
+  return(polygon)
+
+}
 ```
 
+```{r}
+adm <- extract_sum(nga_ghsl_mgd, adm,"ADM1_EN")
+```
+###########worldpop unconstrained##################
+
+```{r}
+wp_unconstrained<-rast('D:/EAGLE/Master_Thesis_Hannes/1/world_pop/nga_ppp_2020.tif')
+```
+
+```{r}
+
+# function
+
+# weighted sum per polygon (using the size of the pixel covered by the polygon "coverage_fraction")
+
+extract_sum  <-  function(raster, polygon, field){
+
+  polygon $id_tmp <- as.data.frame(polygon)[,field]
+
+  v.exact <- exactextractr::exact_extract(raster, polygon, include_cols = 'id_tmp', max_cells_in_memory=3e+10)
+
+  x <- do.call("rbind",v.exact)
+
+  x[,"nga_wp_u"] <- x[, "value"] * x$coverage_fraction
+
+  x_sum <- x %>%
+
+    dplyr::group_by(id_tmp)%>%
+
+    dplyr::summarise_at("nga_wp_u", sum, na.rm = TRUE)
+
+polygon <- polygon %>%
+
+    left_join(x_sum, by = "id_tmp")
+
+  rm(x,v.exact,x_sum)
+
+  return(polygon)
+
+}
+```
+
+```{r}
+adm <- extract_sum(wp_unconstrained, adm,"ADM1_EN")
+```
+
+
+
+###########worldpop Constrained##################
+
+```{r}
+wp_constrained<-rast('D:/EAGLE/Master_Thesis_Hannes/1/world_pop_build/nga_ppp_2020_constrained.tif')
+```
+
+```{r}
+
+# function
+
+# weighted sum per polygon (using the size of the pixel covered by the polygon "coverage_fraction")
+
+extract_sum  <-  function(raster, polygon, field){
+
+  polygon $id_tmp <- as.data.frame(polygon)[,field]
+
+  v.exact <- exactextractr::exact_extract(raster, polygon, include_cols = 'id_tmp', max_cells_in_memory=3e+10)
+
+  x <- do.call("rbind",v.exact)
+
+  x[,"nga_wp_c"] <- x[, "value"] * x$coverage_fraction
+
+  x_sum <- x %>%
+
+    dplyr::group_by(id_tmp)%>%
+
+    dplyr::summarise_at("nga_wp_c", sum, na.rm = TRUE)
+
+polygon <- polygon %>%
+
+    left_join(x_sum, by = "id_tmp")
+
+  rm(x,v.exact,x_sum)
+
+  return(polygon)
+
+}
+```
+
+```{r}
+adm <- extract_sum(wp_constrained, adm,"ADM1_EN")
+```
+
+
+###########GPW##################
+
+```{r}
+nga_gpw<-rast('D:/EAGLE/Master_Thesis_Hannes/1/gpw/gpw-v4-population-count-rev11_2020_30_sec_tif/gpw_v4_population_count_rev11_2020_30_sec.tif')
+```
+
+```{r}
+
+# function
+
+# weighted sum per polygon (using the size of the pixel covered by the polygon "coverage_fraction")
+
+extract_sum  <-  function(raster, polygon, field){
+
+  polygon $id_tmp <- as.data.frame(polygon)[,field]
+
+  v.exact <- exactextractr::exact_extract(raster, polygon, include_cols = 'id_tmp', max_cells_in_memory=3e+10)
+
+  x <- do.call("rbind",v.exact)
+
+  x[,"nga_gpw"] <- x[, "value"] * x$coverage_fraction
+
+  x_sum <- x %>%
+
+    dplyr::group_by(id_tmp)%>%
+
+    dplyr::summarise_at("nga_gpw", sum, na.rm = TRUE)
+
+polygon <- polygon %>%
+
+    left_join(x_sum, by = "id_tmp")
+
+  rm(x,v.exact,x_sum)
+
+  return(polygon)
+
+}
+```
+
+```{r}
+adm <- extract_sum(nga_gpw, adm,"ADM1_EN")
+```
+
+
+###%%%%%Calculating the total nga population form all%%%#####
+
+```{r}
+
+# Calculate the sum of the columns
+sum_nga_pop <- sum(adm$nga_pop, na.rm = TRUE)
+sum_nga_wp_u <- sum(adm$nga_wp_u, na.rm = TRUE)
+sum_nga_wp_c <- sum(adm$nga_wp_c, na.rm = TRUE)
+sum_nga_gpw <- sum(adm$nga_gpw, na.rm = TRUE)
+nga_census<-204909220
+
+
+# Display the sums
+cat("Sum of nga_pop:", sum_nga_pop, "\n")
+cat("Sum of nga_wp_u:", sum_nga_wp_u, "\n")
+cat("Sum of nga_wp_c:", sum_nga_wp_c, "\n")
+cat("Sum of nga_gpw:", sum_nga_gpw, "\n")
+cat("Nigeria census projection:", nga_census, "\n")
+```
+##%%%%%%%%Ploting the bar graph from different data%%%%%####
+
+```{r}
+# Create a dataframe with the sums, column names, and census projection
+df <- data.frame(columns = c(bar_names, "Nigeria Census "), 
+                 sums = c(sums, nga_census))
+# Convert sums to numeric and then format with commas
+df$sums <- as.numeric(df$sums)
+df$sums_label <- comma(df$sums)
+
+# Create the bar plot using ggplot
+bar_plot <- ggplot(df, aes(x = columns, y = sums, fill = columns)) +
+  geom_bar(stat = "identity", width = 0.5) +
+  labs(x = "Population Datasets", y = "Nigeria Population", title = "Comparison of Total Nigeria Population from Different Datasets") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 8, angle = 45, hjust = 1),
+        plot.title = element_text(size = 10, color = "blue", hjust = 0.5),
+        axis.title.y = element_text(size = 8, hjust = 0.5),
+        axis.title.x = element_text(size = 8, hjust = 0.5),
+        axis.text.y = element_blank()) +  # Remove text on y-axis
+  scale_fill_manual(values = c("GHSL" = "skyblue", "WorldPop_c" = "orange", "WorldPop_uc" = "green", "GPW" = "purple")) +
+  geom_text(aes(label = sums_label), vjust = 0.5, size = 3, angle = 90, position = position_dodge(width = 0.5))  # Add formatted value vertically on the bar
+
+print(bar_plot)
+```
+
+
+```{r}
+# Save the plot to a file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/nga_pop1.png", plot =bar_plot, width = 8, height = 6, dpi = 400)
+```
