@@ -438,8 +438,79 @@ print(ghs_dff_stats)
 
 Seeing that the mean in the difference in population between the ghsl and the surveyed population is overestimation by 2954.9, which is a pritty big overestimation 
 
-What could be the reason for this
+What could be the reason for this????
+#Boxplot the ghsl error
+```{r}
+# Create a boxplot for N_INDVI
+ghsl_error_box <- ggplot(camps) + 
+  geom_boxplot(aes( x=Sit_Stt,y =ghsl_df, fill = "ghsl_df"), alpha = 0.2, width = 0.5) +
+  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
+  scale_fill_viridis_d(name = "GHSL error", alpha = 0.6) +
+  theme_ipsum()+
+  geom_jitter(aes(x=Sit_Stt,y =ghsl_df, fill = "ghsl_df"), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "GHSL-survery difference error summary", x = "Site Status", y = "GHSL-Survey difference") +
+  geom_violin(aes(x = Sit_Stt, y = ghsl_df, fill = "ghsl_df"), alpha = 0.3) +
+  # 
+  theme(plot.title = element_text(size = 9,color="Blue",hjust=0.5),
+        axis.title.x = element_text(size = 6,hjust = 0.5),
+        axis.title.y=element_text(size = 6,hjust = 0.5),
+        axis.text.x = element_text(size=5),
+        axis.text.y=element_text(size = 5),
+        )+ guides(fill = FALSE)
+  #median pointed code if needed
+  #  stat_summary(
+  #   aes(x = Sit_Stt, y = as.numeric(N_INDVI), fill = "N_INDVI"),
+  #   fun = median,
+  #   geom = "point",
+  #   shape = 23,
+  #   size = 2,
+  #   color = "black",
+  #   position = position_dodge(width = 0.5)
+  # )
+  
+  
+ # !!!!if needed to display then have to run the median code below first 
+  # geom_text(
+  #   data = median_values,
+  #   aes(x = Sit_Stt, y = median_ghsl, label = sprintf("%.1f", median_ghsl)),
+  #   vjust = -1,
+  #   size = 1,
+  #   color = "black",
+  #   hjust = 0.5
+  # ) 
+#   # Calculate median values for each Sit_Stt group
+# median_values <- camps %>%
+#   group_by(Sit_Stt) %>%
+#   summarize(median_N_INDVI = median(as.numeric(N_INDVI)))
+#   
 
+# stat_summary(
+  #   aes(x = Sit_Stt, y = as.numeric(N_INDVI)),
+  #   fun = median,
+  #   geom = "crossbar",
+  #   width = 0.4,
+  #   col = "red",
+  #   show.legend = FALSE
+  # )
+
+print(ghsl_error_box)
+```
+
+
+```{r}
+library(ggplot2)
+
+# Assuming ghsl_df is a data frame with a single column named ghsl
+# Create a boxplot for ghsl_df
+boxplot <- ggplot(camps, aes(x=Sit_Stt,y = ghsl_df)) +
+  geom_boxplot() +geom_jitter(aes(x=Sit_Stt, y =ghsl_df), size = 0.2, alpha = 0.9,show.legend = FALSE) +coord_flip()
+  labs(title = "Boxplot of GHSL Data",
+       y = "GHSL Value")
+
+# Print the boxplot
+print(boxplot)
+```
 
 
 
