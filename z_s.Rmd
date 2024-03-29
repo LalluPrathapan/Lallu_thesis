@@ -173,9 +173,14 @@ ghsl_surv<-ggplot(camps, aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated GHSL population",
        x = "Iom surveyed population") +
-  theme_minimal()
+  theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
   print(ghsl_surv)
 ```
+Analysis:
+For the Iom surveyed population less than 5000, it can be seen that there is a very high overestimation og the GHSL population for Formal camps.
+
+
+??Most of the formal camps are subjected to overestimation in the GHSL data.What can be the reason for this??
 
 
 #saving the calc vs survey plot ghsl
@@ -215,6 +220,21 @@ print(ghsl_surv_lesser)
 ```
 Analysis : most of the formal camps have population greated than 10,000 and for informal camps the popualtion is mostly under 5000.
 
+#splitting the population less than 500
+
+```{r}
+ghsl_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  labs(title = "Comparison between estimated and survey IOM populations",
+       y = "Estimated population",
+       x = "IOM surveyed population (N_INDVI < 500)") +
+  theme_minimal() +
+  scale_y_continuous(breaks = seq(0, 1000, by = 100))  # Adjust y-axis intervals
+
+#print plots'
+print(ghsl_surv_ls500)
+
+```
 
 
 ```{r}
