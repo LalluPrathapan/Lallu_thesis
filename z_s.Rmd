@@ -161,6 +161,9 @@ st_write(sf_polygon_camps,
  "ghsl_output/polygon_camps_ghsl.shp")
 
 ```
+#%%%%%%GHSL END%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
+
 GHSL some plot visualisation
 
 
@@ -170,12 +173,31 @@ GHSL some plot visualisation
 ghsl_surv<-ggplot(camps, aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(y =as.numeric(N_INDVI) , x = as.numeric(ghsl)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated GHSL population",
        x = "Iom surveyed population") +
   theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
   print(ghsl_surv)
 ```
+
+```{r}
+# Scatter plot with site_status
+ghsl_surv<-ggplot(camps, aes(y = ghsl, x = N_INDVI, color = Sit_Stt, label = Name)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(y =as.numeric(N_INDVI) , x = as.numeric(ghsl)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_text(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5)+
+  labs(title = "Comparison between estimated and survey iom populations",
+       y = "Estimated GHSL population",
+       x = "Iom surveyed population") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
+  print(ghsl_surv)
+```
+
+
+
+
+
 Analysis:
 For the Iom surveyed population less than 5000, it can be seen that there is a very high overestimation og the GHSL population for Formal camps.
 
@@ -220,6 +242,45 @@ print(ghsl_surv_lesser)
 ```
 Analysis : most of the formal camps have population greated than 10,000 and for informal camps the popualtion is mostly under 5000.
 
+
+Considering the camps having the survey population less than or equal to 10,000. it can be seen that varies sites having the population estimate higher than tht of the survey population. 
+
+#save plot
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/ghsl_g10000.png", plot =ghsl_surv_greater, width = 8, height = 6, dpi = 400)
+
+ggsave("Plots/ghsl_l10000.png", plot =ghsl_surv_lesser, width = 8, height = 6, dpi = 400)
+```
+
+# to see the sitesname for less than and greateer than 10000
+
+```{r}
+ #Scatter plot with site_status for N_INDVI greater than 10,000
+ghsl_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = ghsl, x = N_INDVI, color = Sit_Stt,label = Name)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  labs(title = "Comparison between estimated and survey iom populations",
+       y = "Estimated population",
+       x = "Iom surveyed population (N_INDVI > 10,000)") +
+  theme_minimal() +geom_text(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5)+
+  scale_y_continuous(breaks = seq(0, 40000, by = 5000))  # Adjust y-axis intervals
+
+# Scatter plot with site_status for N_INDVI less than or equal to 10,000
+ghsl_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = ghsl, x = N_INDVI, color = Sit_Stt,label=Name)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  labs(title = "Comparison between estimated and survey iom populations",
+       y = "Estimated population",
+       x = "Iom surveyed population (N_INDVI <= 10,000)") +
+  theme_minimal() +geom_text(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5)+
+  scale_y_continuous(breaks = seq(0, 10000, by = 1000))  # Adjust y-axis intervals
+
+# Print the plots
+print(ghsl_surv_greater)
+print(ghsl_surv_lesser)
+```
+
+
 #splitting the population less than 500
 
 ```{r}
@@ -228,61 +289,160 @@ ghsl_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = ghsl
   labs(title = "Comparison between estimated and survey IOM populations",
        y = "Estimated population",
        x = "IOM surveyed population (N_INDVI < 500)") +
-  theme_minimal() +
-  scale_y_continuous(breaks = seq(0, 1000, by = 100))  # Adjust y-axis intervals
+  theme_minimal() 
+  # scale_y_continuous(breaks = seq(0, 550, by = 100))+scale_x_continuous(breaks = seq(0, 550, by = 100))  # Adjust y-axis intervals
 
 #print plots'
 print(ghsl_surv_ls500)
 
 ```
+#save plot
+```{r}
+# Save the plot to a file
+ggsave("Plots/ghsl_ls500.png", plot =ghsl_surv_ls500, width = 8, height = 6, dpi = 400)
+```
+
+
+
+Now again I made plots to see if the population of the survey sites below 500 shows any relationship.
 
 
 ```{r}
+ghsl_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 300), aes(y = as.numeric(ghsl), x = as.numeric(N_INDVI), color = Sit_Stt, label = Name)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_text(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5) +  # Add geom_text for site names
+  labs(title = "Comparison between estimated and survey IOM populations",
+       y = "Estimated population",
+       x = "IOM surveyed population (N_INDVI < 500)") +
+  theme_minimal() 
+  # scale_y_continuous(breaks = seq(0, 550, by = 100)) +
+  # scale_x_continuous(breaks = seq(0, , by = 100))  # Adjust y-axis intervals
+
+#print plots'
+print(ghsl_surv_ls500)
+```
+
+
+# Plot shelter type to see how it behave
+```{r}
 # Define custom colors for Shelter_type
-custom_colors <- c("#FF5733", "#33FF57", "#3366FF", "#FF33A8", "#FFFF33", "#33FFFF", "#FF3399", "#9933FF")
-filt_data_shltyls <- subset(camps, as.numeric(N_INDVI) < 500)
+custom_colors <- c("#FF5733", "#33FF57", "#3366FF", "#FF33A8", "#FFFF33", "#33FFFF",  "#808080", "#A52A2A")
+# filt_data_shltyls <- subset(camps, as.numeric(N_INDVI)<500)
 # Set the alpha value for all points
-alpha_value <- 0.5
+alpha_value <- 0.2
 # Scatter plot with different colors based on Shelter_type
-ggplot(filt_data_shltyls, aes(x = as.numeric(ghsl), y = as.numeric(N_INDVI), color = Shlt_ty)) +
+ggplot(camps, aes(x = as.numeric(ghsl), y = as.numeric(N_INDVI), color = Shlt_ty)) +
   geom_point(alpha = alpha_value) +
   labs(title = "Comparison between ghsl and N_INDVI",
        x = "Estimated ghsl population",
        y = "Surveyed Population") +
   scale_color_manual(values = custom_colors) +  # Set custom colors
+   # scale_y_continuous(breaks = seq(0, 2500, by = 500)) +
+   # # scale_x_continuous(breaks = seq(0,2500 , by = 500))  # Adjust y-axis intervals
+  theme_minimal()
+```
+#seeing the name of the shelter for the shelter type.
+```{r}
+# Define custom colors for Shelter_type
+custom_colors <- c("#FF5733", "#33FF57", "#3366FF", "#FF33A8", "#FFFF33", "#33FFFF",  "#808080", "#A52A2A")
+filt_data_shltyls <- subset(camps, as.numeric(N_INDVI)<2500)
+# Set the alpha value for all points
+alpha_value <- 0.2
+# Scatter plot with different colors based on Shelter_type
+ggplot(camps, aes(x = as.numeric(ghsl), y = as.numeric(N_INDVI), color = Shlt_ty,label=Name)) +
+  geom_point(alpha = alpha_value) +
+  labs(title = "Comparison between ghsl and N_INDVI",
+       x = "Estimated ghsl population",
+       y = "Surveyed Population") +
+  scale_color_manual(values = custom_colors) +
+  geom_text(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5)+
+  # Set custom colors
+    # scale_y_continuous(breaks = seq(0, 10000, by = 1000)) +
   theme_minimal()
 ```
 
+#The plots with Number of Households and survey population +ghsl population
 
 
 ```{r}
 # Scatter plot comparing N_INDIVID and N_HH
-plot1 <- ggplot(camps, aes(x = N_INDVI, y = N_HH, color = ghsl)) +
+plot1 <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), color = Sit_Stt)) +
   geom_point() +
-  labs(title = "Comparison between N_INDVID and N_HH",
-       x = "N_INDVID",
-       y = "N_HH") +
+  labs(title = "Comparison between IOM survey population and Survey Houshold numbers",
+       x = "Iom Survey population",
+       y = "Households") +
+  theme(plot.title = element_text(size = 3, color = "Blue", hjust = 0.5),
+        axis.title.x = element_text(size = 3, hjust = 0.5),
+        axis.title.y = element_text(size = 3, hjust = 0.5),
+        axis.text.x = element_text(size = 2),
+        axis.text.y = element_text(size = 2)) +
   theme_minimal()
 
-# Scatter plot comparing N_INDIVID and ras_name
-plot2 <- ggplot(camps, aes(x = N_INDVI, y = ghsl, color = ghsl)) +
+# Scatter plot comparing N_HH and ghsl
+plot3 <- ggplot(camps, aes(x = as.numeric(N_HH), y = as.numeric(ghsl), color = Sit_Stt)) +
   geom_point() +
-  labs(title = "Comparison between N_INDVID and ghsl",
-       x = "N_INDVID",
-       y = "ghsl") +
-  theme_minimal()
-
-# Scatter plot comparing N_HH and ras_name
-plot3 <- ggplot(camps, aes(x = N_HH, y = ghsl, color = ghsl)) +
-  geom_point() +
-  labs(title = "Comparison between N_HH and ghsl",
-       x = "N_HH",
-       y = "ghsl") +
+  labs(title = "Comparison between Household survey and Estimated GHSL Population",
+       x = "Households",
+       y = "Estimated GHSL Population") +
+  coord_flip() +
+  theme(plot.title = element_text(size = 3, color = "Blue", hjust = 0.5),
+        axis.title.x = element_text(size = 3, hjust = 0.5),
+        axis.title.y = element_text(size = 3, hjust = 0.5),
+        axis.text.x = element_text(size = 2),
+        axis.text.y = element_text(size = 2)) +
   theme_minimal()
 
 # Arrange the plots in a grid
-grid.arrange(plot1, plot2, plot3, ncol = 2)
+hh_ghsl<-grid.arrange(plot1, plot3, ncol = 1)
 ```
+#save
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/ghs_hh_ind.png", plot =hh_ghsl, width = 8, height = 6, dpi = 400)
+```
+
+
+#Number of households and GHSL population only
+
+```{r}
+# Scatter plot comparing N_HH and ghsl
+hh_ghsl_c <- ggplot(camps, aes(x = as.numeric(N_HH), y = as.numeric(ghsl), color = Sit_Stt)) +
+  geom_point() +
+  labs(title = "Comparison between Household survey and Estimated GHSL Population",
+       x = "Households",
+       y = "Estimated GHSL Population") +
+  coord_flip() +
+  theme(plot.title = element_text(size = 3, color = "Blue", hjust = 0.5),
+        axis.title.x = element_text(size = 3, hjust = 0.5),
+        axis.title.y = element_text(size = 3, hjust = 0.5),
+        axis.text.x = element_text(size = 2),
+        axis.text.y = element_text(size = 2)) +
+  theme_minimal()
+print(hh_ghsl_c)
+```
+```{r}
+# Save the plot to a file
+ggsave("Plots/ghs_hh.png", plot =hh_ghsl_c, width = 8, height = 6, dpi = 400)
+```
+
+
+#Find about the difference in  statistics which will help in understanding the change in population of the camps from that of the estimated population 
+```{r}
+ghs_dff_stats<-summary(as.numeric(camps$ghsl_df))
+print(ghs_dff_stats)
+
+```
+
+#Analysis:
+
+Seeing that the mean in the difference in population between the ghsl and the surveyed population is overestimation by 2954.9, which is a pritty big overestimation 
+
+What could be the reason for this
+
+
+
+
 #2.World POP(unconstrained)
 
 #nga_PPP_2020 is actually unconstrained dataset
