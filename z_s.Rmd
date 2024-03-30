@@ -39,6 +39,7 @@ library(viridis)
 library(hrbrthemes)
 library(corrplot)
 library(cowplot)
+library(reshape2)
 ```
 
 
@@ -172,7 +173,7 @@ GHSL some plot visualisation
 # Scatter plot with site_status
 ghsl_surv<-ggplot(camps, aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(y =as.numeric(N_INDVI) , x = as.numeric(ghsl)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(y =as.numeric(N_INDVI) , x = as.numeric(ghsl)),shape=3,size = 0.5, alpha = 2,show.legend = TRUE)+
   
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated GHSL population",
@@ -180,6 +181,8 @@ ghsl_surv<-ggplot(camps, aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
   theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
   print(ghsl_surv)
 ```
+#Analysis:
+
 
 ```{r}
 # Scatter plot with site_status
@@ -1486,46 +1489,107 @@ ggsave("plots/box_vida.png", plot =vida_plot, width = 8, height = 6, dpi = 400)
 # Convert numeric variables from character to numeric
 camps$N_INDVI <- as.numeric(camps$N_INDVI)
 camps$ghsl <- as.numeric(camps$ghsl)
-camps$wp_c <- as.numeric(camps$wp_c)
-camps$wp_uc <- as.numeric(camps$wp_uc)
+camps$wp_con <- as.numeric(camps$wp_con)
+camps$wp_uncon <- as.numeric(camps$wp_uncon)
 camps$gpw <- as.numeric(camps$gpw)
 
 # Check the data types again
-str(camps[, c("N_INDVI", "ghsl", "wp_c", "wp_uc", "gpw")])
+str(camps[, c("N_INDVI", "ghsl", "wp_con", "wp_uncon", "gpw")])
 
 # Check for missing values
-summary(camps[, c("N_INDVI", "ghsl", "wp_c", "wp_uc", "gpw")])
+summary(camps[, c("N_INDVI", "ghsl", "wp_con", "wp_uncon", "gpw")])
 
 # Calculate correlation coefficients
 corr_ghsl <- cor(camps$N_INDVI,camps$ghsl)
-corr_wp_c<-cor(camps$N_INDVI,camps$wp_c)
-corr_wp_uc<-cor(camps$N_INDVI,camps$wp_uc)
+corr_wp_con<-cor(camps$N_INDVI,camps$wp_con)
+corr_wp_uncon<-cor(camps$N_INDVI,camps$wp_uncon)
 corr_gpw<-cor(camps$N_INDVI,camps$gpw)
 
 # View correlation coefficients
 print(corr_ghsl)
-print(corr_wp_uc)
-print(corr_wp_c)
+print(corr_wp_uncon)
+print(corr_wp_con)
 print(corr_gpw)
 ```
-#trying corrplot
+#doing the correlation matrix for the variables.
 
 ```{r}
-# Specify the variables to keep
-variables_to_keep <- c("N_INDVI", "ghsl", "wp_c", "wp_uc", "gpw")
-
-# Remove the geometry column and keep the specified variables
-camps_numeric <- camps[, names(camps) %in% c(variables_to_keep, "geometry")]
-
-# Remove the geometry column and keep the specified variables
-camps_numeric <- camps[, !names(camps) %in% c("geometry")]
-
-# Calculate the correlation matrix
-cor_matrix <- cor(camps_numeric)
+# Create a matrix of correlation coefficients
+cor_matrix <- matrix(c(corr_ghsl, corr_wp_con, corr_wp_uncon, corr_gpw),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_con", "wp_uncon", "gpw")))
 
 # Plot the correlation matrix
-corrplot(cor_matrix, method = "circle", type = "upper", tl.cex = 0.7)
+cor_coe<-corrplot(cor_matrix, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
 ```
+
+
+
+
+#Coorelation matrix calculation
+```{r}
+# Convert spatial object to data frame without geometry
+camps_data_nogeom <- st_drop_geometry(camps)
+
+# Define numeric columns
+numeric_cols <- c("N_INDVI", "ghsl", "wp_con", "wp_uncon", "gpw")
+
+# Convert selected columns to numeric, handling non-numeric values
+for (col in numeric_cols) {
+  camps_data_nogeom[[col]] <- as.numeric(as.character(camps_data_nogeom[[col]]))
+}
+
+# Calculate correlation coefficients
+correlation_matrix <- cor(camps_data_nogeom[, numeric_cols])
+print(correlation_matrix)
+```
+# Analysis correlation matrix
+N_INDVI vs. ghsl: The correlation coefficient is 0.6701, indicating a moderate positive correlation between N_INDVI and ghsl.
+N_INDVI vs. wp_con: The correlation coefficient is 0.6251, indicating a moderate positive correlation between N_INDVI and wp_con.
+ghsl vs. wp_con: The correlation coefficient is 0.8905, indicating a strong positive correlation between ghsl and wp_con.
+wp_uncon vs. N_INDVI: The correlation coefficient is 0.5516, indicating a moderate positive correlation between wp_uncon and N_INDVI.
+wp_uncon vs. ghsl: The correlation coefficient is 0.6079, indicating a moderate positive correlation between wp_uncon and ghsl.
+wp_uncon vs. wp_con: The correlation coefficient is 0.6640, indicating a moderate positive correlation between wp_uncon and wp_con.
+gpw vs. N_INDVI: The correlation coefficient is 0.1556, indicating a weak positive correlation between gpw and N_INDVI.
+gpw vs. ghsl: The correlation coefficient is 0.1361, indicating a weak positive correlation between gpw and ghsl.
+gpw vs. wp_con: The correlation coefficient is 0.1953, indicating a weak positive correlation between gpw and wp_con.
+wp_uncon vs. gpw: The correlation coefficient is 0.7454, indicating a strong positive correlation between wp_uncon and gpw.
+
+#Heat map of correlation matrix
+
+```{r}
+# Convert the correlation matrix to a dataframe
+corr_matrix <- correlation_matrix
+# Assign row and column names
+rownames(corr_matrix) <- colnames(corr_matrix) <- c("N_INDVI", "ghsl", "wp_con", "wp_uncon", "gpw")
+# Convert the correlation matrix to long format
+corr_matrix_long <- melt(corr_matrix)
+
+# Plot the heatmap
+heat_map_corr<-ggplot(data = corr_matrix_long, aes(x = Var1, y = Var2, fill = value)) +
+  geom_tile() +
+  scale_fill_gradient(low = "blue", high = "red") +
+  labs(title = "Correlation Matrix Heatmap",
+       x = "Variables",
+       y = "Variables") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(heat_map_corr)
+
+```
+#save heat map coorelation matrix
+
+#save the plot
+```{r}
+# Save the plot to a file
+ggsave("Plots/heat_map_corr.png", plot =heat_map_corr, width = 8, height = 6, dpi = 400)
+```
+
+
+
+
+
 #trying some summary stats
 
 ```{r}
