@@ -3740,7 +3740,7 @@ print(corr_ms_hh_pop)
 # correlation is 
 # [1]  0.8214727
 ```
-#3.Informal sites only ms_building count vs population
+#3.Site status (InFormal) only ms_building count vs population
 ```{r}
 # 1. Subset the informal camps
 informal_camps <- camps %>% filter(Sit_Stt == "Informal")
@@ -3766,7 +3766,7 @@ print(corr_ms_b_pop_inf)
 ```
 
 
-#4. Informal sites only ms_building count vs number of households
+#4.Site status (InFormal) only ms_building count vs number of households
 
 ```{r}
 # 1. Subset the informal camps
@@ -3793,9 +3793,158 @@ print(corr_ms_b_hh_inf)
 ```
 
 
-#5. Formal sites only ms_building count vs survey population
+#5.Site status (Formal) only ms_building count vs survey population
 
-#6. Formal sites only ms_building count vs number of households
+```{r}
+# 1. Subset the informal camps
+formal_camps <- camps %>% filter(Sit_Stt == "Formal")
+
+# 2. Extract relevant columns
+data_plot_ms_f <- formal_camps %>%
+  select(ms_b_c, N_INDVI,Sit_Stt)
+
+# Scatter plot with site_status
+ms_b_for<-ggplot(data_plot_ms_f, aes(y = ms_b_c, x = N_INDVI,colour=Sit_Stt)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  
+  labs(title = "Comparison between MS building count and IOM survey populations for formal site status",
+       y = "Microsoft building count",
+       x = "Iom surveyed population(formal sites") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
+print(ms_b_for)
+corr_ms_b_pop_f<-cor((as.numeric(formal_camps$ms_b_c)),(as.numeric(formal_camps$N_INDVI)))
+print(corr_ms_b_pop_f)
+# correlation is 
+# [1] 0.7930982
+
+
+```
+
+#6.Site status (Formal) only ms_building count vs number of households
+
+```{r}
+# 1. Subset the informal camps
+formal_camps <- camps %>% filter(Sit_Stt == "Formal")
+
+# 2. Extract relevant columns
+data_plot_ms_f <- formal_camps %>%
+  select(ms_b_c, N_INDVI,Sit_Stt)
+
+# Scatter plot with site_status
+ms_b_for_hh<-ggplot(data_plot_ms_f, aes(y = ms_b_c, x = N_HH,colour=Sit_Stt)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  
+  labs(title = "Comparison between MS building count and IOM survey household count for formal site status",
+       y = "Microsoft building count",
+       x = "Iom surveyed household count(formal sites") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
+print(ms_b_for)
+corr_ms_b_hh_f<-cor((as.numeric(formal_camps$ms_b_c)),(as.numeric(formal_camps$N_HH)))
+print(corr_ms_b_hh_f)
+# correlation is 
+# [1] 0.7810073
+
+```
+
+#7. Site_type plot for ms_building and population
+```{r}
+# Scatter plot with site_status
+ms_b_st_typ<-ggplot(camps, aes(y = ms_b_c, x = N_INDVI, color = Sit_Typ)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  
+  labs(title = "Comparison between MS building count and survey iom populations with Site Type ",
+       y = "Microsoft building count",
+       x = "Iom surveyed population") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
+  print(ms_b_st_typ)
+
+```
+
+#8. Site type plot for ms_building and survey household
+```{r}
+# Scatter plot with site_status
+ms_b_st_typ_hh<-ggplot(camps, aes(y = ms_b_c, x = N_HH,colour=Sit_Typ)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  
+  labs(title = "Comparison between MS building count and IOM survey household count",
+       y = "Microsoft building count",
+       x = "Iom surveyed household count(formal sites") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
+print(ms_b_st_typ_hh)
+
+```
+
+#9. Site class(spontaneous/planned) plot for ms_building and survey population
+
+```{r}
+# Scatter plot with site_status
+ms_b_st_typ<-ggplot(camps, aes(y = ms_b_c, x = N_INDVI, color = St_clss)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  
+  labs(title = "Comparison between MS building count and survey iom populations with Site Class ",
+       y = "Microsoft building count",
+       x = "Iom surveyed population") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
+  print(ms_b_st_typ)
+```
+
+
+
+#10.Shelter type plot for survey population vs ms building counts
+```{r}
+# Scatter plot with site_status
+ms_b_sl_typ<-ggplot(camps, aes(y = ms_b_c, x = N_INDVI, color = Shlt_ty)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  
+  labs(title = "Comparison between MS building count and survey iom populations with Shelter type ",
+       y = "Microsoft building count",
+       x = "Iom surveyed population") +
+  theme_minimal()  # Adjust axis scale to start from zero
+print(ms_b_sl_typ)
+```
+#11.Shelter type plot for survey household count vs ms building counts
+
+
+```{r}
+# Scatter plot with site_status
+ms_b_sl_typ_hh<-ggplot(camps, aes(y = ms_b_c, x = N_HH,colour=Shlt_ty)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  
+  labs(title = "Comparison between MS building count and IOM survey household count for different shelter type",
+       y = "Microsoft building count",
+       x = "Iom surveyed household count") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
+print(ms_b_sl_typ_hh)
+```
+
+#Microsoft building stats(Mean of building area/density and count)
+
+```{r}
+
+
+camps$ms_b_a <- as.numeric(camps$ms_b_a)
+camps$ms_b_c <- as.numeric(camps$ms_b_c)
+camps$N_HH<-as.numeric(camps$N_HH)
+camps$cl_Shp_a<-as.numeric(camps$cl_Shp_a)
+
+print("ms_b_c")
+summary(camps$ms_b_c)
+print("ms_b_a")
+summary(camps$ms_b_a)
+print("N_HH")
+summary(camps$N_HH)
+print("cl_Shp_a")
+summary(camps$cl_Shp_a)
+```
+
+
 
 #____GOOGLE BUILDINGS______________
 #1.(Surveyed population vs _ms building count)plot
@@ -3933,4 +4082,40 @@ osm_b_hh<-ggplot(camps, aes(y = osm_b_c, x = N_INDVI, color = Sit_Stt)) +
 
 #6. Formal sites only osm_building count vs number of households
 #_________________________________________________
+#BUIDING SUMMARY STATISTIC PLOTS
+#1.BAR PLOT(BUILDING COUNT)
+```{r}
+
+# Aggregate the counts
+summarized_data <- camps %>%
+  summarise(Google = sum(g_b_c, na.rm = TRUE),
+            OSM = sum(osm_b_c, na.rm = TRUE),
+            Microsoft = sum(ms_b_c, na.rm = TRUE),
+            VIDA = sum(vida_b_c, na.rm = TRUE))
+
+
+summarized_data <- data.frame(
+  source = c("Google", "OSM", "Microsoft", "VIDA"),
+  building_count = c(170437, 26323, 67317, 185608)
+)
+
+# Plotting
+bar_plot <- ggplot(summarized_data, aes(x = source, y = building_count, fill = source)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = building_count), vjust = -0.5) +  # Add text labels above the bars
+  labs(x = "Data Source", y = "Building Count", title = "Total Building Counts by Data Source") +
+  scale_fill_manual(values = c("Google" = "skyblue", "OSM" = "orange", "Microsoft" = "green", "VIDA" = "red")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+# Show the plot
+print(bar_plot)
+```
+
+#(BAR PLOT SAVE)
+```{r}
+# Save the plot to a file
+ggsave("Plots/building_count_bar.png", plot =bar_plot , width = 8, height = 6, dpi = 400)
+```
 
