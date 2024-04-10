@@ -13,6 +13,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r}
 library(sf)
+library(vctrs)
 library(ggplot2)
 library(raster)
 library(exactextractr)
@@ -21,6 +22,9 @@ library(dplyr)
 library(gridExtra)
 library(tidyr)
 library(units)
+library(viridis)
+library(hrbrthemes)
+library(corrplot)
 ```
 
 
@@ -28,16 +32,17 @@ library(units)
 #5 loading the data from all the building stats
 
 ```{r}
-build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/kml_gee/all_build_stats/all_build_stats.shp")
+build_stat_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camps_EO/camps_eo1.shp")
 build_stats_inc<-st_read(build_stat_path)
 head(build_stats_inc)
+data_fr_ur<-build_stats_inc
 ```
 
 
 
 #Categorising the urban, periurban, rural, hamlet from GRD3
 #as data was so big did the clipping in qgis and expprted the clipped data here
-
+WGS 84
 ```{r}
 grd3_path<-"D:/EAGLE/Master_Thesis_Hannes/1/grd3_settlementextent/clipped/clipped_grd3.shp"
 grd3<-st_read(grd3_path)
@@ -67,14 +72,14 @@ print(selected_columns)
 #!!!! Run once only
 #Removing unnecessary attributes// only run if needed
 ```{r}
-attributes_to_remove <- c("smod.x","smod.y","smod");
-
-# Remove specified attributes
-build_stats_inc<- build_stats_inc%>%select(-one_of(attributes_to_remove))
+# attributes_to_remove <- c("smod.x","smod.y","smod");
+# 
+# # Remove specified attributes
+# build_stats_inc<- build_stats_inc%>%select(-one_of(attributes_to_remove))
 
 ```
 
-#now clipped data have urban classification, population from GHSL, Worlpop(constrained, unconstrained), GPW and the building data from google, microsoft, vida-google-microsoft, osm.
+#now clipped data have urban classification, population from GHSL, Worlpop(constrained, unconstrained), GPW and the building data from google, !!!!!have to be addded microsoft, vida-google-microsoft, osm.
 
 # writing out this data remembering now there is 226 number because of the repetation of  BN_S023, B0_S259,BO_S350
 
@@ -83,26 +88,187 @@ build_stats_inc<- build_stats_inc%>%select(-one_of(attributes_to_remove))
 # Write out the entire clipped_data to a GeoPackage (or other supported formats)
 st_write(clipped_data, "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/everything/all_merg.shp")
 ```
+#**plots for grd3*******
+
+
+```{r}
+barplot_data <- clipped_data %>%
+  group_by(dou_level1, status) %>%
+  summarise(count = n()) %>%
+  ggplot(aes(x = dou_level1, y = count, fill = status)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = count), position = position_dodge(width = 0.9), vjust = -0.5) + # Add count labels
+  labs(title = "Count of Formal and Informal Camps by dou_level1",
+       x = "dou_level1",
+       y = "Count",
+       fill = "Status") +
+  theme_minimal() +
+  theme(axis.text.x = element_text( hjust = 1))+scale_fill_viridis(discrete=TRUE, name="") +coord_flip()
+
+# Create a stacked bar plot showing the count of formal and informal camps for each dou_level2
+stacked_barplot_data <- clipped_data %>%
+  group_by(dou_level2, status) %>%
+  summarise(count = n()) %>%
+  ggplot(aes(x = dou_level2, y = count, fill = status)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = count), position = position_stack(vjust = 0.5), size = 3) + # Add count labels
+  labs(title = "Count of Formal and Informal Camps by dou_level2",
+       x = "dou_level2",
+       y = "Count",
+       fill = "Status") +
+  theme_minimal() +
+  theme(axis.text.x = element_text( hjust = 1))+scale_fill_viridis(discrete=TRUE, name="") +
+  coord_flip()
+
+# Show the bar plots
+print(barplot_data)
+print(stacked_barplot_data)
+```
+#saving the plot
+
+
+
+
+```{r}
+# Calculate counts of Sit_Stt for each dou_level1
+count_data_dou_level1 <- clipped_data %>%
+  group_by(dou_level1, Sit_Stt) %>%
+  summarise(count = n())
+
+# Create a bar plot showing the count of Sit_Stt for each dou_level1
+barplot_dou_level1 <- ggplot(count_data_dou_level1, aes(x = dou_level1, y = count, fill = Sit_Stt)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = count), position = position_dodge(width = 0.9), vjust = -0.5) + # Add count labels
+  labs(title = "Count of Refugee site status by Degree of Urbanisation(level-1) from GRD3 data",
+       x = "dou_level1",
+       y = "Count",
+       fill = "Sit_Stt") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(hjust = 1))+scale_fill_viridis(discrete=TRUE, name="") +
+  coord_flip()
+
+# Calculate counts of Sit_Stt for each dou_level2
+count_data_dou_level2 <- clipped_data %>%
+  group_by(dou_level2, Sit_Stt) %>%
+  summarise(count = n())
+
+# Create a stacked bar plot showing the count of Sit_Stt for each dou_level2
+barplot_dou_level2 <- ggplot(count_data_dou_level2, aes(x = dou_level2, y = count, fill = Sit_Stt)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = count), position = position_stack(vjust = 0.5), size = 3) + # Add count labels
+  labs(title = "Count of Refugee site status by Degree of Urbanisation(level-2)in GRD3 data",
+       x = "dou_level2",
+       y = "Count",
+       fill = "Sit_Stt") +
+  theme_minimal() +
+  theme(axis.text.x = element_text( hjust = 1))+scale_fill_viridis(discrete=TRUE, name="") +
+  coord_flip()
+
+# Show the bar plots
+print(barplot_dou_level1)
+print(barplot_dou_level2)
+```
+
+#saving the plots 
+```{r}
+# Save the plot to a file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/bar_grd3_st_stt1.png", plot =barplot_dou_level1, width = 8, height = 6, dpi = 400)
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/bar_grd3_st_stt2.png", plot =barplot_dou_level2, width = 8, height = 6, dpi = 400)
+
+```
+
+#N_INDVI and dou_levels1(Boxplot try)
+```{r}
+
+# Create a boxplot for ghsl
+d1_plot <- ggplot(clipped_data) + 
+  geom_boxplot(aes(x = dou_level1, y = as.numeric(N_INDVI), fill = "N_INDVI"), alpha = 0.2, width = 0.5) +
+  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
+  scale_fill_viridis_d(name = "Degree of urbanisation(level1)", alpha = 0.6) +
+  theme_ipsum()+
+  geom_jitter(aes(x = dou_level1, y = as.numeric(N_INDVI), fill ="N_INDVI",color = dou_level1), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "Degree of urbanisation-level1 from GRD3 data with site population", x = "Degree of urbanisatin(l1)", y = "Surveyed IOM population") +
+  geom_violin(aes(x = dou_level1, y = as.numeric(N_INDVI), fill = "N_INDVI"), alpha = 0.3) +
+  
+  theme(plot.title = element_text(size = 9,color="Blue",hjust=0.5),
+        axis.title.x = element_text(size = 6,hjust = 0.5),
+        axis.title.y=element_text(size = 6,hjust = 0.5),
+        axis.text.x = element_text(size=5),
+        axis.text.y=element_text(size = 5),
+        )+ guides(fill = FALSE)
+
+print(d1_plot)
+```
+
+#saving the plot
+```{r}
+# Save the plot to a file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/box_N_IND_dou1.png", plot =d1_plot, width = 8, height = 6, dpi = 400)
+```
+
+#dou_level2_NINDVI
+```{r}
+# Create a boxplot for ghsl
+d2_plot <- ggplot(clipped_data) + 
+  geom_boxplot(aes(x = dou_level2, y = as.numeric(N_INDVI), fill = "N_INDVI"), alpha = 0.2, width = 0.5) +
+  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
+  scale_fill_viridis_d(name = "Degree of urbanisation(level2)", alpha = 0.6) +
+  theme_ipsum()+
+  geom_jitter(aes(x = dou_level2, y = as.numeric(N_INDVI), fill ="N_INDVI",color = dou_level2), size = 0.2, alpha = 0.9,show.legend = FALSE) +
+  coord_flip() +
+  labs(title = "Degree of urbanisation-level2 from GRD3 data with site population", x = "Degree of urbanisatin(l2)", y = "Surveyed IOM population") +
+  geom_violin(aes(x = dou_level2, y = as.numeric(N_INDVI), fill = "N_INDVI"), alpha = 0.3) +
+  
+  theme(plot.title = element_text(size = 9,color="Blue",hjust=0.5),
+        axis.title.x = element_text(size = 6,hjust = 0.5),
+        axis.title.y=element_text(size = 6,hjust = 0.5),
+        axis.text.x = element_text(size=5),
+        axis.text.y=element_text(size = 5),
+        )+ guides(fill = FALSE)
+
+print(d2_plot)
+```
+#saving the plot
+```{r}
+# Save the plot to a file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/box_N_IND_dou2.png", plot =d2_plot, width = 8, height = 6, dpi = 400)
+```
+
+
 
 
 #******************GHSL SMOD*********************
 
 ```{r}
 smod_path<-("D:/EAGLE/Master_Thesis_Hannes/1/ghsl_settlement_extent/merged/mrgd_smod.tif")
-smod<-rast(smod_path)
+smod<-raster(smod_path)
 print(smod)
+head(smod)
 plot(smod)
 ```
 
+
+#Need to change the projection to mollweid before that
 ```{r}
-# # Extract raster values for camp polygons
-# extracted_values <- raster::extract(smod, build_stats_inc)
-# 
-# # Add the extracted values to the camp_polygons data frame
-# build_stats_inc$extracted_values <- extracted_values
+st_crs(data_fr_ur)
+st_crs(smod)
+# Convert to Mollweide projection (replace "Mollweide" with the desired projection)
+data_fr_ur_gh<- st_transform(data_fr_ur, crs = "+proj=moll")
+st_crs(data_fr_ur_gh)
+```
+
+
+
+```{r}
+# Extract raster values for camp polygons
+extracted_values <- raster::extract(smod, data_fr_ur_gh)
+
+# Add the extracted values to the camp_polygons data frame
+data_fr_ur_gh$extracted_values <- extracted_values
 
 # Print or view the updated camp_polygons data frame
-print(build_stats_inc[, c("Name", "extracted_values")])
+print(data_fr_ur_gh[, c("Name", "extracted_values")])
 ```
   
 #The classed in smod (urban classification)
@@ -122,10 +288,117 @@ level, has less than 50 inhabitant and is not part of a Rural Cluster;
 populated nor built.
 
 
+```{r}
+# Write out the entire clipped_data to a GeoPackage (or other supported formats)
+st_write(data_fr_ur, "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/everything/u_r_smod.shp")
+```
+#realised that the region will remained clipped in the sections where there is no data and no way to change that
+
+#**maps***
 
 ```{r}
-# Call function
 
-build_stats_inc<- extract_sum(smod, build_stats_inc,"Name")
+# Convert extracted values to character
+data_fr_ur_gh$extracted_values <- as.character(data_fr_ur_gh$extracted_values)
+
+# Split the extracted values
+extracted_values <- strsplit(data_fr_ur_gh$extracted_values, ", ")
+
+# Convert to numeric
+extracted_values <- lapply(extracted_values, function(x) as.numeric(x))
+
+# Duplicate geometry to match the length of extracted values
+duplicated_geometry <- rep(data_fr_ur_gh$geometry, lengths(extracted_values))
+
+# Create a data frame with the extracted values and duplicated geometry
+values_df <- data.frame(
+  extracted_class = unlist(extracted_values),
+  geometry = duplicated_geometry
+)
+
+# Convert extracted_class to factor with appropriate levels
+values_df$extracted_class <- factor(values_df$extracted_class, levels = c("10", "11", "12", "13", "21", "22", "23", "30"))
+
+# Convert to sf object
+values_sf <- st_as_sf(values_df)
+
+# Plot
+ggplot() +
+  geom_sf(data = values_sf, aes(fill = extracted_class)) +
+  scale_fill_manual(values = c(
+    "10" = "blue", "11" = "lightblue", "12" = "green", "13" = "yellow",
+    "21" = "orange", "22" = "red", "23" = "darkred", "30" = "purple"
+  ), name = "Extracted Class") +
+  labs(title = "Extracted Values Map") +
+  theme_minimal()
+```
+
+
+#zoom to any regions of extracted value
+```{r}
+
+# Define the extracted value you want to zoom in on
+extracted_value_to_zoom <- "30"
+
+# Filter the values_df dataframe for the extracted value
+filtered_values_df <- subset(values_df, extracted_class == extracted_value_to_zoom)
+
+# Convert the filtered dataframe to an sf object
+filtered_values_sf <- st_as_sf(filtered_values_df)
+
+# Plot the filtered sf object
+ggplot() +
+  geom_sf(data = filtered_values_sf, aes(fill = extracted_class)) +
+  scale_fill_manual(values = c(
+    "10" = "blue", "11" = "lightblue", "12" = "green", "13" = "yellow",
+    "21" = "orange", "22" = "red", "23" = "darkred", "30" = "purple"
+  ), name = "Extracted Class") +
+  labs(title = paste("Zoomed in on Extracted Value:", extracted_value_to_zoom)) +
+  theme_minimal()
+```
+
+# A scatter plot to visualise how the Site _status effec the urban-rural classification from the GHSL_SMOD data
+
+```{r}
+# Create a scatter plot
+ggplot(data = data_fr_ur_gh, aes(x = extracted_values, y = Sit_Stt)) +
+  geom_point(aes(color = Sit_Stt)) +
+  scale_color_manual(values = c("Formal" = "blue", "Informal" = "red"), name = "Site Status") +
+  labs(
+    title = "Relationship between Extracted Value and Site Status",
+    x = "Extracted Class",
+    y = "Site Status"
+  ) +
+  theme_minimal()+coord_flip()
+```
+
+#trying the heat map
+
+```{r}
+# Coerce extracted values to character type
+data_fr_ur_gh$extracted_values <- as.character(data_fr_ur_gh$extracted_values)
+
+# Define representative labels for each category
+category_labels <- c("10" = "Water", "11" = "Very low density rural", "12" = "Low density rural",
+                     "13" = "Rural cluster", "21" = "Suburban or per-urban", "22" = "Semi-dense urban",
+                     "23" = "Dense urban", "30" = "Urban Centre")
+
+# Add a new column to data_fr_ur_gh with the representative labels
+data_fr_ur_gh$extracted_label <- category_labels[data_fr_ur_gh$extracted_values]
+
+# Create the heatmap with the generalized extracted values
+heatmap_generalized <- ggplot(data_fr_ur_gh, aes(x = factor(Sit_Stt), y = extracted_label, fill = extracted_label)) +
+  geom_tile() +
+  scale_fill_manual(values = category_colors) +
+  labs(
+    title = "Heatmap of Generalized Extracted Values and Site Status",
+    x = "Site Status",
+    y = "Extracted Class"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+
+# Print the generalized heatmap
+print(heatmap_generalized)
 ```
 
