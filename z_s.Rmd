@@ -4826,4 +4826,193 @@ heat_map_corr_b<-ggplot(data = corr_matrix_long_b, aes(x = Var1, y = Var2, fill 
 print(heat_map_corr_b)
 
 ```
+#save correlation matrix
+```{r}
+# Save the plot to a file
+ggsave("Plots/heat_map_corr_building.png", plot =heat_map_corr_b, width = 8, height = 6, dpi = 400)
+```
+#___________________________________
+#URBAN_RURAL 
+#Load the data which also has the urban rural classification for the camp sites 
+```{r}
+camp_fin_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/all_ur_build_eo_camp/camp_fin.shp")
+camp_final<-st_read(camp_fin_path)
+head(camp_final)
+```
+
+#Plots using the Urban- rural classification from GRD3 .
+
+#1.Checking the formal and informal distribution of the camp and their presence in the urban -rural set up
+#A. a bar plot or count plot to visualize the distribution of Sit_Stt within each category of dou_level1.
+
+```{r}
+
+# Convert factors to character to avoid issues in ggplot2
+camp_final$dou_level1 <- as.character(camp_final$dou_level1)
+camp_final$Sit_Stt <- as.character(camp_final$Sit_Stt)
+
+# Create a count plot
+dou_1_sit_stt<-ggplot(camp_final, aes(x = dou_level1, fill = Sit_Stt)) +
+  geom_bar(position = "dodge", color = "black") +
+  geom_text(stat = 'count', aes(label = ..count..), position = position_dodge(width = 0.9), vjust = -0.5) +
+  labs(x = "Degree of Urbanisation Level 1", y = "Count", fill = "Site Status") +
+  theme_minimal()
+print(dou_1_sit_stt)
+
+```
+#Analysis
+#Rural region has the least number of camps overall and the presence of formal camps can also be seen very less.
+#Whilt most of the refugee sites are distributed and remain the urban center of the both fomal and informal
+#And several informal camps are the main refugee accomodations in the region.
+#save dou-1 and site status
+```{r}
+# Save the plot to a file
+ggsave("Plots/dou_1_st_sta_bar.png", plot =dou_1_sit_stt, width = 8, height = 6, dpi = 400)
+```
+
+#Percentage calcutation for the above
+```{r}
+
+# Assuming your data frame is named 'camp_final'
+
+# Convert 'camp_final' to an sf object
+camp_final_sf <- st_as_sf(camp_final)
+
+# Calculate counts for each combination of dou_level1 and Sit_Stt
+counts <- camp_final_sf %>%
+  st_drop_geometry() %>%
+  group_by(dou_level1, Sit_Stt) %>%
+  summarise(count = n()) %>%
+  ungroup()
+
+# Calculate total counts for each level of dou_level1
+total_counts <- counts %>%
+  group_by(dou_level1) %>%
+  summarise(total_count = sum(count))
+
+# Join counts with total_counts to calculate percentages
+counts <- counts %>%
+  left_join(total_counts, by = "dou_level1") %>%
+  mutate(percentage = (count / total_count) * 100)
+
+# Print out the percentages
+print(counts)
+
+```
+
+
+
+#Analysis
+
+#The result provides information on the distribution of camps based on their formal or informal status (Sit_Stt) within different levels of development (dou_level1). Here's a breakdown of the information:
+
+<!-- Rural: -->
+
+<!-- Formal: There are 3 camps classified as formal out of a total of 12 rural camps, making up 25% of the total rural camps. -->
+<!-- Informal: There are 9 camps classified as informal out of a total of 12 rural camps, making up 75% of the total rural camps. -->
+<!-- Urban Centre: -->
+
+<!-- Formal: There are 26 camps classified as formal out of a total of 137 urban centre camps, making up approximately 19% of the total urban centre camps. -->
+<!-- Informal: There are 111 camps classified as informal out of a total of 137 urban centre camps, making up approximately 81% of the total urban centre camps. -->
+<!-- Urban Cluster: -->
+
+<!-- Formal: There are 9 camps classified as formal out of a total of 74 urban cluster camps, making up approximately 12% of the total urban cluster camps. -->
+<!-- Informal: There are 65 camps classified as informal out of a total of 74 urban cluster camps, making up approximately 88% of the total urban cluster camps. -->
+<!-- Overall, the result provides insights into the proportion of formal and informal camps within different levels of development, highlighting the dominance of informal camps in urban areas compared to formal ones. -->
+
+# POPULATION AND DOU_LEVEL1
+
+```{r}
+
+# Convert factors to character to avoid issues in ggplot2
+camp_final$dou_level1 <- as.character(camp_final$dou_level1)
+
+# Create a boxplot to visualize the distribution of population (N_INDVI) within each dou_level1 category
+box_dou_indv<-ggplot(camp_final, aes(x = dou_level1, y = N_INDVI)) +
+  geom_boxplot() +
+  stat_summary(fun = median, geom = "point", shape = 18, size = 3, color = "red", show.legend = FALSE) +  # Add median point
+  stat_summary(fun = mean, geom = "text", aes(label = round(..y.., 2)), vjust = -0.5, show.legend = FALSE) +  # Add mean text
+  labs(x = "Dou Level 1", y = "Population (N_INDVI)", title = "Distribution of Population by GRD3 Degree of urbanisation Level 1") +
+  theme_minimal()
+
+print(box_dou_indv)
+```
+
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/box_dou_indv.png", plot =box_dou_indv, width = 8, height = 6, dpi = 400)
+```
+
+#3. Dou_level 1 and google building count
+```{r}
+# Convert factors to character to avoid issues in ggplot2
+camp_final$dou_level1 <- as.character(camp_final$dou_level1)
+
+# Calculate the sum of building count for each dou_level1 and source
+camp_final_sum <- camp_final %>%
+  group_by(dou_level1) %>%
+  summarise(ms_b_c_sum = sum(as.numeric(ms_b_c)),
+            g_b_c_sum = sum(as.numeric(g_b_c)),
+            osm_b_c_sum = sum(as.numeric(osm_b_c)),
+            vida_b_c_sum = sum(as.numeric(vida_b_c))) %>%
+  pivot_longer(cols = c(ms_b_c_sum, g_b_c_sum, osm_b_c_sum, vida_b_c_sum),
+               names_to = "Source", values_to = "Building_Count")
+
+# Create a stacked horizontal bar plot for building footprint counts by dou_level1
+p <- ggplot(camp_final_sum, aes(x = Source, y = Building_Count, fill = dou_level1)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Source", y = "Total Building Footprint Count", title = "Total Building Footprint Counts by Source") +
+  scale_fill_manual(values = c("blue", "green", "red", "orange"),
+                    name = "Dou Level 1") +
+  scale_x_discrete(labels = c("Microsoft" , "Google", "OSM", "Vida" )) +
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Add text labels for the counts on top of each stack
+p + geom_text(aes(label = Building_Count), position = position_stack(vjust = 0.5), size = 2, color = "black")
+
+```
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/dou_1_building_bar.png", plot =p, width = 8, height = 6, dpi = 400)
+```
+
+
+```{r}
+library(scales)  # for formatting axis labels
+
+# Assuming your data frame is named 'camp_final'
+
+# Convert factors to character to avoid issues in ggplot2
+camp_final$dou_level1 <- as.character(camp_final$dou_level1)
+
+# Calculate the sum of building area for each dou_level1 and source
+camp_final_sum <- camp_final %>%
+  group_by(dou_level1) %>%
+  summarise(ms_b_a_sum = sum(as.numeric(ms_b_a)),
+            g_b_a_sum = sum(as.numeric(g_b_a)),
+            osm_b_a_sum = sum(as.numeric(osm_b_a)),
+            vida_b_a_sum = sum(as.numeric(vida_b_a))) %>%
+  pivot_longer(cols = c(ms_b_a_sum, g_b_a_sum, osm_b_a_sum, vida_b_a_sum),
+               names_to = "Source", values_to = "Building_Area")
+
+# Convert building area to kilo (1k = 1000)
+camp_final_sum$Building_Area <- camp_final_sum$Building_Area / 1000
+
+# Create a stacked horizontal bar plot for building area by dou_level1
+p <- ggplot(camp_final_sum, aes(x = Source, y = Building_Area, fill = dou_level1)) +
+  geom_bar(stat = "identity", position = "stack") +
+  labs(x = "Source", y = "Total Building Area (k m^2)", title = "Total Building Area by Source") +
+  scale_fill_manual(values = c("blue", "green", "red", "orange"),
+                    name = "Dou Level 1") +
+  scale_x_discrete(labels = c("Microsoft", "Google", "OSM", "Vida")) +
+  scale_y_continuous(labels = comma_format(scale = 0.001)) +  # Set y-axis labels in "k mode"
+  theme_minimal() +
+  theme(legend.position = "top")
+
+# Add text labels for the areas on top of each stack
+p + geom_text(aes(label = format(Building_Area, big.mark = ",", scientific = FALSE)), position = position_stack(vjust = 0.5), size = 2.5, color = "black")
+```
 
