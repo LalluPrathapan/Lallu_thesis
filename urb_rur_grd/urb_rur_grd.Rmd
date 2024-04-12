@@ -27,7 +27,7 @@ library(hrbrthemes)
 library(corrplot)
 ```
 
-
+#________________________________________________
 
 #5 loading the data from all the building stats
 
@@ -86,13 +86,25 @@ print(selected_columns)
 
 ```{r}
 # Write out the entire clipped_data to a GeoPackage (or other supported formats)
-st_write(clipped_data, "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/everything/all_merg.shp")
+st_write(clipped_data, "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/all_ur_build_eo_camp/camp_fin.shp")
 ```
+
+#Load the corrected data avoiding the repeat
+
+```{r}
+camp_fin_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/all_ur_build_eo_camp/camp_fin.shp")
+camp_final<-st_read(camp_fin_path)
+head(camp_final)
+```
+
+
+
+
 #**plots for grd3*******
 
 
 ```{r}
-barplot_data <- clipped_data %>%
+barplot_data <- camp_final %>%
   group_by(dou_level1, status) %>%
   summarise(count = n()) %>%
   ggplot(aes(x = dou_level1, y = count, fill = status)) +
@@ -106,7 +118,7 @@ barplot_data <- clipped_data %>%
   theme(axis.text.x = element_text( hjust = 1))+scale_fill_viridis(discrete=TRUE, name="") +coord_flip()
 
 # Create a stacked bar plot showing the count of formal and informal camps for each dou_level2
-stacked_barplot_data <- clipped_data %>%
+stacked_barplot_data <- camp_final %>%
   group_by(dou_level2, status) %>%
   summarise(count = n()) %>%
   ggplot(aes(x = dou_level2, y = count, fill = status)) +
@@ -131,7 +143,7 @@ print(stacked_barplot_data)
 
 ```{r}
 # Calculate counts of Sit_Stt for each dou_level1
-count_data_dou_level1 <- clipped_data %>%
+count_data_dou_level1 <- camp_final %>%
   group_by(dou_level1, Sit_Stt) %>%
   summarise(count = n())
 
@@ -148,7 +160,7 @@ barplot_dou_level1 <- ggplot(count_data_dou_level1, aes(x = dou_level1, y = coun
   coord_flip()
 
 # Calculate counts of Sit_Stt for each dou_level2
-count_data_dou_level2 <- clipped_data %>%
+count_data_dou_level2 <- camp_final %>%
   group_by(dou_level2, Sit_Stt) %>%
   summarise(count = n())
 
@@ -176,7 +188,7 @@ ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/bar_grd3_st_stt1.pn
 ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/bar_grd3_st_stt2.png", plot =barplot_dou_level2, width = 8, height = 6, dpi = 400)
 
 ```
-
+#_________________________________________________
 #N_INDVI and dou_levels1(Boxplot try)
 ```{r}
 
