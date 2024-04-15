@@ -378,11 +378,11 @@ data_plot <- informal_camps %>%
   select(ghsl, N_INDVI)
 
 # 3. Plot with ggplot2
-inf_plot<-ggplot(data_plot, aes(y = ghsl, x = N_INDVI)) +
+inf_plot<-ggplot(data_plot, aes(y = ghsl, x = N_INDVI)) + geom_smooth(method = "lm", se = FALSE, color = "red") +  # Add a linear trend line
   geom_point() +
   labs(y = "GHSL Estimated Population", x = "Surveyed Population (N_INDVI)",
        title = "GHSL vs Surveyed Population for Informal Camps")
-
+print(inf_plot)
 corr_ghsl_inf<-cor(as.numeric(informal_camps$N_INDVI),as.numeric(informal_camps$ghsl))
 print(corr_ghsl_inf)
 
@@ -402,10 +402,10 @@ data_plot <- formal_camps %>%
 
 # 3. Plot with ggplot2
 for_plot<-ggplot(data_plot, aes(y = ghsl, x = N_INDVI)) +
-  geom_point() +
+  geom_point() + geom_smooth(method = "lm", se = FALSE, color = "red") +  # Add a linear trend line
   labs(y = "GHSL Estimated Population", x = "Surveyed Population (N_INDVI)",
        title = "GHSL vs Surveyed Population for formal Camps")
-
+print(for_plot)
 corr_ghsl_f<-cor(as.numeric(formal_camps$N_INDVI),as.numeric(formal_camps$ghsl))
 print(corr_ghsl_f)
 
@@ -428,7 +428,7 @@ data_plot <- informal_camps_filtered %>%
 
 # 3. Plot with ggplot2
 info_fil<-ggplot(data_plot, aes(x = N_INDVI, y = ghsl)) +
-  geom_point() +
+  geom_point() + geom_smooth(method = "lm", se = FALSE, color = "red") +  # Add a linear trend line
   labs(x = "Surveyed Population (N_INDVI)", y = "GHSL Estimated Population",
        title = "Surveyed vs Estimated Population for Informal Camps") 
  
@@ -446,8 +446,7 @@ print(corr_ghsl_inf_ls5)
 # Scatter plot with site_status
 ghsl_surv_a<-ggplot(subset_data, aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ghsl)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
-  
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ghsl)),size = 0.6, alpha = 0.8,show.legend = TRUE)+   geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +  # Add trend lines by site status
   labs(title = "Comparison between estimated and survey iom populations for area greater then 10000 sq mts",
        y = "Estimated GHSL population",
        x = "Iom surveyed population") +
@@ -467,7 +466,7 @@ print(corr_ghsl_ath)
 # Scatter plot with site_status
 ghsl_surv_als<-ggplot(subset_data_2, aes(y = ghsl, x = N_INDVI, color = Sit_Stt, label = Name)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ghsl)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ghsl)),size = 0.6, alpha = 0.8,show.legend = TRUE)+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +  # Add trend lines by site status
   # geom_text(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5)+
   labs(title = "Comparison between estimated and survey iom populations for area less then 10000 sq mts",
        y = "Estimated GHSL population",
@@ -574,6 +573,7 @@ lr <- ggplot(camps, aes(x = N_INDVI, y = ghsl_N_INDVI_ratio)) +
 print(lr)
 
 ```
+#________NO NEED__________________________
 #_________________________
 # splitting the population estimates for <10000 and > 10000
 
@@ -581,8 +581,11 @@ print(lr)
 
 ```{r}
  #Scatter plot with site_status for N_INDVI greater than 10,000
+campsgt10000 <- subset(camps, N_INDVI > 10000)
+campls10000 <- subset(camps, N_INDVI < 10000)
+
 ghsl_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +  # Add trend lines by site status
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated GHSL population",
        x = "Iom surveyed population (N_INDVI > 10,000)") +
@@ -591,7 +594,7 @@ ghsl_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = 
 
 # Scatter plot with site_status for N_INDVI less than or equal to 10,000
 ghsl_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +  # Add trend lines by site status
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated population",
        x = "Iom surveyed population (N_INDVI <= 10,000)") +
@@ -607,6 +610,13 @@ print(ghsl_surv_lesser)
 #N_INDVI<10000(Survey pop <10000)
 #Simple feature collection with 199 features and 37 fields
 
+
+#correlation for this
+
+cor_ghsl_gt10000<-cor(campsgt10000 $N_INDVI,campsgt10000$ghsl )
+print(cor_ghsl_gt10000)
+cor_ghsl_ls10000<-cor(campls10000 $N_INDVI,campls10000$ghsl )
+print(cor_ghsl_ls10000)
 ```
 #Analysis : most of the formal camps have population greated than 10,000 and for informal camps the popualtion is mostly under 5000.
 
@@ -617,8 +627,9 @@ Considering the camps having the survey population less than or equal to 10,000.
 #8.(POP<500)splitting the population less than 500
 
 ```{r}
+ghsl_ls_500<-subset(camps, N_INDVI<500)
 ghsl_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 0.6, alpha = 0.4, show.legend = TRUE) +  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey IOM populations",
        y = "Estimated GHSL population",
        x = "IOM surveyed population (N_INDVI < 500)") +
@@ -627,7 +638,9 @@ ghsl_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = ghsl
 
 #print plots'
 print(ghsl_surv_ls500)
-
+#correlation
+cor_ghsl_ls500<-cor(ghsl_ls_500 $N_INDVI,ghsl_ls_500$ghsl )
+print(cor_ghsl_ls500)
 ```
 
 
@@ -674,7 +687,7 @@ ghsl_st_cl<-ggplot(camps, aes(y = as.numeric(ghsl), x = as.numeric(N_INDVI), col
    # scale_y_continuous(breaks = seq(0, 2500, by = 500)) +
    # # scale_x_continuous(breaks = seq(0,2500 , by = 500))  # Adjust y-axis intervals
   theme_minimal()
-
+print(ghsl_st_cl)
 ```
 # Analysis
 
@@ -690,7 +703,7 @@ plot1 <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), color 
   geom_point() +
   labs(title = "Comparison between IOM survey population and Survey Houshold numbers",
        x = "IOM Survey population",
-       y = "Households") +
+       y = "Households") + geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   theme(plot.title = element_text(size = 3, color = "Blue", hjust = 0.5),
         axis.title.x = element_text(size = 3, hjust = 0.5),
         axis.title.y = element_text(size = 3, hjust = 0.5),
@@ -700,7 +713,7 @@ plot1 <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), color 
 
 # Scatter plot comparing N_HH and ghsl
 plot3 <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(ghsl), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() + geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between Household survey and Estimated GHSL Population",
        y = "Households",
        x = "Estimated GHSL Population") +
@@ -721,7 +734,7 @@ hh_ghsl<-grid.arrange(plot1, plot3, ncol = 1)
 ```{r}
 # Scatter plot comparing N_HH and ghsl
 hh_ghsl_c <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(ghsl), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() + geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between Household survey and Estimated GHSL Population",
        y = "Households",
        x = "Estimated GHSL Population") +
@@ -760,13 +773,13 @@ ggsave("Plots/ghsl_pls.png", plot =ghsl_surv_lesser, width = 8, height = 6, dpi 
 #8.Populationwise subsetted(<500) calc vs estimated plot for formal and informal
 ggsave("Plots/ghsl_ls500.png", plot =ghsl_surv_ls500, width = 8, height = 6, dpi = 400)
 #9. Shelter type wise calc vs estimated plot 
-ggsave("Plots/ghsl_shlt_typ", plot =ghsl_shlt_typ, width = 8, height = 6, dpi = 400)
+ggsave("Plots/ghsl_shlt_typ.png", plot =ghsl_shlt_typ, width = 8, height = 6, dpi = 400)
 #10.Settlement class wise calc vs estimated plot
-ggsave("Plots/ghsl_st_cl", plot=ghsl_st_cl,width = 8, height = 6, dpi = 400)
+ggsave("Plots/ghsl_st_cl.png", plot=ghsl_st_cl,width = 8, height = 6, dpi = 400)
 #11. Houslhold survey number vs surveyed population and estimated population plot
 ggsave("Plots/ghs_hh_ind.png", plot =hh_ghsl, width = 8, height = 6, dpi = 400)
 #12. Household number vs estimated population
-gsave("Plots/hh_ghsl_c.png", plot =hh_ghsl_c, width = 8, height = 6, dpi = 400)
+ggsave("Plots/hh_ghsl_c.png", plot =hh_ghsl_c, width = 8, height = 6, dpi = 400)
 ```
 
 #_______GHS PLOT END_______
@@ -818,7 +831,7 @@ print(ghs_dff_stats)
 
 #Analysis:
 
-Seeing that the mean in the difference in population between the ghsl and the surveyed population is overestimation by 2954.9, which is a pritty big overestimation 
+Seeing that the mean in the difference in population between the ghsl and the surveyed population is overestimation by 2954.9, which is a pretty big overestimation 
 
 What could be the reason for this????
 
@@ -926,12 +939,15 @@ print(camps)
 # Scatter plot with site_status
 wp_uc_sc_surv<-ggplot(camps, aes(y = wp_uc, x = N_INDVI, color = Sit_Stt)) +
 
-  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_uc)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_uc)), size = 0.6, alpha = 0.8,show.legend = TRUE)+ geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) + 
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated population(Worldpop unconstrained)",
        x = "IOM surveyed population") +
   theme_minimal()
 print(wp_uc_sc_surv)
+corr_wp_uc<-cor(camps$N_INDVI,camps$wp_uc)
+print(corr_wp_uc)
+
 ```
 
 
@@ -947,7 +963,7 @@ data_plot <- informal_camps %>%
   select(wp_uc, N_INDVI)
 
 # 3. Plot with ggplot2
-inf_plot_wp_uc<-ggplot(data_plot, aes(y = wp_uc, x = N_INDVI)) +
+inf_plot_wp_uc<-ggplot(data_plot, aes(y = wp_uc, x = N_INDVI)) + geom_smooth(method = "lm", se = FALSE) + 
   #geom_point() +
   geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_uc)), size = 0.6, alpha = 0.8,show.legend = TRUE)
   labs(title = "World Pop (Unconstrained) vs Surveyed Population for Informal Camps",
@@ -976,7 +992,7 @@ data_plot <- formal_camps %>%
 
 # 3. Plot with ggplot2
 for_plot_wp_uc<-ggplot(data_plot, aes(y = wp_uc, x = N_INDVI)) +
-  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_uc)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_uc)), size = 0.6, alpha = 0.8,show.legend = TRUE)+ geom_smooth(method = "lm", se = FALSE) + 
   #geom_point() +
   labs(y = "GHSL Estimated Population", x = "Surveyed Population (N_INDVI)",
        title = "GHSL vs Surveyed Population for formal Camps")
@@ -1007,7 +1023,7 @@ data_plot <- informal_camps_filtered %>%
 
 # 3. Plot with ggplot2
 info_fil_wp_uc<-ggplot(data_plot, aes(x = N_INDVI, y = wp_uc)) +
-  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_uc)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_uc)), size = 0.6, alpha = 0.8,show.legend = TRUE)+ geom_smooth(method = "lm",  se = FALSE) + 
   #geom_point() +
   labs(x = "Surveyed Population (N_INDVI)", y = "World Pop (unconstrained) Estimated Population",
        title = "Surveyed vs Estimated Population for Informal Camps") 
@@ -1025,7 +1041,7 @@ print(corr_wp_uc_inf_ls5)
 
 ```{r}
 # Scatter plot with site_status
-wp_uc_surv_a<-ggplot(subset_data, aes(y = wp_uc, x = N_INDVI, color = Sit_Stt)) +
+wp_uc_surv_a<-ggplot(subset_data, aes(y = wp_uc, x = N_INDVI, color = Sit_Stt)) + geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) + 
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(wp_uc)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
   
@@ -1051,7 +1067,7 @@ print(corr_wp_uc_ath)
 # Scatter plot with site_status
 wp_uc_surv_als<-ggplot(subset_data_2, aes(y = wp_uc, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(wp_uc)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(wp_uc)),size = 0.6, alpha = 0.8,show.legend = TRUE)+ geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) + 
   # geom_text(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5)+
   labs(title = "Comparison between estimated and survey iom populations for area less then 10000 sq mts",
        y = "Estimated Worldpop(UnConstrained) population",
@@ -1072,10 +1088,12 @@ print(corr_wp_uc_als)
 
 #7.(POPwise<10000&>10000) to see the sitesname for less than and greateer than 10000
 ```{r}
+campsgt10000 <- subset(camps, N_INDVI > 10000)
+campls10000 <- subset(camps, N_INDVI < 10000)
 
 # Scatter plot with site_status for N_INDVI greater than 10,000
 wp_uc_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = wp_uc, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_uc)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_uc)), size = 0.6, alpha = 0.4, show.legend = TRUE) + geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey IOM populations",
        y = "Estimated population Worldpop(unconstrained)",
        x = "IOM surveyed population (N_INDVI > 10,000)") +
@@ -1083,7 +1101,7 @@ wp_uc_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y =
   scale_y_continuous(breaks = seq(0, 40000, by = 5000))  # Adjust y-axis intervals
 
 # Scatter plot with site_status for N_INDVI less than or equal to 10,000
-wp_uc_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = wp_uc, x = N_INDVI, color = Sit_Stt)) +
+wp_uc_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = wp_uc, x = N_INDVI, color = Sit_Stt)) + geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_uc)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated population(World pop unconstrained)",
@@ -1094,6 +1112,15 @@ wp_uc_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y =
 # Print the plots
 print(wp_uc_surv_greater)
 print(wp_uc_surv_lesser)
+
+
+
+cor_wp_uc_gt10000<-cor(campsgt10000 $N_INDVI,campsgt10000$wp_uc)
+print('population greater than10000')
+print(cor_wp_uc_gt10000)
+cor_wp_uc_ls10000<-cor(campls10000 $N_INDVI,campls10000$wp_uc )
+print('population less than10000')
+print(cor_wp_uc_ls10000)
 ```
 
 ```{r}
@@ -1106,8 +1133,9 @@ ggsave("Plots/wp_uc_sc_surv.png", plot =wp_uc_sc_surv, width = 8, height = 6, dp
 
 
 ```{r}
+ghsl_ls_500<-subset(camps, N_INDVI<500)
 wp_uc_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = wp_uc, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_uc)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_uc)), size = 0.6, alpha = 0.4, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey IOM populations",
        y = "Estimated population (Wp_uc",
        x = "IOM surveyed population (N_INDVI < 500)") +
@@ -1116,6 +1144,9 @@ wp_uc_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = wp_
 
 #print plots'
 print(wp_uc_surv_ls500)
+#correlation
+cor_wp_uc_ls500<-cor(ghsl_ls_500 $N_INDVI,ghsl_ls_500$wp_uc )
+print(cor_wp_uc_ls500)
 
 ```
 
@@ -1173,7 +1204,7 @@ print(sl_cls_wp_uc)
 ```{r}
 # Scatter plot comparing N_INDIVID and N_HH
 N_ind_HH <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between IOM survey population and Survey Houshold numbers",
        x = "Iom Survey population",
        y = "Households") +
@@ -1186,8 +1217,8 @@ N_ind_HH <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), col
 
 # Scatter plot comparing N_HH and wp_uc
 WP_uc_N_HH <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(wp_uc), color = Sit_Stt)) +
-  geom_point() +
-  labs(title = "Comparison between Household survey and Estimated GHSL Population",
+  geom_point() +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  labs(title = "Comparison between Household survey and Estimated Worldpop unconstrained Population",
        y = "Households",
        x = "Estimated WP_unconstrained Population") +
 
@@ -1210,7 +1241,7 @@ WP_uc_N_HH <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(wp_uc), col
   geom_point() +
   labs(title = "Comparison between Household survey and Estimated GHSL Population",
        y = "Households",
-       x = "Estimated WP_unconstrained Population") +
+       x = "Estimated WP_unconstrained Population") +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
 
   theme(plot.title = element_text(size = 3, color = "Blue", hjust = 0.5),
         axis.title.x = element_text(size = 3, hjust = 0.5),
@@ -1260,7 +1291,7 @@ ggsave("Plots/sl_cls_wp_uc.png", plot=ghsl_st_cl,width = 8, height = 6, dpi = 40
 ggsave("Plots/hh_wp_uc.png", plot =hh_wp_uc, width = 8, height = 6, dpi = 400)
 
 #13. Household number vs estimated population
-gsave("Plots/WP_uc_N_HH.png", plot =WP_uc_N_HH, width = 8, height = 6, dpi = 400)
+ggsave("Plots/WP_uc_N_HH.png", plot =WP_uc_N_HH, width = 8, height = 6, dpi = 400)
 ```
 
 
@@ -1294,7 +1325,6 @@ print(corr_ind_HH)
 # [1] 0.9409748
 
 ```
-
 
 
 #B.Find about the difference in  statistics which will help in understanding the change in population of the camps from that of the estimated population 
@@ -1378,17 +1408,19 @@ print(camps)
 
 #_____WORLDPOP C PLOTS________________
 
-#1.(ESTI_SUR)worldpop unconstrained Estimated and Iom survey population
+  #1.(ESTI_SUR)worldpop unconstrained Estimated and Iom survey population
 ```{r}
 # Scatter plot with site_status
 wp_c_surv<-ggplot(camps, aes(x = wp_c, y = N_INDVI, color = Sit_Stt)) +
 
-  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_c)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_c)), size = 0.6, alpha = 0.8,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) + 
   labs(title = "Comparison between estimated WorldPop(constrained) and survey Iom populations",
        y = "Estimated population (Worldpop(constrained))",
        x = "Iom surveyed population") +
   theme_minimal()
 print(wp_c_surv)
+corr_wp_c<-cor(camps$N_INDVI,camps$wp_c)
+print(corr_wp_c)
 ```
 
 
@@ -1404,9 +1436,9 @@ data_plot <- informal_camps %>%
   select(wp_c, N_INDVI)
 
 # 3. Plot with ggplot2
-inf_plot_wp_c<-ggplot(data_plot, aes(y = wp_c, x = N_INDVI)) +
+inf_plot_wp_c<-ggplot(data_plot, aes(y = wp_c, x = N_INDVI)) +geom_smooth(method = "lm", se = FALSE) +
   #geom_point() +
-  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_c)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_c)), size = 0.6, alpha = 0.8,show.legend = TRUE)+geom_smooth(method = "lm", se = FALSE) + 
   labs(title = "World Pop (Constrained) vs Surveyed Population for Informal Camps",
   y = "World Pop (Unconstrained)Estimated Population", x = "Surveyed Population (N_INDVI)" )
 
@@ -1433,10 +1465,10 @@ data_plot <- formal_camps %>%
 
 # 3. Plot with ggplot2
 for_plot_wp_c<-ggplot(data_plot, aes(y = wp_c, x = N_INDVI)) +
-  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_c)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_c)), size = 0.6, alpha = 0.8,show.legend = TRUE)+geom_smooth(method = "lm",  se = FALSE) +
   #geom_point() +
-  labs(y = "GHSL Estimated Population", x = "Surveyed Population (N_INDVI)",
-       title = "GHSL vs Surveyed Population for formal Camps")
+  labs(y = "World Pop (Unconstrained)estimated Population", x = "Surveyed Population (N_INDVI)",
+       title = "World Pop (Unconstrained) vs Surveyed Population for formal Camps")
 print(for_plot_wp_c)
 
 corr_wp_c_f<-cor(as.numeric(formal_camps$N_INDVI),as.numeric(formal_camps$wp_c))
@@ -1461,7 +1493,7 @@ data_plot <- informal_camps_filtered %>%
   select(wp_c, N_INDVI)
 
 # 3. Plot with ggplot2
-info_fil_wp_c<-ggplot(data_plot, aes(x = N_INDVI, y = wp_c)) +
+info_fil_wp_c<-ggplot(data_plot, aes(x = N_INDVI, y = wp_c)) +geom_smooth(method = "lm",  se = FALSE)  + 
   geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(wp_c)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
   #geom_point() +
   labs(x = "Surveyed Population (N_INDVI)", y = "World Pop (constrained) Estimated Population",
@@ -1480,7 +1512,7 @@ print(corr_wp_c_inf_ls5)
 
 ```{r}
 # Scatter plot with site_status
-wp_c_surv_a<-ggplot(subset_data, aes(y = wp_c, x = N_INDVI, color = Sit_Stt)) +
+wp_c_surv_a<-ggplot(subset_data, aes(y = wp_c, x = N_INDVI, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(wp_c)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
   
@@ -1506,7 +1538,7 @@ print(corr_wp_c_ath)
 # Scatter plot with site_status
 wp_c_surv_als<-ggplot(subset_data_2, aes(y = wp_c, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(wp_c)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(wp_c)),size = 0.6, alpha = 0.8,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   # geom_text(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5)+
   labs(title = "Comparison between estimated and survey iom populations for area less then 10000 sq mts",
        y = "Estimated Worldpop(Constrained) population",
@@ -1526,10 +1558,11 @@ print(corr_wp_c_als)
 # splitting the population estimates for <10000 and > 10000
 #7.(POPwise<10000&>10000) to see the sitesname for less than and greateer than 10000
 ```{r}
-
+campsgt10000 <- subset(camps, N_INDVI > 10000)
+campls10000 <- subset(camps, N_INDVI < 10000)
 # Scatter plot with site_status for N_INDVI greater than 10,000
 wp_c_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = wp_c, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_c)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_c)), size = 0.6, alpha = 0.4, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey IOM populations",
        y = "Estimated population Worldpop(constrained)",
        x = "Iom surveyed population (N_INDVI > 10,000)") +
@@ -1537,7 +1570,7 @@ wp_c_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = 
   scale_y_continuous(breaks = seq(0, 40000, by = 5000))  # Adjust y-axis intervals
 
 # Scatter plot with site_status for N_INDVI less than or equal to 10,000
-wp_c_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = wp_c, x = N_INDVI, color = Sit_Stt)) +
+wp_c_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = wp_c, x = N_INDVI, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_c)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated population(World pop constrained)",
@@ -1548,13 +1581,21 @@ wp_c_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = 
 # Print the plots
 print(wp_c_surv_greater)
 print(wp_c_surv_lesser)
+
+
+cor_wp_c_gt10000<-cor(campsgt10000 $N_INDVI,campsgt10000$wp_c)
+print('population greater than10000')
+print(cor_wp_c_gt10000)
+cor_wp_c_ls10000<-cor(campls10000 $N_INDVI,campls10000$wp_c )
+print('population less than10000')
+print(cor_wp_c_ls10000)
 ```
 
 
 #8.(POP<500)splitting the population less than 500
 ```{r}
 wp_c_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = wp_c, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_c)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_c)), size = 0.6, alpha = 0.4, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey IOM populations",
        y = "Estimated population (Wp_c)",
        x = "IOM surveyed population (N_INDVI < 500)") +
@@ -1563,7 +1604,9 @@ wp_c_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = wp_c
 
 #print plots'
 print(wp_c_surv_ls500)
-
+#correlation
+cor_wp_c_ls500<-cor(ghsl_ls_500 $N_INDVI,ghsl_ls_500$wp_c )
+print(cor_wp_c_ls500)
 ```
 
 
@@ -1618,7 +1661,7 @@ N_ind_HH <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), col
   geom_point() +
   labs(title = "Comparison between IOM survey population and Survey Houshold numbers",
        x = "Iom Survey population",
-       y = "Households") +
+       y = "Households") +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   theme(plot.title = element_text(size = 3, color = "Blue", hjust = 0.5),
         axis.title.x = element_text(size = 3, hjust = 0.5),
         axis.title.y = element_text(size = 3, hjust = 0.5),
@@ -1628,7 +1671,7 @@ N_ind_HH <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), col
 
 # Scatter plot comparing N_HH and ghsl
 WP_c_N_HH <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(wp_c), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between Household survey and Estimated worldpop constrained Population",
        y = "Households",
        x= "Estimated Worldpop const Population") +
@@ -1649,7 +1692,7 @@ hh_wp_c<-grid.arrange(N_ind_HH, WP_c_N_HH , ncol = 1)
 
 # Scatter plot comparing N_HH and ghsl
 WP_c_N_HH <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(wp_c), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between Household survey and Estimated worldpop constrained Population",
        y = "Households",
        x= "Estimated Worldpop const Population") +
@@ -1844,12 +1887,15 @@ print(camps)
 # Scatter plot with site_status
 gpw_surv_scat<-ggplot(camps, aes(y = gpw, x = N_INDVI, color = Sit_Stt)) +
 
-  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw)), size = 0.6, alpha = 0.8,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey iom populations",
        x = "Estimated population(GPW V4)",
        y = "Iom surveyed population") +
   theme_minimal()
 print(gpw_surv_scat)
+corr_gpw<-cor(camps$N_INDVI,camps$gpw)
+print(corr_gpw)
+
 ```
 
 
@@ -1865,7 +1911,7 @@ data_plot <- informal_camps %>%
   select(gpw, N_INDVI)
 
 # 3. Plot with ggplot2
-inf_plot_gpw<-ggplot(data_plot, aes(y = gpw, x = N_INDVI)) +
+inf_plot_gpw<-ggplot(data_plot, aes(y = gpw, x = N_INDVI)) +geom_smooth(method = "lm", se = FALSE) +geom_smooth(method = "lm", se = FALSE) +
   #geom_point() +
   geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
   labs(title = "GPW vs Surveyed Population for Informal Camps",
@@ -1893,7 +1939,7 @@ data_plot_gpw <- formal_camps %>%
   select(gpw, N_INDVI)
 
 # 3. Plot with ggplot2
-for_plot_gpw<-ggplot(data_plot, aes(y = gpw, x = N_INDVI)) +
+for_plot_gpw<-ggplot(data_plot, aes(y = gpw, x = N_INDVI)) +geom_smooth(method = "lm", se = FALSE) +
   geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
   #geom_point() +
   labs(y = "GPW Estimated Population", x = "Surveyed Population (N_INDVI)",
@@ -1922,7 +1968,7 @@ data_plot_gpw <- informal_camps_filtered %>%
   select(gpw, N_INDVI)
 
 # 3. Plot with ggplot2
-info_fil_gpw<-ggplot(data_plot, aes(x = N_INDVI, y = gpw)) +
+info_fil_gpw<-ggplot(data_plot, aes(x = N_INDVI, y = gpw)) +geom_smooth(method = "lm", se = FALSE) +
   geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
   #geom_point() +
   labs(x = "Surveyed Population (N_INDVI)", y = "GPW estimated Population",
@@ -1940,7 +1986,7 @@ print(corr_gpw_inf_ls5)
 
 ```{r}
 # Scatter plot with site_status
-gpw_surv_a<-ggplot(subset_data, aes(y = gpw, x = N_INDVI, color = Sit_Stt)) +
+gpw_surv_a<-ggplot(subset_data, aes(y = gpw, x = N_INDVI, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(gpw)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
   
@@ -1966,7 +2012,7 @@ print(corr_gpw_ath)
 # Scatter plot with site_status
 gpw_surv_als<-ggplot(subset_data_2, aes(y = gpw, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(gpw)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(gpw)),size = 0.6, alpha = 0.8,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   # geom_text(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5)+
   labs(title = "Comparison between estimated and survey iom populations for area less then 10000 sq mts",
        y = "Estimated GPW population",
@@ -1995,9 +2041,10 @@ print(corr_gpw_als)
 
 #7.(POPwise<10000&>10000) to see the sitesname for less than and greateer than 10000
 ```{r}
-
+campsgt10000 <- subset(camps, N_INDVI > 10000)
+campls10000 <- subset(camps, N_INDVI < 10000)
 # Scatter plot with site_status for N_INDVI greater than 10,000
-gpw_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = gpw, x = N_INDVI, color = Sit_Stt)) +
+gpw_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = gpw, x = N_INDVI, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated population (GPW-V4)",
@@ -2007,7 +2054,7 @@ gpw_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = g
 
 # Scatter plot with site_status for N_INDVI less than or equal to 10,000
 gpw_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = gpw, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw)), size = 0.6, alpha = 0.4, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey IOM populations",
        y = "Estimated population(GPW-V4)",
        x = "Iom surveyed population (N_INDVI <= 10,000)") +
@@ -2017,12 +2064,19 @@ gpw_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = g
 # Print the plots
 print(gpw_surv_greater)
 print(gpw_surv_lesser)
+cor_gpw_gt10000<-cor(campsgt10000 $N_INDVI,campsgt10000$gpw)
+print('population greater than10000')
+print(cor_gpw_gt10000)
+cor_gpw_ls10000<-cor(campls10000 $N_INDVI,campls10000$gpw )
+print('population less than10000')
+print(cor_gpw_ls10000)
 ```
 
 #8.(POP<500)splitting the population less than 500
 ```{r}
+ghsl_ls_500<-subset(camps, N_INDVI<500)
 gpw_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = gpw, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw)), size = 0.6, alpha = 0.4, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey IOM populations",
        y = "Estimated population (gpw)",
        x = "IOM surveyed population (N_INDVI < 500)") +
@@ -2031,7 +2085,9 @@ gpw_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = gpw, 
 
 #print plots'
 print(gpw_surv_ls500)
-
+#correlation
+cor_gpw_ls500<-cor(ghsl_ls_500 $N_INDVI,ghsl_ls_500$gpw )
+print(cor_gpw_ls500)
 ```
 
 #9.(SHELTER TYPE) Plot between calc vs surveyed pop arranged according to the shelter type
@@ -2089,7 +2145,7 @@ N_ind_HH <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), col
   geom_point() +
   labs(title = "Comparison between IOM survey population and Survey Houshold numbers",
        x = "Iom Survey population",
-       y = "Households") +
+       y = "Households") +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   theme(plot.title = element_text(size = 3, color = "Blue", hjust = 0.5),
         axis.title.x = element_text(size = 3, hjust = 0.5),
         axis.title.y = element_text(size = 3, hjust = 0.5),
@@ -2099,7 +2155,7 @@ N_ind_HH <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), col
 
 # Scatter plot comparing N_HH and ghsl
 gpw_N_HH <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(gpw), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between Household survey and Estimated GPW",
       y = "Households",
        x = "Estimated GPW Population") +
@@ -2120,7 +2176,7 @@ hh_gpw<-grid.arrange(N_ind_HH, gpw_N_HH , ncol = 1)
 ```{r}
 # Scatter plot comparing N_HH and ghsl
 gpw_N_HH <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(gpw), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between Household survey and Estimated GPW",
       y = "Households",
        x = "Estimated GPW Population") +
@@ -2370,12 +2426,14 @@ head(camps)
 # Scatter plot with site_status
 gpw_UN_surv_scat<-ggplot(camps, aes(y = gpw_UN, x = N_INDVI, color = Sit_Stt)) +
 
-  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.8,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey iom populations",
        x = "Estimated population(GPW V4)",
        y = "Iom surveyed population") +
   theme_minimal()
 print(gpw_UN_surv_scat)
+corr_gpw_UN<-cor(camps$N_INDVI,camps$gpw_UN)
+print(corr_gpw_UN)
 ```
 
 
@@ -2391,7 +2449,7 @@ data_plot_gpw_U <- informal_camps %>%
   select(gpw_UN, N_INDVI)
 
 # 3. Plot with ggplot2
-inf_plot_gpw_UN<-ggplot(data_plot_gpw_U, aes(y = gpw_UN, x = N_INDVI)) +
+inf_plot_gpw_UN<-ggplot(data_plot_gpw_U, aes(y = gpw_UN, x = N_INDVI)) +geom_smooth(method = "lm",  se = FALSE) +
   #geom_point() +
   geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
   labs(title = "GPW_UN vs Surveyed Population for Informal Camps",
@@ -2419,7 +2477,7 @@ data_plot_gpw_U <- formal_camps %>%
   select(gpw_UN, N_INDVI)
 
 # 3. Plot with ggplot2
-for_plot_gpw_UN<-ggplot(data_plot_gpw_U, aes(y = gpw_UN, x = N_INDVI)) +
+for_plot_gpw_UN<-ggplot(data_plot_gpw_U, aes(y = gpw_UN, x = N_INDVI)) +geom_smooth(method = "lm",  se = FALSE) +
   geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
   #geom_point() +
   labs(y = "GPW UN Estimated Population", x = "Surveyed Population (N_INDVI)",
@@ -2448,7 +2506,7 @@ data_plot_gpw_U <- informal_camps_filtered %>%
   select(gpw_UN, N_INDVI)
 
 # 3. Plot with ggplot2
-info_fil_gpw_UN<-ggplot(data_plot_gpw_U, aes(x = N_INDVI, y = gpw_UN)) +
+info_fil_gpw_UN<-ggplot(data_plot_gpw_U, aes(x = N_INDVI, y = gpw_UN)) +geom_smooth(method = "lm",  se = FALSE) +
   geom_jitter(aes(x = (as.numeric(N_INDVI)),y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.8,show.legend = TRUE)+
   #geom_point() +
   labs(x = "Surveyed Population (N_INDVI)", y = "GPW_UN estimated Population",
@@ -2468,7 +2526,7 @@ print(corr_gpw_UN_inf_ls5)
 # Scatter plot with site_status
 gpw_UN_surv_a<-ggplot(subset_data, aes(y = gpw_UN, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(gpw_UN)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(gpw_UN)),size = 0.6, alpha = 0.8,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
   labs(title = "Comparison between estimated and survey IOM populations for area greater then 10000 sq mts",
        y = "Estimated GPW_UN population",
@@ -2491,7 +2549,7 @@ print(corr_gpw_UN_ath)
 # Scatter plot with site_status
 gpw_UN_surv_als<-ggplot(subset_data_2, aes(y = gpw_UN, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(gpw_UN)),size = 0.6, alpha = 0.8,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(gpw_UN)),size = 0.6, alpha = 0.8,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   # geom_text(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 1, vjust = -0.5, hjust = -0.5)+
   labs(title = "Comparison between estimated and survey iom populations for area less then 10000 sq mts",
        y = "Estimated GPW_UN population",
@@ -2520,9 +2578,10 @@ print(corr_gpw_UN_als)
 
 #7.(POPwise<10000&>10000) to see the sitesname for less than and greateer than 10000
 ```{r}
-
+campsgt10000 <- subset(camps, N_INDVI > 10000)
+campls10000 <- subset(camps, N_INDVI < 10000)
 # Scatter plot with site_status for N_INDVI greater than 10,000
-gpw_UN_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = gpw_UN, x = N_INDVI, color = Sit_Stt)) +
+gpw_UN_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y = gpw_UN, x = N_INDVI, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
   labs(title = "Comparison between estimated and survey iom populations",
        y = "Estimated population (GPW_UN-V4)",
@@ -2532,7 +2591,7 @@ gpw_UN_surv_greater <- ggplot(subset(camps, as.numeric(N_INDVI) > 10000), aes(y 
 
 # Scatter plot with site_status for N_INDVI less than or equal to 10,000
 gpw_UN_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y = gpw_UN, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
+  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.4, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between estimated and survey IOM populations",
        y = "Estimated population(GPW-V4_UN)",
        x = "Iom surveyed population (N_INDVI <= 10,000)") +
@@ -2542,10 +2601,20 @@ gpw_UN_surv_lesser <- ggplot(subset(camps, as.numeric(N_INDVI) <= 10000), aes(y 
 # Print the plots
 print(gpw_UN_surv_greater)
 print(gpw_UN_surv_lesser)
+
+# Print the plots
+
+cor_gpw_UN_gt10000<-cor(campsgt10000 $N_INDVI,campsgt10000$gpw_UN)
+print('population greater than10000')
+print(cor_gpw_UN_gt10000)
+cor_gpw_UN_ls10000<-cor(campls10000 $N_INDVI,campls10000$gpw_UN )
+print('population less than10000')
+print(cor_gpw_UN_ls10000)
 ```
 
 #8.(POP<500)splitting the population less than 500
 ```{r}
+ghsl_ls_500<-subset(camps, N_INDVI<500)
 gpw_UN_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = gpw_UN, x = N_INDVI, color = Sit_Stt)) +
   geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.4, show.legend = TRUE) +
   labs(title = "Comparison between estimated and survey IOM populations",
@@ -2556,7 +2625,8 @@ gpw_UN_surv_ls500 <- ggplot(subset(camps, as.numeric(N_INDVI) < 500), aes(y = gp
 
 #print plots'
 print(gpw_UN_surv_ls500)
-
+cor_gpw_UN_ls500<-cor(ghsl_ls_500 $N_INDVI,ghsl_ls_500$gpw_UN )
+print(cor_gpw_UN_ls500)
 ```
 
 #9.(SHELTER TYPE) Plot between calc vs surveyed pop arranged according to the shelter type
@@ -2611,7 +2681,7 @@ print(sl_cls_gpw_UN)
 ```{r}
 # Scatter plot comparing N_INDIVID and N_HH
 N_ind_HH <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between IOM survey population and Survey Houshold numbers",
        x = "Iom Survey population",
        y = "Households") +
@@ -2624,7 +2694,7 @@ N_ind_HH <- ggplot(camps, aes(x = as.numeric(N_INDVI), y = as.numeric(N_HH), col
 
 # Scatter plot comparing N_HH and ghsl
 gpw_UN_N_HH <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(gpw_UN), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between Household survey and Estimated GPW_UN",
       y = "Households",
        x = "Estimated GPW_UN Population") +
@@ -2645,7 +2715,7 @@ hh_gpw_UN<-grid.arrange(N_ind_HH, gpw_UN_N_HH , ncol = 1)
 ```{r}
 # Scatter plot comparing N_HH and ghsl
 gpw_UN_N_HH <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(gpw_UN), color = Sit_Stt)) +
-  geom_point() +
+  geom_point() +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   labs(title = "Comparison between Household survey and Estimated GPW_UN",
       y = "Households",
        x = "Estimated GPW_UN Population") +
@@ -3003,12 +3073,89 @@ combined_plot3 <- combined_plot + draw_label(y_label, x = 0, angle = 90, vjust =
 print(combined_plot3)
 ```
 
+
+#-Main combined scatterplot household and population
+
+```{r}
+
+
+# Scatter plot with site_status for gpw
+scatter_nindvi_hh<- ggplot(camps, aes(x= N_INDVI, y= N_HH, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_HH), x = as.numeric(N_INDVI)), size = 0.6, alpha = 0.8, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  labs(title = "Comparison between  population and survey household numbers",
+       x = "Survey  population (N_INDVI)",
+       y = "Survey_House holdnumbers") +  # No y-axis label
+  theme_minimal()+theme(plot.title = (element_text(size = 6,colour = "Red")),axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))
+
+# Scatter plot with site_status for gpw
+scatter_gpw_hh<- ggplot(camps, aes(x= gpw, y= N_HH, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_HH), x = as.numeric(gpw)), size = 0.6, alpha = 0.8, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  labs(title = NULL,
+       x = "Estimated population (GPW)",
+       y = "Survey_House holdnumbers") +  # No y-axis label
+  theme_minimal()+theme(axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))
+
+# Scatter plot with site_status for wp_con
+scatter_wp_con_hh <- ggplot(camps, aes(x = wp_c, y = N_HH, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_HH), x = as.numeric(wp_c)), size = 0.6, alpha = 0.8, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  labs(title = NULL,  # No title
+       x = "Estimated population (WP_CON)",
+       y = "Survey_household number") +  # No y-axis label
+  theme_minimal()+theme(axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))
+
+# Scatter plot with site_status for wp_uncon
+scatter_wp_uncon_hh <- ggplot(camps, aes(x= wp_uc, y = N_HH, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_HH), x = as.numeric(wp_uc)), size = 0.6, alpha = 0.8, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  labs(title = NULL,  # No title
+       x = "Estimated population (WP_UNCON)",
+       y = "Survey_household number") +  # No y-axis label
+  theme_minimal()+theme(axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))
+
+# Scatter plot with site_status for ghsl
+scatter_ghsl_hh <- ggplot(camps, aes(x = ghsl, y = N_HH, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_jitter(aes(y = as.numeric(N_HH), x = as.numeric(ghsl)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  labs(title = NULL,  # No title
+       x = "Estimated population (GHSL)",
+       y = "Survey_household number") +  # Only this plot has y-axis label
+  theme_minimal()+theme(axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))
+
+
+# Scatter plot with site_status for gpw_UN
+scatter_gpw_UN_hh<- ggplot(camps, aes(x = gpw_UN, y = N_HH, color = Sit_Stt)) +
+  geom_jitter(aes(y= as.numeric(N_HH), x = as.numeric(gpw_UN)), size = 0.6, alpha = 0.8, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  labs(title = NULL,  # No title
+       x = "Estimated population (GPW_UN)",
+       y = "Survey_household number") +  # Only this plot has y-axis label
+  theme_minimal()+theme(axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))
+
+# Combine all scatter plots into one
+combined_plot_hh <- grid.arrange(scatter_nindvi_hh,scatter_gpw_hh,scatter_gpw_UN_hh, scatter_wp_con_hh, scatter_wp_uncon_hh, scatter_ghsl_hh, nrow = 2, ncol = 3)
+
+
+print(combined_plot_hh)
+```
+
+
+
 #saving the all scatterplots
 
 ```{r}
 # Save the plot to a file
 ggsave("Plots/combined_sctr1.png", plot = combined_plot1, width = 8, height = 6, dpi = 400)
 ggsave("Plots/combined_sctr2.png", plot = combined_plot2, width = 8, height = 6, dpi = 400)
+ggsave("Plots/combined_plot_hh.png", plot = combined_plot_hh, width = 8, height = 6, dpi = 400)
 ```
 
 
@@ -3536,11 +3683,11 @@ print(corr_wp_c)
 print(corr_gpw)
 print(corr_gpw_UN)
 
-# [1] 0.6700698
-# [1] 0.6251175
-# [1] 0.5516316
-# [1] 0.1555537
-# [1] 0.1553798
+# [1] 0.6700698-ghsl
+# [1] 0.6251175-wp_uc
+# [1] 0.5516316-wp_c
+# [1] 0.1555537-gpw
+# [1] 0.1553798-gpw_UN
 
 
 ```
@@ -3556,7 +3703,11 @@ cor_matrix <- matrix(c(corr_ghsl, corr_wp_c, corr_wp_uc, corr_gpw,corr_gpw_UN),
 corrplot(cor_matrix, method = "color", type = "upper", 
          addCoef.col = "black", tl.col = "black", tl.srt = 45)
 ```
-
+#save the correlation
+```{r}
+# Save the plot to a file
+ggsave("Plots/cor_matrix.png", plot =cor_matrix , width = 8, height = 6, dpi = 400)
+```
 
 
 
@@ -3566,7 +3717,7 @@ corrplot(cor_matrix, method = "color", type = "upper",
 camps_data_nogeom <- st_drop_geometry(camps)
 
 # Define numeric columns
-numeric_cols <- c("N_INDVI", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")
+numeric_cols <- c("N_INDVI","N_HH", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")
 
 # Convert selected columns to numeric, handling non-numeric values
 for (col in numeric_cols) {
@@ -3595,7 +3746,7 @@ wp_uncon vs. gpw: The correlation coefficient is 0.7454, indicating a strong pos
 # Convert the correlation matrix to a dataframe
 corr_matrix <- correlation_matrix
 # Assign row and column names
-rownames(corr_matrix) <- colnames(corr_matrix) <- c("N_INDVI", "ghsl", "wp_con", "wp_uncon", "gpw","gpw_UN")
+rownames(corr_matrix) <- colnames(corr_matrix) <- c("N_INDVI","N_HH", "ghsl", "wp_con", "wp_uncon", "gpw","gpw_UN")
 # Convert the correlation matrix to long format
 corr_matrix_long <- melt(corr_matrix)
 
@@ -3648,18 +3799,181 @@ Strong positive correlation with wp_con (0.20) and wp_uncon (0.75), similar to G
 ggsave("Plots/heat_map_corr.png", plot =heat_map_corr, width = 8, height = 6, dpi = 400)
 ```
 
-#poputalion difference summary
+#formal camp_correlation
 ```{r}
-summary(camps$wp_c_df)
-summary(as.numeric(camps$wp_c_df))
-summary(as.numeric(camps$wp_uc_df))
+# Create a matrix of correlation coefficients
+cor_matrix_f <- matrix(c(corr_ghsl_f, corr_wp_c_f, corr_wp_uc_f, corr_gpw_f,corr_gpw_UN_f),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
 
-summary(as.numeric(camps$gpw_dff))
-   
-summary(as.numeric(camps$ghsl_df))
-  
+# Plot the correlation matrix
+corrplot(cor_matrix_f, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
 ```
 
+
+#informal camp_correlation
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_inf <- matrix(c(corr_ghsl_inf, corr_wp_c_inf, corr_wp_uc_inf, corr_gpw_inf,corr_gpw_UN_inf),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_inf, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+
+#poputalion difference summary
+```{r}
+print('wp_c_difference')
+summary(camps$wp_c_df)
+print('wp_c_difference')
+summary(as.numeric(camps$wp_c_df))
+print('wp_uc_difference')
+summary(as.numeric(camps$wp_uc_df))
+print('gpw_difference')
+summary(as.numeric(camps$gpw_dff))
+print('ghsl_difference')
+summary(as.numeric(camps$ghsl_df))
+print('gpw_UN_difference')
+summary(as.numeric(camps$gpwU_df))
+
+cat("Absolute Difference GPW_UN:", mean(absolute_difference_gpw_UN), "\n")
+cat("Absolute Difference GPW:", mean(absolute_difference_gpw), "\n")
+cat("Absolute Difference:", mean(absolute_difference), "\n")
+cat("Absolute Difference wp_uc:", mean(absolute_difference_wp_uc), "\n")
+cat("Absolute Difference wp_c:", mean(absolute_difference_wp_c), "\n")
+
+
+
+# GHSL
+print("GHSL")
+cat("Absolute Difference:", mean(absolute_difference), "\n")
+cat("Percentage Difference:", mean(percentage_difference), "%\n")
+cat("RMSE:", rmse, "\n")
+cat("MAPE:", mape, "%\n")
+cat("Absolute error:",absolute_error,"\n")
+cat("Percentage error:",percentage_error)
+
+
+# Print results
+print("WP_UC")
+cat("Absolute Difference:", mean(absolute_difference_wp_uc), "\n")
+cat("Percentage Difference:", mean(percentage_difference_wp_uc), "%\n")
+cat("RMSE:", rmse_wp_uc, "\n")
+cat("MAPE:", mape_uc, "%\n")
+cat("Absolute error:",absolute_error_wp_uc,"\n")
+cat("Percentage error:",percentage_error_wp_uc)
+  
+
+# Print results
+print("WP_C")
+cat("Absolute Difference:", mean(absolute_difference_wp_c), "\n")
+cat("Percentage Difference:", mean(percentage_difference_wp_c), "%\n")
+cat("RMSE:", rmse_wp_c, "\n")
+cat("MAPE:", mape_wp_c, "%\n")
+cat("Absolute error:",absolute_error_wp_c,"\n")
+cat("Percentage error:",percentage_error_wp_c)
+
+
+print("GPW")
+cat("Absolute Difference:", mean(absolute_difference_gpw), "\n")
+cat("Percentage Difference:", mean(percentage_difference_gpw), "%\n")
+cat("RMSE:", rmse_gpw, "\n")
+cat("MAPE:", mape_gpw, "%\n")
+cat("Absolute error:",absolute_error_gpw,"\n")
+cat("Percentage error:",percentage_error_gpw)
+
+
+# Print results
+print("gpw_UN")
+cat("Absolute Difference:", mean(absolute_difference_gpw_UN), "\n")
+cat("Percentage Difference:", mean(percentage_difference_gpw_UN), "%\n")
+cat("RMSE:", rmse_gpw_UN, "\n")
+cat("MAPE:", mape_gpw_UN, "%\n")
+cat("Absolute error:",absolute_error_gpw_UN,"\n")
+cat("Percentage error:",percentage_error_gpw_UN)
+
+```
+#Boxplot of the difference of eo population pdt and N_INDVI
+
+
+
+#box plot with mean value displayed
+```{r}
+library(ggplot2)
+
+# Combine all population difference columns into one data frame
+difference_data <- data.frame(
+  Dataset = rep(c("WP_CON", "WP_UNCON", "GPW", "GHSL", "GPW_UN"), each = nrow(camps)),
+  Population_Difference = c(camps$wp_c_df, camps$wp_uc_df, camps$gpw_dff, camps$ghsl_df, camps$gpwU_df)
+)
+
+# Calculate mean values
+mean_values <- aggregate(Population_Difference ~ Dataset, data = difference_data, mean)
+
+# Create a box plot
+boxplot_pop_diff <- ggplot(difference_data, aes(x = Dataset, y = Population_Difference)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 2, color = "red") + # Adding mean points
+  geom_text(data = mean_values, aes(label = round(Population_Difference, digits = 2)), vjust = -0.5) + # Adding text labels
+  labs(title = "Difference between Estimated and Surveyed Populations for different EO population data products",
+       x = "Dataset", y = "Population Difference") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotate x-axis labels
+
+# Print the box plot
+print(boxplot_pop_diff)
+
+
+```
+#Save error boxplot
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/boxplot_pop_diff.png", plot =boxplot_pop_diff, width = 8, height = 6, dpi = 400)
+```
+
+
+
+#Bar plot of all the errors
+
+```{r}
+library(ggplot2)
+
+# Create a data frame with the summary statistics for Mean Absolute Difference and RMSE
+summary_data <- data.frame(
+  Dataset = c("GHSL", "WP_UC", "WP_C", "GPW"),
+  Mean_Absolute_Difference = c(mean(absolute_difference), mean(absolute_difference_wp_uc), 
+                               mean(absolute_difference_wp_c), mean(absolute_difference_gpw)),
+  RMSE = c(rmse, rmse_wp_uc, rmse_wp_c, rmse_gpw)
+)
+
+# Reshape the data frame into long format for plotting
+summary_data_long <- tidyr::pivot_longer(summary_data, cols = c("Mean_Absolute_Difference", "RMSE"), 
+                                         names_to = "Statistic", values_to = "Value")
+
+# Create the bar plot
+bar_plot_error_rmse <- ggplot(summary_data_long, aes(x = Dataset, y = Value, fill = Statistic, label = round(Value, digits = 2))) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(position = position_dodge(width = 0.9),    # Dodge position adjustment
+            vjust = -0.5,    # Adjust vertical position
+            size = 3) +      # Adjust text size
+  labs(title = "Mean Absolute Difference and RMSE Comparison Across Datasets",
+       x = "Dataset", y = "Value", fill = "Statistic") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Print the bar plot
+print(bar_plot_error_rmse )
+
+
+```
+```{r}
+# Save the plot to a file
+ggsave("Plots/bar_plot_error_rmse.png", plot =bar_plot_error_rmse, width = 8, height = 6, dpi = 400)
+```
 #____________________________________
 
 
@@ -4569,7 +4883,7 @@ library(gridExtra)
 # Scatter plot with site_status
 ms_b_surv<-ggplot(camps, aes(y = ms_b_c, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
   labs(title = "Comparison between MS building count and survey iom populations",
        y = "Microsoft building count",
@@ -4585,7 +4899,7 @@ ms_b_surv<-ggplot(camps, aes(y = ms_b_c, x = N_INDVI, color = Sit_Stt)) +
 # Scatter plot with site_status
 g_b_surv<-ggplot(camps, aes(y = g_b_c, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(g_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(g_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
   labs(title = NULL,
        y = "Google building count",
@@ -4599,7 +4913,7 @@ g_b_surv<-ggplot(camps, aes(y = g_b_c, x = N_INDVI, color = Sit_Stt)) +
  # Scatter plot with site_status
 vida_b_surv<-ggplot(camps, aes(y = vida_b_c, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(vida_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(vida_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
   labs(title = NULL,
        y = "Vida building count",
@@ -4613,7 +4927,7 @@ vida_b_surv<-ggplot(camps, aes(y = vida_b_c, x = N_INDVI, color = Sit_Stt)) +
   # Scatter plot with site_status
 osm_b_surv<-ggplot(camps, aes(y = osm_b_c, x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(osm_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(osm_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
   labs(title = NULL,
        y = "OSM building count",
@@ -4652,7 +4966,7 @@ library(gridExtra)
 # Scatter plot with site_status
 ms_b_surv_hh<-ggplot(camps, aes(y = ms_b_c, x = N_HH, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
   labs(title = "Comparison between MS building count and survey household number",
        y = "Microsoft building count",
@@ -4669,7 +4983,7 @@ ms_b_surv_hh<-ggplot(camps, aes(y = ms_b_c, x = N_HH, color = Sit_Stt)) +
 # Scatter plot with site_status
 g_b_hh<-ggplot(camps, aes(y = g_b_c, x = N_HH, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
-  geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(g_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
+  geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(g_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
   labs(title = NULL,
        y = "Google building count",
@@ -4680,7 +4994,7 @@ g_b_hh<-ggplot(camps, aes(y = g_b_c, x = N_HH, color = Sit_Stt)) +
  
   
 # Scatter plot with site_status
-vida_b_hh<-ggplot(camps, aes(y = vida_b_c, x = N_HH, color = Sit_Stt)) +
+vida_b_hh<-ggplot(camps, aes(y = vida_b_c, x = N_HH, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(vida_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
   
@@ -4696,7 +5010,7 @@ vida_b_hh<-ggplot(camps, aes(y = vida_b_c, x = N_HH, color = Sit_Stt)) +
   
   # Scatter plot with site_status
 # Scatter plot with site_status
-osm_b_hh<-ggplot(camps, aes(y = osm_b_c, x = N_INDVI, color = Sit_Stt)) +
+osm_b_hh<-ggplot(camps, aes(y = osm_b_c, x = N_INDVI, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(osm_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
   
@@ -4944,7 +5258,7 @@ print(box_dou_indv)
 ggsave("Plots/box_dou_indv.png", plot =box_dou_indv, width = 8, height = 6, dpi = 400)
 ```
 
-#3. Dou_level 1 and google building count
+#3. Dou_level 1 and  building count
 ```{r}
 # Convert factors to character to avoid issues in ggplot2
 camp_final$dou_level1 <- as.character(camp_final$dou_level1)
@@ -4970,16 +5284,16 @@ p <- ggplot(camp_final_sum, aes(x = Source, y = Building_Count, fill = dou_level
   theme(legend.position = "top")
 
 # Add text labels for the counts on top of each stack
-p + geom_text(aes(label = Building_Count), position = position_stack(vjust = 0.5), size = 2, color = "black")
+k<-p + geom_text(aes(label = Building_Count), position = position_stack(vjust = 0.5), size = 2, color = "black")
 
 ```
 
 ```{r}
 # Save the plot to a file
-ggsave("Plots/dou_1_building_bar.png", plot =p, width = 8, height = 6, dpi = 400)
+ggsave("Plots/dou_1_building_bar.png", plot =k, width = 8, height = 6, dpi = 400)
 ```
 
-
+#4. Dou_level and building area
 ```{r}
 library(scales)  # for formatting axis labels
 
@@ -5014,5 +5328,467 @@ p <- ggplot(camp_final_sum, aes(x = Source, y = Building_Area, fill = dou_level1
 
 # Add text labels for the areas on top of each stack
 p + geom_text(aes(label = format(Building_Area, big.mark = ",", scientific = FALSE)), position = position_stack(vjust = 0.5), size = 2.5, color = "black")
+```
+
+#5. dou_level1 and median footprint stratified by urban, rural classifications
+```{r}
+# Check if there's any data available in camp_final
+if (nrow(camp_final) > 0) {
+  # Check if dou_level1 variable is present in camp_final
+  if ("dou_level1" %in% colnames(camp_final)) {
+    # Filter out non-numeric values in building count columns
+    camp_final <- camp_final %>%
+      filter(
+        is.numeric(ms_b_c),
+        is.numeric(g_b_c),
+        is.numeric(osm_b_c),
+        is.numeric(vida_b_c)
+      )
+    
+    # Check if there's any data available in camp_final after filtering
+    if (nrow(camp_final) > 0) {
+      # Calculate the median count of building footprints for each camp
+      median_counts <- camp_final %>%
+        group_by(dou_level1) %>%
+        summarise(median_ms = median(ms_b_c),
+                  median_google = median(g_b_c),
+                  median_osm = median(osm_b_c),
+                  median_vida = median(vida_b_c))
+      
+      # Ensure median_counts has at least one row
+      if (nrow(median_counts) > 0) {
+        # Add a column for camp index
+        median_counts$Camp <- 1:nrow(median_counts)
+        
+        # Reshape the data into long format for plotting
+        median_counts_long <- median_counts %>%
+          pivot_longer(cols = c(median_ms, median_google, median_osm, median_vida),
+                       names_to = "Source", values_to = "Median_Count")
+        
+        # Create the lollipop plot
+        ggplot(median_counts_long, aes(x = Median_Count, y = Camp, color = Source)) +
+          geom_segment(aes(xend = 0, yend = Camp), size = 1) +  # Lollipop stems
+          geom_point(size = 3, shape = 18) +  # Lollipop points
+          facet_grid(dou_level1 ~ ., scales = "free_y", space = "free_y") +  # Facet by dou_level1
+          labs(x = "Median Count of Building Footprints", y = "Camp", title = "Lollipop Plot of Median Count of Building Footprints") +
+          scale_color_manual(values = c("blue", "green", "red", "orange"), name = "Source") +
+          theme_minimal() +
+          theme(legend.position = "top") +
+          coord_flip()  # Rotate the plot for better readability
+      } else {
+        print("No data available for plotting after summarization.")
+      }
+    } else {
+      print("No data available in camp_final after filtering non-numeric values.")
+    }
+  } else {
+    print("The variable 'dou_level1' is missing in camp_final.")
+  }
+} else {
+  print("No data available in camp_final.")
+}
+
+```
+
+
+#__________________________________________
+#ANALYSIS TO FIND STORY
+#@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+#_______________________________________________
+#line of best fit
+```{r}
+library(gridExtra)
+
+# Scatter plot with site_status for gpw
+scatter_gpw <- ggplot(camps, aes(x= gpw, y= N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(gpw)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") + # Add line of best fit
+  labs(title = "Comparison between estimated and survey iom populations",
+       x = "Estimated population (GPW)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(plot.title = (element_text(size = 9, colour = "Red")),
+        axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status for wp_con
+scatter_wp_con <- ggplot(camps, aes(x = wp_c, y = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(wp_c)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") + # Add line of best fit
+  labs(title = NULL,  # No title
+       x = "Estimated population (WP_CON)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status for wp_uncon
+scatter_wp_uncon <- ggplot(camps, aes(x= wp_uc, y = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(wp_uc)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") + # Add line of best fit
+  labs(title = NULL,  # No title
+       x = "Estimated population (WP_UNCON)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status for ghsl
+scatter_ghsl <- ggplot(camps, aes(x = ghsl, y = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") + # Add line of best fit
+  labs(title = NULL,  # No title
+       x = "Estimated population (GHSL)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+
+# Scatter plot with site_status for gpw_UN
+scatter_gpw_UN<- ggplot(camps, aes(x = gpw_UN, y = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y= as.numeric(N_INDVI), x = as.numeric(gpw_UN)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", se = FALSE, color = "red") + # Add line of best fit
+  labs(title = NULL,  # No title
+       x = "Estimated population (GPW_UN)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Combine all scatter plots into one
+combined_plot_fit_line_eo <- grid.arrange(scatter_gpw,scatter_gpw_UN, scatter_wp_con, scatter_wp_uncon, scatter_ghsl, nrow = 3, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_fit_line_eo)
+
+```
+
+
+#save the line of fit plot
+
+```{r}
+
+# Save the plot to a file
+ggsave("Plots/combined_plot_fit_line_eo.png", plot =combined_plot_fit_line_eo, width = 8, height = 6, dpi = 400)
+```
+
+# fitted lines for different Sit_stt 
+
+```{r}
+library(gridExtra)
+
+# Scatter plot with site_status for gpw
+scatter_gpw <- ggplot(camps, aes(x = gpw, y = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(gpw)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +  # Add trend lines by site status
+  labs(title = "Comparison between estimated and survey iom populations",
+       x = "Estimated population (GPW)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(plot.title = (element_text(size = 9, colour = "Red")),
+        axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status for wp_con
+scatter_wp_con <- ggplot(camps, aes(x = wp_c, y = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(wp_c)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +  # Add trend lines by site status
+  labs(title = NULL,
+       x = "Estimated population (WP_CON)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status for wp_uncon
+scatter_wp_uncon <- ggplot(camps, aes(x = wp_uc, y = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(wp_uc)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +  # Add trend lines by site status
+  labs(title = NULL,
+       x = "Estimated population (WP_UNCON)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status for ghsl
+scatter_ghsl <- ggplot(camps, aes(x = ghsl, y = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(ghsl)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +  # Add trend lines by site status
+  labs(title = NULL,
+       x = "Estimated population (GHSL)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status for gpw_UN
+scatter_gpw_UN <- ggplot(camps, aes(x = gpw_UN, y = N_INDVI, color = Sit_Stt)) +
+  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(gpw_UN)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +  # Add trend lines by site status
+  labs(title = NULL,
+       x = "Estimated population (GPW_UN)",
+       y = "Survey_population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Combine all scatter plots into one
+combined_plot_2_line <- grid.arrange(scatter_gpw,scatter_gpw_UN, scatter_wp_con, scatter_wp_uncon, scatter_ghsl, 
+                              nrow = 3, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_2_line)
+
+```
+
+#save the line of fit plot
+
+```{r}
+
+# Save the plot to a file
+ggsave("Plots/combined_plot_2_line.png", plot =combined_plot_2_line, width = 8, height = 6, dpi = 400)
+```
+
+
+#combine camp and camp_final
+```{r}
+# Perform spatial intersection
+merged_data <- st_intersection(camps, camp_final)
+
+# Check the structure of the merged dataset
+str(merged_data)
+
+```
+
+#plot with camps final and based on urban _peri urban
+
+```{r}
+str(camp_final)
+
+# Convert non-numeric columns to numeric
+camp_final$ms_b_c <- as.numeric(camp_final$ms_b_c)
+camp_final$g_b_c <- as.numeric(camp_final$g_b_c)
+camp_final$vida_b_c <- as.numeric(camp_final$vida_b_c)
+camp_final$osm_b_c <- as.numeric(camp_final$osm_b_c)
+library(gridExtra)
+# Scatter plot with site_status
+ms_b_surv<-ggplot(camp_final, aes(y = ms_b_c, x = N_INDVI, color = dou_level1)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = dou_level1), se = FALSE) +
+  
+  labs(title = "Comparison between MS building count and survey iom populations",
+       y = "Microsoft building count",
+       x = "Iom surveyed population") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))+
+   theme_minimal()+theme(plot.title = (element_text(size = 9,colour = "Red")),axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))# Adjust axis scale to start from zero
+ 
+
+
+
+# Scatter plot with site_status
+g_b_surv<-ggplot(camp_final, aes(y = g_b_c, x = N_INDVI, color = dou_level1)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(g_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = dou_level1), se = FALSE) +
+  
+  labs(title = NULL,
+       y = "Google building count",
+       x = "Iom surveyed population") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))+
+   theme_minimal()+theme(axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))# Adjust axis scale to start from zero
+ 
+  
+ # Scatter plot with site_status
+vida_b_surv<-ggplot(camp_final, aes(y = vida_b_c, x = N_INDVI, color = dou_level1)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(vida_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = dou_level1), se = FALSE) +
+  
+  labs(title = NULL,
+       y = "Vida building count",
+       x = "Iom surveyed population") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))+ theme_minimal()+theme(axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))  # Adjust axis scale to start from zero
+  
+  
+  
+  # Scatter plot with site_status
+osm_b_surv<-ggplot(camp_final, aes(y = osm_b_c, x = N_INDVI, color = dou_level1)) +
+  #geom_point(alpha=0.2) +
+  geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(osm_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = dou_level1), se = FALSE) +
+  
+  labs(title = NULL,
+       y = "OSM building count",
+       x = "Iom surveyed population") +
+  theme_minimal()+scale_x_continuous(expand = c(0,0))+
+   theme_minimal()+theme(axis.text.x = element_text(size=5),
+        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+        axis.title.y=element_text(size=5))# Adjust 
+
+# Combine all scatter plots into one
+combined_plot_ru <- grid.arrange(ms_b_surv,g_b_surv, vida_b_surv, osm_b_surv, nrow = 2, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_ru)
+
+```
+```{r}
+
+# Save the plot to a file
+ggsave("Plots/combined_plot_ru.png", plot =combined_plot_ru, width = 8, height = 6, dpi = 400)
+```
+
+#lollipop
+
+```{r}
+
+# Create separate lollipop plots for each dou_level1 group
+lollipop_plots <- camp_median %>%
+  group_split(dou_level1) %>%
+  map(~ ggplot(., aes(x = Name)) +
+        geom_segment(aes(xend = Name, y = 0, yend = median_g_b_c, color = "Google", size = median_g_b_c), size = 2) +
+        geom_segment(aes(xend = Name, y = 0, yend = median_ms_b_c, color = "Microsoft", size = median_ms_b_c), size = 2) +
+        geom_segment(aes(xend = Name, y = 0, yend = median_osm_b_c, color = "OSM", size = median_osm_b_c), size = 2) +
+        geom_segment(aes(xend = Name, y = 0, yend = median_vida_b_c, color = "Vida", size = median_vida_b_c), size = 2) +
+        scale_color_manual(values = c("Google" = "blue", "Microsoft" = "green", "OSM" = "red", "Vida" = "orange")) +
+        labs(title = paste("Lollipop Plot: Median Building Count by Camp (", first(.$dou_level1), ")", sep = ""),
+             x = "Camp Name",
+             y = "Median Building Count",
+             color = "Building Source",
+             size = "Median Building Count") +
+        theme_minimal() +
+        theme(legend.position = "top",
+              axis.text.y = element_text(size = 5)) + # Adjust size of camp names
+        coord_flip())
+
+# Print the lollipop plots
+print(lollipop_plots[[1]]) # Urban
+print(lollipop_plots[[2]]) # Rural
+print(lollipop_plots[[3]]) # Urban Cluster
+
+```
+
+```{r}
+
+# Save the plot to a file
+ggsave("Plots/lollipop_plot.png", plot =lollipop_plot, width = 8, height = 6, dpi = 400)
+```
+
+
+```{r}
+library(purrr)
+# Create separate lollipop plots for each dou_level1 group
+lollipop_plots <- camp_median %>%
+  group_split(dou_level1) %>%
+  map(~ ggplot(., aes(x = Name)) +
+        geom_segment(aes(xend = Name, y = median_g_b_c, yend = 0, color = "Google"), size = 2) +
+        geom_segment(aes(xend = Name, y = median_ms_b_c, yend = 0, color = "Microsoft"), size = 2) +
+        geom_segment(aes(xend = Name, y = median_osm_b_c, yend = 0, color = "OSM"), size = 2) +
+        geom_segment(aes(xend = Name, y = median_vida_b_c, yend = 0, color = "Vida"), size = 2) +
+        geom_point(aes(y = median_g_b_c, color = dou_level1, size = median_g_b_c)) +
+        #scale_color_manual(values = c("urban" = "blue", "rural" = "green", "urban cluster" = "red")) +
+        scale_size_continuous(range = c(5, 15)) +
+        labs(title = paste("Lollipop Plot: Median Building Count by Camp (", first(.$dou_level1), ")", sep = ""),
+             x = "Camp Name",
+             y = "Median Building Count",
+             color = "Dou Level 1",
+             size = " Building Count") +
+        theme_minimal() +
+        theme(legend.position = "top") +
+        coord_flip())
+
+# Print the lollipop plots
+print(lollipop_plots[[1]]) # Urban
+print(lollipop_plots[[2]]) # Rural
+print(lollipop_plots[[3]]) # Urban Cluster
+
+
+
+```
+#big caps 
+```{r}
+library(dplyr)
+
+# Filter the camp_final dataset for the specified camp names
+filtered_camps <- camp_final %>%
+  filter(Name %in% c("BO_S010", "BO_S097"))
+
+# View the filtered dataset
+print(filtered_camps)
+```
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+library(dplyr)
+library(ggplot2)
+
+# Filter the camp_final dataset for the specified camp names
+filtered_camps <- camp_final %>%
+  filter(Name %in% c("BO_S010", "BO_S097"))
+
+# Remove the geometry column
+filtered_camps <- filtered_camps[, !names(filtered_camps) %in% c("geometry")]
+
+# Summary statistics
+summary_stats <- filtered_camps %>%
+  summarise_all(list(mean = mean, median = median, sd = sd))
+
+print(summary_stats)
+
+# Visualize relationships
+ggplot(filtered_camps, aes(x = N_HH, y = gpw, color = Name)) +
+  geom_point() +
+  labs(title = "Relationship between N_HH and GPW",
+       x = "N_HH",
+       y = "GPW") +
+  theme_minimal()
+
+
+```
+
+```{r}
+library(ggplot2)
+
+
+
+# Plotting
+ggplot(camp_final, aes(x = Shlt_ty, fill = factor(dou_level1))) +
+  geom_bar(position = "dodge") +
+  facet_wrap(~ Name, scales = "free") +  # Separate plots for each camp
+  labs(title = "Building Counts by Shelter Type and Camp",
+       x = "Shelter Type",
+       y = "Building Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
+
+
 ```
 
