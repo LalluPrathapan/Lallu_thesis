@@ -2867,7 +2867,8 @@ cat("Percentage error:",percentage_error_gpw_UN)
 #_______________________________________________
 
 
-
+#COMBINING THE PLOTS
+#______________________________________
 
 
 ##**%%%Combining the scatterplots for all the eo datsets in one plot%%%%%
@@ -2932,79 +2933,181 @@ combined_plot1 <- grid.arrange(scatter_gpw,scatter_gpw_UN, scatter_wp_con, scatt
 # Print the combined plot
 print(combined_plot1)
 ```
-#combined_scatterplot 2
-```{r}
-library(cowplot)
 
-# General y-axis label
-y_label <- "Iom surveyed population"
+#Same scale compared scatterplots for pop
+```{r}
+library(ggplot2)
+library(gridExtra)
+
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(min(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+max_value <- max(c(max(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+
+# Define the x-value for the vertical line
+vertical_line_x <- 15000
+
+# Function to create scatter plot with equal aspect ratio, diagonal line, and vertical line
+create_scatter_plot <- function(data, x_var) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI", color = "Sit_Stt")) +
+    geom_jitter(aes_string(y = "as.numeric(N_INDVI)", x = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8, show.legend = TRUE) +
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    geom_vline(xintercept = vertical_line_x, linetype = "dotted", color = "red") +  # Add vertical line
+    theme_minimal() + 
+    theme(axis.text.x = element_text(size = 5),
+          axis.text.y = element_text(size = 5),
+          axis.title.x = element_text(size = 5),
+          axis.title.y = element_text(size = 5)) +
+    scale_x_continuous(limits = c(min_value, max_value), 
+                       breaks = seq(min_value, max_value, by = (max_value - min_value) / 5)) +
+    coord_fixed(ratio = 1)  # Set equal aspect ratio
+}
 
 # Scatter plot with site_status for gpw
-scatter_gpw <- ggplot(camps, aes(y= gpw, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw)), size = 0.6, alpha = 0.8, show.legend = FALSE) +
-  labs(title = "Comparison between(GPW) and survey populations",
-       y = " (GPW)",
-       x = NULL) +  # No y-axis label
-  theme_minimal()+coord_flip()
-  theme(plot.title = element_text(size = 1.5,color="Blue",hjust=0.7),
-        axis.title.x = element_text(size = 2,hjust = 0.5),axis.text.x = element_text(size=2),
-        )
-
-
-# Scatter plot with site_status for gpw_UN
-scatter_gpw_UN <- ggplot(camps, aes(y= gpw_UN, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(gpw_UN)), size = 0.6, alpha = 0.8, show.legend = FALSE) +
-  labs(title = "Comparison between(GPW_UN) and survey populations",
-       y = "(GPW_UN)",
-       x = NULL) +  # No y-axis label
-  theme_minimal()+coord_flip()
-  theme(plot.title = element_text(size = 1.5,color="Blue",hjust=0.7),
-        axis.title.x = element_text(size = 2,hjust = 0.5),axis.text.x = element_text(size=2),
-        )
-
-
+scatter_gpw <- create_scatter_plot(camps, "gpw")
 
 # Scatter plot with site_status for wp_con
-scatter_wp_con <- ggplot(camps, aes(y = wp_c, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_c)), size = 0.6, alpha = 0.8, show.legend = FALSE) +
-  labs(title = "Comparison between Worlpop(c) and survey populations",  # No title
-       y = " (WorldPop_CON)",
-       x = NULL) +  # No y-axis label
-  theme_minimal()+coord_flip()
-   theme(plot.title = element_text(size = 1.5,color="Blue",hjust=0.7),
-        axis.title.x = element_text(size = 2,hjust = 0.5),axis.text.x = element_text(size=2),
-        )
+scatter_wp_con <- create_scatter_plot(camps, "wp_c")
+
 # Scatter plot with site_status for wp_uncon
-scatter_wp_uncon <- ggplot(camps, aes(x = wp_uc, y = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(wp_uc)), size = 0.6, alpha = 0.8, show.legend = FALSE) +
-  labs(title = "Comparison between Worlpop(uc) and survey populations",  # No title
-       y = "(WorldPop_UNCON)",
-       x = NULL) +  # No y-axis label
-  theme_minimal()+coord_flip()
-    theme(plot.title = element_text(size = 1.5,color="Blue",hjust=0.7),
-        axis.title.x = element_text(size = 2,hjust = 0.5),axis.text.x = element_text(size=2),
-        )
+scatter_wp_uncon <- create_scatter_plot(camps, "wp_uc")
 
 # Scatter plot with site_status for ghsl
-scatter_ghsl <- ggplot(camps, aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(x = as.numeric(N_INDVI), y = as.numeric(ghsl)), size = 0.6, alpha = 0.8, show.legend = FALSE) +
-  labs(title ="Comparison between GHSL and survey  populations",  # No title
-       y = "(GHSL)",
-       x = NULL) +  # No y-axis label
-  theme_minimal()+coord_flip()
-    theme(plot.title = element_text(size = 1.5,color="Blue",hjust=0.7),
-        axis.title.x = element_text(size = 2,hjust = 0.5),axis.text.x = element_text(size=2),
-        )
+scatter_ghsl <- create_scatter_plot(camps, "ghsl")
 
-# Combine all scatter plots into one using cowplot
-combined_plot <- plot_grid(scatter_gpw,scatter_gpw_UN, scatter_wp_con, scatter_wp_uncon, scatter_ghsl, nrow = 3, ncol = 2, align = "h", labels = "AUTO")
+# Scatter plot with site_status for gpw_UN
+scatter_gpw_UN <- create_scatter_plot(camps, "gpw_UN")
 
-# Add y-axis label outside the grid
-combined_plot2 <- combined_plot + draw_label(y_label, x = 0, angle = 90, vjust =0.5, hjust = 0.5,size =5)
+# Arrange the plots using grid.arrange
+combined_plot_scale_adj <- grid.arrange(scatter_gpw, scatter_wp_con, scatter_wp_uncon, scatter_ghsl, scatter_gpw_UN,
+                               nrow = 3, ncol = 2)
 
 # Print the combined plot
-print(combined_plot2)
+print(combined_plot_scale_adj)
+
+
+
+
 ```
+
+```{r}
+ggsave("Plots/combined_plot_scale_adj.png", plot = combined_plot_scale_adj, width = 8, height = 6, dpi = 400)
+```
+
+
+
+
+#fit the line
+```{r}
+library(ggplot2)
+
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(min(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+max_value <- max(c(max(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+
+# Function to create scatter plot with fit line and consistent x-axis scale
+create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI", color = "Sit_Stt")) +
+    geom_jitter(aes_string(y = "as.numeric(N_INDVI)", x = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE) +  # Add fit line
+    labs(title = title,
+         x = "Estimated Population",
+         y = "Survey Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5),
+          legend.position = "none") +
+    scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
+}
+
+# Scatter plot with fit line for gpw
+scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw", "GPW", min_value, max_value)
+
+# Scatter plot with fit line for wp_con
+scatter_wp_con <- create_scatter_plot_with_fit(camps, "wp_c", "WP_CON", min_value, max_value)
+
+# Scatter plot with fit line for wp_uncon
+scatter_wp_uncon <- create_scatter_plot_with_fit(camps, "wp_uc", "WP_UNCON", min_value, max_value)
+
+# Scatter plot with fit line for ghsl
+scatter_ghsl <- create_scatter_plot_with_fit(camps, "ghsl", "GHSL", min_value, max_value)
+
+# Scatter plot with fit line for gpw_UN
+scatter_gpw_UN <- create_scatter_plot_with_fit(camps, "gpw_UN", "GPW_UN", min_value, max_value)
+
+# Arrange the plots using grid.arrange
+combined_smooth <- grid.arrange(scatter_gpw,scatter_gpw_UN,  scatter_ghsl, scatter_wp_con, scatter_wp_uncon,
+                              nrow = 3, ncol = 2)
+
+# Print the combined plot
+print(combined_smooth)
+
+
+```
+
+```{r}
+ggsave("Plots/combined_smooth.png", plot = combined_smooth, width = 8, height = 6, dpi = 400)
+```
+
+#scatterplots with geom_smooth and geomabline slope =1
+```{r}
+library(ggplot2)
+
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(min(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+max_value <- max(c(max(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+
+# Function to create scatter plot with fit line and consistent x-axis scale
+create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI", color = "Sit_Stt")) +
+    geom_jitter(aes_string(y = "as.numeric(N_INDVI)", x = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE) +  # Add fit line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    labs(title = title,
+         x = "Estimated Population",
+         y = "Survey Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5),
+          legend.position = "none") +
+    scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
+}
+
+# Scatter plot with fit line for gpw
+scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw", "GPW", min_value, max_value)
+
+# Scatter plot with fit line for wp_con
+scatter_wp_con <- create_scatter_plot_with_fit(camps, "wp_c", "WP_CON", min_value, max_value)
+
+# Scatter plot with fit line for wp_uncon
+scatter_wp_uncon <- create_scatter_plot_with_fit(camps, "wp_uc", "WP_UNCON", min_value, max_value)
+
+# Scatter plot with fit line for ghsl
+scatter_ghsl <- create_scatter_plot_with_fit(camps, "ghsl", "GHSL", min_value, max_value)
+
+# Scatter plot with fit line for gpw_UN
+scatter_gpw_UN <- create_scatter_plot_with_fit(camps, "gpw_UN", "GPW_UN", min_value, max_value)
+
+# Arrange the plots using grid.arrange
+combined_plot_smooth_line <- grid.arrange(scatter_gpw, scatter_gpw_UN,scatter_ghsl,scatter_wp_con, scatter_wp_uncon,  
+                              nrow = 3, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_smooth_line)
+
+```
+
+
+```{r}
+ggsave("Plots/combined_plot_smooth_line.png", plot = combined_plot_smooth_line, width = 8, height = 6, dpi = 400)
+```
+
+
+
+
+
+
+
 
 #combined_scatterplot 3
 ```{r}
@@ -3147,6 +3250,54 @@ combined_plot_hh <- grid.arrange(scatter_nindvi_hh,scatter_gpw_hh,scatter_gpw_UN
 print(combined_plot_hh)
 ```
 
+#Same scale for hh plots
+```{r}
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(min(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN,camps$N_INDVI)))
+max_value <- max(c(max(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN,camps$N_INDVI)))
+
+# Function to create scatter plot with fit line and consistent x-axis scale
+create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = x_var, y = "N_HH", color = "Sit_Stt")) +
+    geom_jitter(aes_string(y = "as.numeric(N_HH)", x = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE) +  # Add fit line
+    geom_abline(intercept = 0, slope = 0.5, linetype = "dashed", color = "black") +  # Add diagonal line
+    labs(title = title,
+         x = "Population",
+         y = "Survey Household number") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5),
+          legend.position = "none") +
+    scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
+}
+#scatter plot with fit line for  N_INDVI
+scatter_nind_nhh<-
+create_scatter_plot_with_fit(camps, "N_INDVI", "Survey population", min_value, max_value)  
+
+# Scatter plot with fit line for gpw
+scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw", "GPW", min_value, max_value)
+
+# Scatter plot with fit line for wp_con
+scatter_wp_con <- create_scatter_plot_with_fit(camps, "wp_c", "WP_CON", min_value, max_value)
+
+# Scatter plot with fit line for wp_uncon
+scatter_wp_uncon <- create_scatter_plot_with_fit(camps, "wp_uc", "WP_UNCON", min_value, max_value)
+
+# Scatter plot with fit line for ghsl
+scatter_ghsl <- create_scatter_plot_with_fit(camps, "ghsl", "GHSL", min_value, max_value)
+
+# Scatter plot with fit line for gpw_UN
+scatter_gpw_UN <- create_scatter_plot_with_fit(camps, "gpw_UN", "GPW_UN", min_value, max_value)
+
+# Arrange the plots using grid.arrange
+combined_plot_smooth_line_hh <- grid.arrange(scatter_nind_nhh,scatter_gpw, scatter_gpw_UN,scatter_ghsl,scatter_wp_con, scatter_wp_uncon,  
+                              nrow = 2, ncol = 3)
+
+# Print the combined plot
+print(combined_plot_smooth_line_hh)
+
+```
 
 
 #saving the all scatterplots
@@ -3156,8 +3307,175 @@ print(combined_plot_hh)
 ggsave("Plots/combined_sctr1.png", plot = combined_plot1, width = 8, height = 6, dpi = 400)
 ggsave("Plots/combined_sctr2.png", plot = combined_plot2, width = 8, height = 6, dpi = 400)
 ggsave("Plots/combined_plot_hh.png", plot = combined_plot_hh, width = 8, height = 6, dpi = 400)
+ggsave("Plots/combined_plot_smooth_line_hh.png", plot = combined_plot_smooth_line_hh, width = 8, height = 6, dpi = 400)
+```
+#_____________________________
+
+#AREA WISE combined scatterplots
+#(area_wise>10000)
+```{r}
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(min(subset_data$gpw, subset_data$wp_c, subset_data$wp_uc, subset_data$ghsl, subset_data$gpw_UN)))
+max_value <- max(c(max(subset_data$gpw, subset_data$wp_c, subset_data$wp_uc, subset_data$ghsl, subset_data$gpw_UN)))
+
+# Function to create scatter plot with fit line and consistent x-axis scale
+create_scatter_plot_with_fit_g1 <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI", color = "Sit_Stt")) +
+    geom_jitter(aes_string(y = "as.numeric(N_INDVI)", x = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE) +  # Add fit line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    labs(title = title,
+         x = "Estimated Population(area>10000m2)",
+         y = "Survey Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5),
+          legend.position = "none") +
+    scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
+}
+
+# Scatter plot with fit line for gpw
+scatter_gpw_g1 <- create_scatter_plot_with_fit_g1(subset_data, "gpw", "GPW", min_value, max_value)
+
+# Scatter plot with fit line for wp_con
+scatter_wp_con_g1 <- create_scatter_plot_with_fit_g1(subset_data, "wp_c", "WP_CON", min_value, max_value)
+
+# Scatter plot with fit line for wp_uncon
+scatter_wp_uncon_g1<- create_scatter_plot_with_fit_g1(subset_data, "wp_uc", "WP_UNCON", min_value, max_value)
+
+# Scatter plot with fit line for ghsl
+scatter_ghsl_g1 <- create_scatter_plot_with_fit_g1(subset_data, "ghsl", "GHSL", min_value, max_value)
+
+# Scatter plot with fit line for gpw_UN
+scatter_gpw_UN_g1 <- create_scatter_plot_with_fit_g1(subset_data, "gpw_UN", "GPW_UN", min_value, max_value)
+
+# Arrange the plots using grid.arrange
+combined_plot_smooth_line_g1 <- grid.arrange(scatter_gpw_g1, scatter_gpw_UN_g1,scatter_ghsl_g1,scatter_wp_con_g1, scatter_wp_uncon_g1,  
+                              nrow = 3, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_smooth_line_g1)
 ```
 
+
+
+#(area_wise<10000)
+```{r}
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(min(subset_data_2$gpw, subset_data_2$wp_c, subset_data_2$wp_uc, subset_data_2$ghsl, subset_data_2$gpw_UN)))
+max_value <- max(c(max(subset_data_2$gpw, subset_data_2$wp_c, subset_data_2$wp_uc, subset_data_2$ghsl, subset_data_2$gpw_UN)))
+
+# Function to create scatter plot with fit line and consistent x-axis scale
+create_scatter_plot_with_fit_l1 <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI", color = "Sit_Stt")) +
+    geom_jitter(aes_string(y = "as.numeric(N_INDVI)", x = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE) +  # Add fit line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    labs(title = title,
+         x = "Estimated Population(area<10000m2)",
+         y = "Survey Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5),
+          legend.position = "none") +
+    scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
+}
+
+# Scatter plot with fit line for gpw
+scatter_gpw_l1 <- create_scatter_plot_with_fit_l1(subset_data_2, "gpw", "GPW", min_value, max_value)
+
+# Scatter plot with fit line for wp_con
+scatter_wp_con_l1 <- create_scatter_plot_with_fit_l1(subset_data_2, "wp_c", "WP_CON", min_value, max_value)
+
+# Scatter plot with fit line for wp_uncon
+scatter_wp_uncon_l1<- create_scatter_plot_with_fit_l1(subset_data_2, "wp_uc", "WP_UNCON", min_value, max_value)
+
+# Scatter plot with fit line for ghsl
+scatter_ghsl_l1 <- create_scatter_plot_with_fit_l1(subset_data_2, "ghsl", "GHSL", min_value, max_value)
+
+# Scatter plot with fit line for gpw_UN
+scatter_gpw_UN_l1 <- create_scatter_plot_with_fit_g1(subset_data_2, "gpw_UN", "GPW_UN", min_value, max_value)
+
+# Arrange the plots using grid.arrange
+combined_plot_smooth_line_l1 <- grid.arrange(scatter_gpw_l1, scatter_gpw_UN_l1,scatter_ghsl_l1,scatter_wp_con_l1, scatter_wp_uncon_l1,  
+                              nrow = 3, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_smooth_line_l1)
+```
+
+
+
+
+#save the plot
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/combined_plot_smooth_line_g1.png", plot = combined_plot_smooth_line_g1, width = 8, height = 6, dpi = 400)
+# Save the plot to a file
+ggsave("Plots/combined_plot_smooth_line_l1.png", plot = combined_plot_smooth_line_l1, width = 8, height = 6, dpi = 400)
+```
+
+#POPULATION WISE  SPLIT
+
+```{r}
+campsgt10000 <- subset(camps, N_INDVI > 10000)
+campls10000 <- subset(camps, N_INDVI < 10000)
+```
+#population <10000
+```{r}
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(min(campls10000 $gpw, campls10000 $wp_c, campls10000 $wp_uc, campls10000 $ghsl, campls10000 $gpw_UN)))
+max_value <- max(c(max(campls10000 $gpw, campls10000$wp_c, campls10000$wp_uc, campls10000 $ghsl, campls10000$gpw_UN)))
+
+# Function to create scatter plot with fit line and consistent x-axis scale
+create_scatter_plot_with_fit_pl1 <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI", color = "Sit_Stt")) +
+    geom_jitter(aes_string(y = "as.numeric(N_INDVI)", x = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE) +  # Add fit line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    labs(title = title,
+         x = "Estimated Population",
+         y = "Survey Population(<10000)") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5),
+          legend.position = "none") +
+    scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
+}
+
+# Scatter plot with fit line for gpw
+scatter_gpw_pl1 <- create_scatter_plot_with_fit_pl1(campls10000 , "gpw", "GPW", min_value, max_value)
+
+# Scatter plot with fit line for wp_con
+scatter_wp_con_pl1 <- create_scatter_plot_with_fit_pl1(campls10000 , "wp_c", "WP_CON", min_value, max_value)
+
+# Scatter plot with fit line for wp_uncon
+scatter_wp_uncon_pl1<- create_scatter_plot_with_fit_pl1(campls10000 , "wp_uc", "WP_UNCON", min_value, max_value)
+
+# Scatter plot with fit line for ghsl
+scatter_ghsl_pl1 <- create_scatter_plot_with_fit_pl1(campls10000 , "ghsl", "GHSL", min_value, max_value)
+
+# Scatter plot with fit line for gpw_UN
+scatter_gpw_UN_pl1 <- create_scatter_plot_with_fit_pl1(campls10000 , "gpw_UN", "GPW_UN", min_value, max_value)
+
+# Arrange the plots using grid.arrange
+combined_plot_smooth_line_pl1 <- grid.arrange(scatter_gpw_pl1, scatter_gpw_UN_pl1,scatter_ghsl_pl1,scatter_wp_con_pl1, scatter_wp_uncon_pl1,  
+                              nrow = 3, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_smooth_line_pl1)
+```
+
+
+#save the plot
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/combined_plot_smooth_line_g1.png", plot = combined_plot_smooth_line_g1, width = 8, height = 6, dpi = 400)
+# Save the plot to a file
+ggsave("Plots/combined_plot_smooth_line_pl1.png", plot = combined_plot_smooth_line_pl1, width = 8, height = 6, dpi = 400)
+```
 
 
 
