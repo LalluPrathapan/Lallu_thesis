@@ -3467,12 +3467,57 @@ combined_plot_smooth_line_pl1 <- grid.arrange(scatter_gpw_pl1, scatter_gpw_UN_pl
 print(combined_plot_smooth_line_pl1)
 ```
 
+#population>10000
+```{r}
+
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(min(campsgt10000$gpw, campsgt10000$wp_c, campsgt10000$wp_uc, campsgt10000$ghsl, campsgt10000$gpw_UN)))
+max_value <- max(c(max(campsgt10000$gpw, campsgt10000$wp_c, campsgt10000$wp_uc, campsgt10000$ghsl, campsgt10000$gpw_UN)))
+
+# Function to create scatter plot with fit line and consistent x-axis scale
+create_scatter_plot_with_fit_pg1 <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI", color = "Sit_Stt")) +
+    geom_jitter(aes_string(y = "as.numeric(N_INDVI)", x = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE) +  # Add fit line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    labs(title = title,
+         x = "Estimated Population",
+         y = "Survey Population(>10000)") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5),
+          legend.position = "none") +
+    scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
+}
+
+# Scatter plot with fit line for gpw
+scatter_gpw_pg1 <- create_scatter_plot_with_fit_pg1(campsgt10000, "gpw", "GPW", min_value, max_value)
+
+# Scatter plot with fit line for wp_con
+scatter_wp_con_pg1 <- create_scatter_plot_with_fit_pg1(campsgt10000, "wp_c", "WP_CON", min_value, max_value)
+
+# Scatter plot with fit line for wp_uncon
+scatter_wp_uncon_pg1<- create_scatter_plot_with_fit_pg1(campsgt10000, "wp_uc", "WP_UNCON", min_value, max_value)
+
+# Scatter plot with fit line for ghsl
+scatter_ghsl_pg1 <- create_scatter_plot_with_fit_pg1(campsgt10000, "ghsl", "GHSL", min_value, max_value)
+
+# Scatter plot with fit line for gpw_UN
+scatter_gpw_UN_pg1 <- create_scatter_plot_with_fit_pg1(campsgt10000, "gpw_UN", "GPW_UN", min_value, max_value)
+
+# Arrange the plots using grid.arrange
+combined_plot_smooth_line_pg1 <- grid.arrange(scatter_gpw_pg1, scatter_gpw_UN_pg1,scatter_ghsl_pg1,scatter_wp_con_pg1, scatter_wp_uncon_pg1,  
+                              nrow = 3, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_smooth_line_pg1)
+```
 
 #save the plot
 
 ```{r}
 # Save the plot to a file
-ggsave("Plots/combined_plot_smooth_line_g1.png", plot = combined_plot_smooth_line_g1, width = 8, height = 6, dpi = 400)
+ggsave("Plots/combined_plot_smooth_line_pg1.png", plot = combined_plot_smooth_line_pg1, width = 8, height = 6, dpi = 400)
 # Save the plot to a file
 ggsave("Plots/combined_plot_smooth_line_pl1.png", plot = combined_plot_smooth_line_pl1, width = 8, height = 6, dpi = 400)
 ```
