@@ -41,6 +41,7 @@ library(corrplot)
 library(cowplot)
 library(reshape2)
 library(leaflet)
+library(orca)
 ```
 
 #______________________________________________
@@ -289,11 +290,167 @@ text(x = 1, y = surv_sta[c("Mean", "Median", "Max")],
 # Save the plot to a file
 ggsave("Plots/area_box_pop_plot.png", plot = b, width = 8, height = 6, dpi = 400)
 ```
+# Calculate the variance of N_INDVI
+```{r}
+
+
+# Calculate the variance of N_INDVI
+variance_N_INDVI <- var(camps$N_INDVI)
+
+# Print the variance
+print(variance_N_INDVI)
+
+```
+#Analysis about the data N_INDVI
+
+
+With a variance of 55688371 and the summary statistics you provided earlier for the N_INDVI variable:
+
+Minimum: 26.0
+1st Quartile: 327.5
+Median: 1058.0
+Mean: 4134.3
+3rd Quartile: 4575.5
+Maximum: 43074.0
+We can infer the following about the data:
+
+Spread: The data has a wide spread, as indicated by the large difference between the minimum and maximum values.
+
+Central Tendency: The mean (4134.3) is much higher than the median (1058.0), suggesting that the data might be positively skewed.
+
+Variability: The variance (55688371) is quite large, indicating that the data points are spread out over a wide range from the mean.
+
+Outliers: The presence of outliers at the higher end of the distribution is suggested by the large difference between the 3rd quartile (4575.5) and the maximum (43074.0).
+
+Overall, these statistics suggest that the data is positively skewed, with a few very high values driving up the mean and variance, while the majority of the data is clustered towards the lower end of the distribution.
+
+Positively skewed data means that the distribution of the data is skewed towards the right side, or the tail of the distribution is longer on the right side. In other words, the majority of the data points are concentrated on the left side of the distribution, with a few extremely high values pulling the mean towards the right.
+
+In a positively skewed distribution:
+
+The mean is typically greater than the median.
+The tail of the distribution extends towards the higher values.
+Most of the data points are clustered towards the lower end of the distribution.
+Outliers are more likely to be present on the higher end of the scale.
+Positively skewed distributions are also sometimes referred to as right-skewed distributions.
+
+# bar plot formal camps with area greater than 10000
+
+```{r}
+library(ggplot2)
+
+# Filter the dataset for formal camps with cl_Shp_a > 10000
+formal_large <- subset(camps, Sit_Stt == "Formal" & cl_Shp_a > 10000)
+
+# Filter the dataset for formal camps with cl_Shp_a < 10000
+formal_small <- subset(camps, Sit_Stt == "Formal" & cl_Shp_a < 10000)
+
+# Filter the dataset for informal camps with cl_Shp_a > 10000
+informal_large <- subset(camps, Sit_Stt == "Informal" & cl_Shp_a > 10000)
+
+# Filter the dataset for informal camps with cl_Shp_a < 10000
+informal_small <- subset(camps, Sit_Stt == "Informal" & cl_Shp_a < 10000)
+
+# Create bar plots for formal camps with cl_Shp_a > 10000 and < 10000
+bar_plot_formal <- ggplot() +
+  geom_bar(data = formal_large, aes(x = "Formal (area > 10000)"), fill = "blue", alpha = 0.5) +
+  labs(title = "Count of Formal Camps (area > 10000)",
+       x = "Camp Type",
+       y = "Count") +
+  theme_minimal()
+
+bar_plot_formal_small <- ggplot() +
+  geom_bar(data = formal_small, aes(x = "Formal (area< 10000)"), fill = "blue", alpha = 0.5) +
+  labs(title = "Count of Formal Camps (area < 10000)",
+       x = "Camp Type",
+       y = "Count") +
+  theme_minimal()
+
+# Create bar plots for informal camps with cl_Shp_a > 10000 and < 10000
+bar_plot_informal <- ggplot() +
+  geom_bar(data = informal_large, aes(x = "Informal (area > 10000)"), fill = "green", alpha = 0.5) +
+  labs(title = "Count of Informal Camps (area > 10000)",
+       x = "Camp Type",
+       y = "Count") +
+  theme_minimal()
+
+bar_plot_informal_small <- ggplot() +
+  geom_bar(data = informal_small, aes(x = "Informal (area < 10000)"), fill = "green", alpha = 0.5) +
+  labs(title = "Count of Informal Camps (area < 10000)",
+       x = "Camp Type",
+       y = "Count") +
+  theme_minimal()
+
+library(ggplot2)
+
+# Combine the datasets
+combined_data <- rbind(
+  mutate(formal_large, Type = "Formal (area > 10000)"),
+  mutate(formal_small, Type = "Formal (area < 10000)"),
+  mutate(informal_large, Type = "Informal (area > 10000)"),
+  mutate(informal_small, Type = "Informal (area < 10000)")
+)
+
+# Create a bar plot
+bar_plot_combined_in_f_gs_ls <- ggplot(combined_data, aes(x = Type, fill = Sit_Stt)) +
+  geom_bar(alpha = 0.5) +
+  labs(title = "Count of Camps by Type and Area",
+       x = "Camp Type and Area",
+       y = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotate x-axis labels if needed
+
+# Print the combined bar plot
+print(bar_plot_combined_in_f_gs_ls)
 
 
 
 
+```
+#save the bar plot
 
+```{r}
+ggsave("Plots/formal_informal_areagsls.png", plot =bar_plot_combined_in_f_gs_ls, width = 8, height = 6, dpi = 400)
+```
+#bar plot formal /informal population wise
+
+```{r}
+library(ggplot2)
+
+# Filter the data for formal camps with N_INDVI > 10000 and N_INDVI < 10000
+formal_large <- camps %>% filter(Sit_Stt == "Formal" & N_INDVI > 10000)
+formal_small <- camps %>% filter(Sit_Stt == "Formal" & N_INDVI < 10000)
+
+# Filter the data for informal camps with N_INDVI > 10000 and N_INDVI < 10000
+informal_large <- camps %>% filter(Sit_Stt == "Informal" & N_INDVI > 10000)
+informal_small <- camps %>% filter(Sit_Stt == "Informal" & N_INDVI < 10000)
+
+# Combine the datasets
+combined_data <- rbind(
+  mutate(formal_large, Type = "Formal (N_INDVI > 10000)"),
+  mutate(formal_small, Type = "Formal (N_INDVI < 10000)"),
+  mutate(informal_large, Type = "Informal (N_INDVI > 10000)"),
+  mutate(informal_small, Type = "Informal (N_INDVI < 10000)")
+)
+
+# Create a bar plot
+bar_plot_combined_f_if_plg <- ggplot(combined_data, aes(x = Type, fill = Sit_Stt)) +
+  geom_bar(alpha = 0.5) +
+  labs(title = "Count of Camps by Type and N_INDVI",
+       x = "Camp Type and N_INDVI",
+       y = "Count") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotate x-axis labels if needed
+
+# Print the combined bar plot
+print(bar_plot_combined_f_if_plg)
+
+```
+#save the bar plot
+
+```{r}
+ggsave("Plots/bar_plot_combined_f_if_plg.png", plot =bar_plot_combined_f_if_plg, width = 8, height = 6, dpi = 400)
+```
 #______________________________________________
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #ZONAL STATISTICS for each of the global EO population datasets
@@ -4454,10 +4611,325 @@ corrplot(cor_matrix_inf, method = "color", type = "upper",
 ```
 
 
-#___CORR END______________
+#___CORR POP END______________
 #@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+
+#__CORR HOUSEHOLD____
+#cor(survey hh and estimated pop)
+
+```{r}
+
+camps$N_HH <- as.numeric(camps$N_HH)
+camps$ghsl <- as.numeric(camps$ghsl)
+camps$wp_c <- as.numeric(camps$wp_c)
+camps$wp_uc<- as.numeric(camps$wp_uc)
+camps$gpw <- as.numeric(camps$gpw)
+camps$gpw_UN<-as.numeric(camps$gpw_UN)
+
+
+# Check the data types again
+str(camps[, c("N_HH", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")])
+
+# Check for missing values
+summary(camps[, c("N_HH", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")])
+
+# Calculate correlation coefficients
+corr_ghsl_HH <- cor(camps$N_HH,camps$ghsl)
+corr_wp_c_HH<-cor(camps$N_HH,camps$wp_c)
+corr_wp_uc_HH<-cor(camps$N_HH,camps$wp_uc)
+corr_gpw_HH<-cor(camps$N_HH,camps$gpw)
+corr_gpw_UN_HH<-cor(camps$N_HH,camps$gpw_UN)
+# View correlation coefficients
+
+print(paste("GHSL:",corr_ghsl_HH))
+print(paste("wp_uc:",corr_wp_uc_HH))
+print(paste("wp_c",corr_wp_c_HH))
+print(paste("gpw:",corr_gpw_HH))
+print(paste("gpw_UN:",corr_gpw_UN_HH))
+
+# [1] "GHSL: 0.694545351305014"
+# [1] "wp_uc: 0.618515091659853"
+# [1] "wp_c 0.523798604122295"
+# [1] "gpw: 0.101174748926628"
+# [1] "gpw_UN: 0.101001439700283"
+```
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_hh <- matrix(c(corr_ghsl_HH, corr_wp_c_HH, corr_wp_uc_HH, corr_gpw_HH,corr_gpw_UN_HH),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_hh, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+#A<10000 Correlation(calculation correlation for N_HH and Estimated for area less than 10,000)
+```{r}
+#correlation for the area>10000msq and area<10000msq
+
+subset_data_2$N_HH<- as.numeric(subset_data_2$N_HH)
+subset_data_2$ghsl <- as.numeric(subset_data_2$ghsl)
+subset_data_2$wp_c <- as.numeric(subset_data_2$wp_c)
+subset_data_2$wp_uc<- as.numeric(subset_data_2$wp_uc)
+subset_data_2$gpw <- as.numeric(subset_data_2$gpw_UN)
+
+
+# Calculate correlation coefficients
+corr_ghsl_areal_hh <- cor(subset_data_2$N_HH,subset_data_2$ghsl)
+corr_wp_c_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$wp_c)
+corr_wp_uc_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$wp_uc)
+corr_gpw_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$gpw)
+corr_gpw_UN_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$gpw_UN)
+# View correlation coefficients
+
+print(paste("GHSL:",corr_ghsl_areal_hh))
+print(paste("wp_uc:",corr_wp_uc_areal_hh))
+print(paste("wp_c",corr_wp_c_areal_hh))
+print(paste("gpw:",corr_gpw_areal_hh))
+print(paste("gpw_UN:",corr_gpw_UN_areal_hh))
+
+# [1] "GHSL: 0.0735245533503374"
+# [1] "wp_uc: 0.258855419585444"
+# [1] "wp_c 0.233787523829022"
+# [1] "gpw: 0.129592074410419"
+# [1] "gpw_UN: 0.129592074410419"
+```
+
+# one line corr_mtrix doing the correlation matrix n_indvi and estimated populations for area<10000
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_areal_hh <- matrix(c(corr_ghsl_areal_hh, corr_wp_c_areal_hh, corr_wp_uc_areal_hh, corr_gpw_areal_hh,corr_gpw_UN_areal_hh),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_areal_hh , method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+#A>10000 Correlation(calculation correlation for N_HH and Estimated for area greater than 10,000)
+```{r}
+#correlation for the area>10000msq and area<10000msq
+
+subset_data$N_HH<- as.numeric(subset_data$N_HH)
+subset_data$ghsl <- as.numeric(subset_data$ghsl)
+subset_data$wp_c <- as.numeric(subset_data$wp_c)
+subset_data$wp_uc<- as.numeric(subset_data$wp_uc)
+subset_data$gpw <- as.numeric(subset_data$gpw_UN)
+
+
+# Calculate correlation coefficients
+corr_ghsl_areag_hh <- cor(subset_data$N_HH,subset_data$ghsl)
+corr_wp_c_areag_hh <-cor(subset_data$N_HH,subset_data$wp_c)
+corr_wp_uc_areag_hh <-cor(subset_data$N_HH,subset_data$wp_uc)
+corr_gpw_areag_hh <-cor(subset_data$N_HH,subset_data$gpw)
+corr_gpw_UN_areag_hh <-cor(subset_data$N_HH,subset_data$gpw_UN)
+# View correlation coefficients
+
+print(paste("GHSL:",corr_ghsl_areag_hh))
+print(paste("wp_uc:",corr_wp_uc_areag_hh))
+print(paste("wp_c",corr_wp_c_areag_hh))
+print(paste("gpw:",corr_gpw_areag_hh))
+print(paste("gpw_UN:",corr_gpw_UN_areag_hh))
+
+# [1] "GHSL: 0.670731723075656"
+# [1] "wp_uc: 0.587894390835026"
+# [1] "wp_c 0.479422951378752"
+# [1] "gpw: 0.0576024744490923"
+# [1] "gpw_UN: 0.0576024744490923"
+```
+
+# one line corr_mtrix doing the correlation matrix n_indvi and estimated populations for area>10000
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_areag_hh <- matrix(c(corr_ghsl_areag_hh, corr_wp_c_areag_hh, corr_wp_uc_areag_hh, corr_gpw_areag_hh,corr_gpw_UN_areag_hh),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_areag_hh , method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+
+#Correlation hhh pop>10000
+
+```{r}
+#correlation for the area>10000msq and area<10000msq
+
+campsgt10000$N_HH <- as.numeric(campsgt10000$N_HH)
+campsgt10000$ghsl <- as.numeric(campsgt10000$ghsl)
+campsgt10000$wp_c <- as.numeric(campsgt10000$wp_c)
+campsgt10000$wp_uc<- as.numeric(campsgt10000$wp_uc)
+campsgt10000$gpw <- as.numeric(campsgt10000$gpw_UN)
+
+
+# Calculate correlation coefficients
+corr_ghsl_pg_hh <- cor(campsgt10000$N_HH,campsgt10000$ghsl)
+corr_wp_c_pg_hh <-cor(campsgt10000$N_HH,campsgt10000$wp_c)
+corr_wp_uc_pg_hh <-cor(campsgt10000$N_HH,campsgt10000$wp_uc)
+corr_gpw_pg_hh <-cor(campsgt10000$N_HH,campsgt10000$gpw)
+corr_gpw_UN_pg_hh <-cor(campsgt10000$N_HH,campsgt10000$gpw_UN)
+# View correlation coefficients
+
+print(paste("GHSL:",corr_ghsl_pg_hh))
+print(paste("wp_uc:",corr_wp_uc_pg_hh))
+print(paste("wp_c",corr_wp_c_pg_hh))
+print(paste("gpw:",corr_gpw_pg_hh))
+print(paste("gpw_UN:",corr_gpw_UN_pg_hh))
+# 
+# [1] "GHSL: 0.626456167079001"
+# [1] "wp_uc: 0.435672063691939"
+# [1] "wp_c 0.221383934519847"
+# [1] "gpw: -0.2373029109329"
+# [1] "gpw_UN: -0.2373029109329"
+```
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_pg_hh <- matrix(c(corr_ghsl_pg_hh, corr_wp_c_pg_hh, corr_wp_uc_pg_hh, corr_gpw_pg_hh,corr_gpw_UN_pg_hh),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_pg , method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+#P<10000 Correlation(calculation correlation for N_HH and Estimated for population less than 10,000)
+```{r}
+#correlation for the pop<10000 and 
+campls10000$N_HH <- as.numeric(campls10000$N_HH)
+campls10000$ghsl <- as.numeric(campls10000$ghsl)
+campls10000$wp_c <- as.numeric(campls10000$wp_c)
+campls10000$wp_uc<- as.numeric(campls10000$wp_uc)
+campls10000$gpw <- as.numeric(campls10000$gpw_UN)
+
+
+# Calculate correlation coefficients
+corr_ghsl_pl_hh <- cor(campls10000$N_HH,campls10000$ghsl)
+corr_wp_c_pl_hh <-cor(campls10000$N_HH,campls10000$wp_c)
+corr_wp_uc_pl_hh <-cor(campls10000$N_HH,campls10000$wp_uc)
+corr_gpw_pl_hh <-cor(campls10000$N_HH,campls10000$gpw)
+corr_gpw_UN_pl_hh <-cor(campls10000$N_HH,campls10000$gpw_UN)
+# View correlation coefficients
+
+print(paste("GHSL:",corr_ghsl_pl_hh))
+print(paste("wp_uc:",corr_wp_uc_pl_hh))
+print(paste("wp_c",corr_wp_c_pl_hh))
+print(paste("gpw:",corr_gpw_pl_hh))
+print(paste("gpw_UN:",corr_gpw_UN_pl_hh))
+
+# [1] "GHSL: 0.302281019187766"
+# [1] "wp_uc: 0.332565256451791"
+# [1] "wp_c 0.213400682368705"
+# [1] "gpw: 0.0340064921223657"
+# [1] "gpw_UN: 0.0340064921223657"
+
+```
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_pl_hh <- matrix(c(corr_ghsl_pl_hh, corr_wp_c_pl_hh, corr_wp_uc_pl_hh, corr_gpw_pl_hh,corr_gpw_UN_pl_hh),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_pl , method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+
+
+#formal camp_correlation with household
+```{r}
+formal_camps$N_HH <- as.numeric(formal_camps$N_HH)
+formal_camps$ghsl <- as.numeric(formal_camps$ghsl)
+formal_camps$wp_c <- as.numeric(formal_camps$wp_c)
+formal_camps$wp_uc<- as.numeric(formal_camps$wp_uc)
+formal_camps$gpw <- as.numeric(formal_camps$gpw)
+formal_camps$gpw_UN<-as.numeric(formal_camps$gpw_UN)
+
+
+# Calculate correlation coefficients
+corr_ghsl_HH_f <- cor(formal_camps$N_HH,formal_camps$ghsl)
+corr_wp_c_HH_f<-cor(formal_camps$N_HH,formal_camps$wp_c)
+corr_wp_uc_HH_f<-cor(formal_camps$N_HH,formal_camps$wp_uc)
+corr_gpw_HH_f<-cor(formal_camps$N_HH,formal_camps$gpw)
+corr_gpw_UN_HH_f<-cor(formal_camps$N_HH,formal_camps$gpw_UN)
+# View correlation coefficients
+
+print(paste("GHSL:",corr_ghsl_HH_f))
+print(paste("wp_uc:",corr_wp_uc_HH_f))
+print(paste("wp_c",corr_wp_c_HH_f))
+print(paste("gpw:",corr_gpw_HH_f))
+print(paste("gpw_UN:",corr_gpw_UN_HH_f))
+
+# [1] "GHSL: 0.694545351305014"
+# [1] "wp_uc: 0.618515091659853"
+# [1] "wp_c 0.523798604122295"
+# [1] "gpw: 0.101174748926628"
+# [1] "gpw_UN: 0.101001439700283"
+```
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_hh_f <- matrix(c(corr_ghsl_HH_f, corr_wp_c_HH_f, corr_wp_uc_HH_f, corr_gpw_HH_f,corr_gpw_UN_HH_f),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_hh_f, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+
+
+#Informal camp_correlation with household
+```{r}
+informal_camps$N_HH <- as.numeric(informal_camps$N_HH)
+informal_camps$ghsl <- as.numeric(informal_camps$ghsl)
+informal_camps$wp_c <- as.numeric(informal_camps$wp_c)
+informal_camps$wp_uc<- as.numeric(informal_camps$wp_uc)
+informal_camps$gpw <- as.numeric(informal_camps$gpw)
+informal_camps$gpw_UN<-as.numeric(informal_camps$gpw_UN)
+
+
+# Calculate correlation coefficients
+corr_ghsl_HH_if <- cor(informal_camps$N_HH,informal_camps$ghsl)
+corr_wp_c_HH_if<-cor(informal_camps$N_HH,informal_camps$wp_c)
+corr_wp_uc_HH_if<-cor(informal_camps$N_HH,informal_camps$wp_uc)
+corr_gpw_HH_if<-cor(informal_camps$N_HH,informal_camps$gpw)
+corr_gpw_UN_HH_if<-cor(informal_camps$N_HH,informal_camps$gpw_UN)
+# View correlation coefficients
+
+print(paste("GHSL:",corr_ghsl_HH_if))
+print(paste("wp_uc:",corr_wp_uc_HH_if))
+print(paste("wp_c",corr_wp_c_HH_if))
+print(paste("gpw:",corr_gpw_HH_if))
+print(paste("gpw_UN:",corr_gpw_UN_HH_if))
+
+# [1] "GHSL: 0.655305587898169"
+# [1] "wp_uc: 0.707152002283645"
+# [1] "wp_c 0.45873543451475"
+# [1] "gpw: 0.129618099138202"
+# [1] "gpw_UN: 0.129566317570079"
+```
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_hh_if <- matrix(c(corr_ghsl_HH_if, corr_wp_c_HH_if, corr_wp_uc_HH_if, corr_gpw_HH_if,corr_gpw_UN_HH_if),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_hh_if, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+
+
+
 #___POPULATION DIFFERENCE___________
-#poputalion difference summary
+#poputalion difference e summary
 ```{r}
 print('wp_c_difference')
 summary(camps$wp_c_df)
@@ -4568,6 +5040,50 @@ print(boxplot_pop_diff)
 # Save the plot to a file
 ggsave("Plots/boxplot_pop_diff.png", plot =boxplot_pop_diff, width = 8, height = 6, dpi = 400)
 ```
+
+
+
+#interactive box plot for population difference
+
+
+```{r}
+library(plotly)
+
+# Combine all population difference columns into one data frame
+difference_data <- data.frame(
+  Dataset = rep(c("WP_CON", "WP_UNCON", "GPW", "GHSL", "GPW_UN"), each = nrow(camps)),
+  Population_Difference = c(as.numeric(camps$wp_c_df), as.numeric(camps$wp_uc_df), as.numeric(camps$gpw_dff), as.numeric(camps$ghsl_df), as.numeric(camps$gpwU_df))
+)
+
+# Calculate mean values
+mean_values <- aggregate(Population_Difference ~ Dataset, data = difference_data, mean)
+
+# Create an interactive box plot with plotly
+boxplot_pop_diff_interactive <- plot_ly(difference_data, x = ~Dataset, y = ~Population_Difference, type = "box") %>%
+  add_markers(data = mean_values, x = ~Dataset, y = ~Population_Difference, marker = list(color = "red", size = 10)) %>%
+  add_text(data = mean_values, x = ~Dataset, y = ~Population_Difference, text = ~paste("Mean:", round(Population_Difference, digits = 2)),
+           showlegend = FALSE, textposition = "top", textfont = list(size = 12, color = "red")) %>%
+  layout(title = "Difference between Surveyed and Estimated Populations(Survey-Estimate) for different EO population data products",
+         xaxis = list(title = "Dataset"),
+         yaxis = list(title = "Population Difference"))
+
+
+
+# Create an interactive box plot
+boxplot_pop_diff_interactive <- plot_ly(difference_data, x = ~Dataset, y = ~Population_Difference, type = "box") %>%
+  add_markers(text = ~paste("Camp:", camps$Name, "<br>Population Difference:", Population_Difference, "<br>Situation Status:", camps$Sit_Stt, "<br>Cluster Shape Area:", camps$cl_Shp_a))
+
+# Print the interactive plot
+boxplot_pop_diff_interactive
+
+
+
+
+
+```
+
+
+
 
 #Formal camps error
 
@@ -4740,7 +5256,7 @@ print(boxplot_pop_diff_pg)
 ggsave("Plots/boxplot_pop_diff_pg.png", plot =boxplot_pop_diff_pg, width = 8, height = 6, dpi = 400)
 ```
 
-#population >10000
+#population <10000
 ```{r}
 # Combine all population difference columns into one data frame
 difference_data_pl <- data.frame(
@@ -4811,6 +5327,180 @@ print(bar_plot_error_rmse )
 # Save the plot to a file
 ggsave("Plots/bar_plot_error_rmse.png", plot =bar_plot_error_rmse, width = 8, height = 6, dpi = 400)
 ```
+
+#__RATIOS OF ERROR____
+
+```{r}
+# Calculate the ratio of the difference to the surveyed population
+difference_data$ratio <- difference_data$Population_Difference / camps$N_INDVI
+
+# Aggregate mean ratio values
+mean_ratio_values <- aggregate(ratio ~ Dataset, data = difference_data, mean)
+
+# Create a box plot for the ratios
+boxplot_ratio <- ggplot(difference_data, aes(x = Dataset, y = ratio)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 1, color = "red") +
+  geom_text(data = mean_ratio_values, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 2,color='Red') +
+  labs(title = "Ratio of Difference to Survey Population for Different EO Population Data Products",
+       x = "Dataset", y = "Ratio of Difference to Survey Population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10))
+
+# Print the box plot
+print(boxplot_ratio)
+
+
+
+
+```
+#save ratio error plot
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/boxplot_ratio.png", plot =boxplot_ratio, width = 8, height = 6, dpi = 400)
+```
+
+
+#Interactive box plot for ratio of differences
+
+```{r}
+library(plotly)
+
+# Calculate the ratio of the difference to the surveyed population
+difference_data$ratio <- difference_data$Population_Difference / camps$N_INDVI
+
+# Aggregate mean ratio values
+mean_ratio_values <- aggregate(ratio ~ Dataset, data = difference_data, mean)
+
+# Create an interactive box plot for the ratios
+boxplot_ratio_interactive <- plot_ly(difference_data, x = ~Dataset, y = ~ratio, type = "box") %>%
+  add_markers(text = ~paste("Dataset:", Dataset, "<br>Name:", camps$Name, "<br>Sit_Stt:", camps$Sit_Stt, "<br>cl_Shp_a:", camps$cl_Shp_a, "<br>Ratio:", ratio)) %>%
+  add_markers(data = mean_ratio_values, x = ~Dataset, y = ~ratio, mode = "markers", color = I("red"), 
+              text = ~paste("Mean Ratio:", round(ratio, digits = 2)))
+
+# Print the interactive plot
+boxplot_ratio_interactive
+
+
+```
+
+
+#saving the interactive plot 
+
+```{r}
+# Save the interactive plot as an HTML file
+orca(boxplot_ratio_interactive, file = "boxplot_ratio_interactive.html")
+
+```
+
+
+# underestimation and overestimation plots
+
+```{r}
+# Assuming 'difference_data' contains the data with the ratios of difference
+
+# Categorize the data into underestimation, overestimation, and correct estimation based on the difference of ratios
+underestimation <- difference_data[difference_data$Population_Difference > 0, ]
+overestimation <- difference_data[difference_data$Population_Difference < 0, ]
+correct_estimation <- difference_data[difference_data$Population_Difference == 0, ]
+
+# Create histograms for underestimation, overestimation, and correct estimation
+hist_underestimation <- ggplot(underestimation, aes(x = Population_Difference)) +
+  geom_histogram(binwidth = 0.1, fill = "skyblue", color = "black", alpha = 0.7) +
+  labs(title = "Underestimation of Population",
+       x = "Difference of Ratios",
+       y = "Frequency") +
+  theme_minimal()
+
+hist_overestimation <- ggplot(overestimation, aes(x = Population_Difference)) +
+  geom_histogram(binwidth = 0.1, fill = "salmon", color = "black", alpha = 0.7) +
+  labs(title = "Overestimation of Population",
+       x = "Difference of Ratios",
+       y = "Frequency") +
+  theme_minimal()
+
+hist_correct_estimation <- ggplot(correct_estimation, aes(x = Population_Difference)) +
+  geom_histogram(binwidth = 0.1, fill = "lightgreen", color = "black", alpha = 0.7) +
+  labs(title = "Correct Estimation of Population",
+       x = "Difference of Ratios",
+       y = "Frequency") +
+  theme_minimal()
+
+# Print the histograms
+print(hist_underestimation)
+print(hist_overestimation)
+print(hist_correct_estimation)
+
+
+```
+
+#under 20 over 20 estimation
+
+```{r}
+# Filter estimations that are within ±20 of the surveyed population
+within_20 <- difference_data[abs(difference_data$Population_Difference) <= 20, ]
+
+# Print the filtered data
+print(within_20)
+
+
+
+```
+
+
+
+```{r}
+library(ggplot2)
+
+# Create a boxplot of the filtered data
+boxplot_within_20 <- ggplot(within_20, aes(x = Dataset, y = Population_Difference)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  labs(title = "Population Difference within ±20 of Surveyed Population",
+       x = "Dataset", y = "Population Difference") +
+  theme_minimal()
+
+# Print the boxplot
+print(boxplot_within_20)
+
+```
+#interactive of within 20
+
+```{r}
+library(plotly)
+
+# Combine all population difference columns into one data frame
+difference_data <- data.frame(
+  Dataset = rep(c("WP_CON", "WP_UNCON", "GPW", "GHSL", "GPW_UN"), each = nrow(camps)),
+  Population_Difference = c(as.numeric(camps$wp_c_df), as.numeric(camps$wp_uc_df), as.numeric(camps$gpw_dff), as.numeric(camps$ghsl_df), as.numeric(camps$gpwU_df)),
+  Camp_Name = camps$Name
+)
+
+# Filter estimations that are within ±20 of the surveyed population
+within_20 <- difference_data[abs(difference_data$Population_Difference) <= 20, ]
+
+# Calculate mean values
+mean_values <- aggregate(Population_Difference ~ Dataset, data = within_20, mean)
+
+# Create an interactive box plot with plotly
+boxplot_within_20_interactive <- plot_ly(within_20, x = ~Dataset, y = ~Population_Difference, type = "box") %>%
+  add_markers(data = mean_values, x = ~Dataset, y = ~Population_Difference, marker = list(color = "red", size = 10)) %>%
+  add_trace(data = within_20, 
+            type = "scatter", 
+            mode = "markers", 
+            marker = list(color = "rgba(0,0,0,0)"),
+            hoverinfo = "text",
+            text = ~paste("Camp:", Camp_Name)) %>%
+  layout(title = "Population Difference within ±20 of Surveyed Population",
+         xaxis = list(title = "Dataset"),
+         yaxis = list(title = "Population Difference"))
+
+# Print the interactive plot
+print(boxplot_within_20_interactive)
+
+```
+
 #____________________________________
 
 
