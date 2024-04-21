@@ -5783,6 +5783,8 @@ print("N_HH")
 summary(camps$N_HH)
 print("cl_Shp_a")
 summary(camps$cl_Shp_a)
+
+sum(camps$ms_b_c)
 ```
 
 
@@ -5988,7 +5990,26 @@ g_hh_sl_typ_hh<-ggplot(camps, aes(y = g_b_c, x = N_HH,colour=Shlt_ty)) +
 print(g_hh_sl_typ_hh)
 ```
 
+#Google building stats(Mean of building area/density and count)
 
+```{r}
+
+
+camps$g_b_a <- as.numeric(camps$g_b_a)
+camps$g_b_c <- as.numeric(camps$g_b_c)
+camps$N_HH<-as.numeric(camps$N_HH)
+camps$cl_Shp_a<-as.numeric(camps$cl_Shp_a)
+
+print("g_b_c")
+summary(camps$ms_b_c)
+print("g_b_a")
+summary(camps$ms_b_a)
+print("N_HH")
+summary(camps$N_HH)
+print("cl_Shp_a")
+summary(camps$cl_Shp_a)
+sum(camps$g_b_c)
+```
 
 
 #____VIDA BUILDINGS____________
@@ -6192,6 +6213,29 @@ vida_hh_sl_typ_hh<-ggplot(camps, aes(y = vida_b_c, x = N_HH,colour=Shlt_ty)) +
   theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
 print(vida_hh_sl_typ_hh)
 ```
+
+#Vida building stats(Mean of building area/density and count)
+```{r}
+
+
+camps$vida_b_a <- as.numeric(camps$vida_b_a)
+camps$vida_b_c <- as.numeric(camps$vida_b_c)
+camps$N_HH<-as.numeric(camps$N_HH)
+camps$cl_Shp_a<-as.numeric(camps$cl_Shp_a)
+
+print("vida_b_c")
+summary(camps$vida_b_c)
+print("vida_b_a")
+summary(camps$vida_b_a)
+print("N_HH")
+summary(camps$N_HH)
+print("cl_Shp_a")
+summary(camps$cl_Shp_a)
+sum(camps$vida_b_c)
+```
+
+
+
 #___OPEN STREET MAP BUILDINGS____
 
 
@@ -6400,6 +6444,28 @@ osm_hh_sl_typ_hh<-ggplot(camps, aes(y = osm_b_c, x = N_HH,colour=Shlt_ty)) +
   theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
 print(osm_hh_sl_typ_hh)
 ```
+#OSM building stats(Mean of building area/density and count)
+
+```{r}
+
+
+camps$osm_b_a <- as.numeric(camps$osm_b_a)
+camps$osm_b_c <- as.numeric(camps$osm_b_c)
+camps$N_HH<-as.numeric(camps$N_HH)
+camps$cl_Shp_a<-as.numeric(camps$cl_Shp_a)
+
+print("osm_b_c")
+summary(camps$osm_b_c)
+print("osm_b_a")
+summary(camps$osm_b_a)
+print("N_HH")
+summary(camps$N_HH)
+print("cl_Shp_a")
+summary(camps$cl_Shp_a)
+sum(camps$osm_b_c)
+```
+
+
 #________________________________
 #combining the plots 
 #BUILDING+POPULATION
@@ -6682,6 +6748,64 @@ print(heat_map_corr_b)
 # Save the plot to a file
 ggsave("Plots/heat_map_corr_building.png", plot =heat_map_corr_b, width = 8, height = 6, dpi = 400)
 ```
+
+# BUILDING STATS-HOUSEHOLD DIFFERENCE 
+#BUILDING difference e summary
+```{r}
+# Subtract N_INDVID from ras_name
+camps$g_bc_df <- camps$N_HH - camps$g_b_c
+camps$ms_bc_df <- camps$N_HH - camps$ms_b_c
+camps$vida_bc_df <- camps$N_HH - camps$vida_b_c
+camps$osm_bc_df <- camps$N_HH - camps$osm_b_c
+
+print('g_c_bdifference')
+summary(camps$g_bc_df)
+print('ms_bc_dfdifference')
+summary(as.numeric(camps$ms_bc_df))
+print('vida_bc_df_difference')
+summary(as.numeric(camps$vida_bc_df))
+print('osm_bc_df_difference')
+summary(as.numeric(camps$osm_bc_df))
+
+
+
+
+```
+#Boxplot of the difference of eo population pdt and N_INDVI
+
+
+
+#box plot with mean value displayed
+```{r}
+library(ggplot2)
+
+# Combine all population difference columns into one data frame
+difference_data_building <- data.frame(
+  Dataset_build = rep(c("GOOGLE", "MICROSOFT", "OSM", "VIDA"), each = nrow(camps)),
+  Building_Difference = c(as.numeric(camps$g_bc_df), as.numeric(camps$ms_bc_df),as.numeric(camps$vida_bc_df), as.numeric(camps$osm_bc_df)))
+
+
+# Calculate mean values
+mean_values <- aggregate(Building_Difference ~ Dataset_build, data = difference_data_building, mean)
+
+# Create a box plot
+boxplot_build_diff <- ggplot(difference_data_building, aes(x = Dataset_build, y = Building_Difference)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 1, color = "red") + # Adding mean points
+  geom_text(data = mean_values, aes(label = round(Building_Difference, digits = 2)), vjust = -0.5,size=2) + # Adding text labels
+  labs(title = "Difference between Surveyed Household and Building count(Survey-Estimate) for different Building footprint data products",
+       x = "Dataset", y = "Building count Difference") +
+  theme_minimal() +
+ theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        plot.title = element_text(size = 10)) # Rotate x-axis labels
+
+# Print the box plot
+print(boxplot_build_diff)
+
+
+```
+
+
 #___________________________________
 #URBAN_RURAL 
 #Load the data which also has the urban rural classification for the camp sites 
@@ -6689,6 +6813,15 @@ ggsave("Plots/heat_map_corr_building.png", plot =heat_map_corr_b, width = 8, hei
 camp_fin_path<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/all_ur_build_eo_camp/camp_fin.shp")
 camp_final<-st_read(camp_fin_path)
 head(camp_final)
+```
+
+
+#deleting the BO_S294
+
+```{r}
+# Delete row with Name "BO_S294"
+camp_final <- subset(camp_final, Name != "BO_S294")
+
 ```
 
 #Plots using the Urban- rural classification from GRD3 .
@@ -6800,11 +6933,13 @@ ggsave("Plots/box_dou_indv.png", plot =box_dou_indv, width = 8, height = 6, dpi 
 # Convert factors to character to avoid issues in ggplot2
 camp_final$dou_level1 <- as.character(camp_final$dou_level1)
 
+
+
 # Calculate the sum of building count for each dou_level1 and source
 camp_final_sum <- camp_final %>%
   group_by(dou_level1) %>%
-  summarise(ms_b_c_sum = sum(as.numeric(ms_b_c)),
-            g_b_c_sum = sum(as.numeric(g_b_c)),
+  summarise(g_b_c_sum = sum(as.numeric(g_b_c)),
+            ms_b_c_sum = sum(as.numeric(ms_b_c)),
             osm_b_c_sum = sum(as.numeric(osm_b_c)),
             vida_b_c_sum = sum(as.numeric(vida_b_c))) %>%
   pivot_longer(cols = c(ms_b_c_sum, g_b_c_sum, osm_b_c_sum, vida_b_c_sum),
@@ -6814,14 +6949,17 @@ camp_final_sum <- camp_final %>%
 p <- ggplot(camp_final_sum, aes(x = Source, y = Building_Count, fill = dou_level1)) +
   geom_bar(stat = "identity", position = "stack") +
   labs(x = "Source", y = "Total Building Footprint Count", title = "Total Building Footprint Counts by Source") +
-  scale_fill_manual(values = c("blue", "green", "red", "orange"),
-                    name = "Dou Level 1") +
-  scale_x_discrete(labels = c("Microsoft" , "Google", "OSM", "Vida" )) +
+  scale_fill_manual(values = c( "coral","lightgreen",  "lightblue"),
+                    name = "Degree of urbanisation(Level 1)") +
+  scale_x_discrete(labels = c( "Google","Microsoft" , "OSM", "Vida" )) +
   theme_minimal() +
   theme(legend.position = "top")
 
 # Add text labels for the counts on top of each stack
-k<-p + geom_text(aes(label = Building_Count), position = position_stack(vjust = 0.5), size = 2, color = "black")
+k <- p + geom_text(aes(label = Building_Count), position = position_stack(vjust = 0.5), size = 2, color = "black")
+
+# Print the plot
+print(k)
 
 ```
 
