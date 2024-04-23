@@ -6749,6 +6749,84 @@ print(heat_map_corr_b)
 ggsave("Plots/heat_map_corr_building.png", plot =heat_map_corr_b, width = 8, height = 6, dpi = 400)
 ```
 
+#informal camp household buildstat correlation
+```{r}
+
+informal_camps$N_HH <- as.numeric(informal_camps$N_HH)
+informal_camps$g_b_c <- as.numeric(informal_camps$g_b_c)
+informal_camps$ms_b_c <- as.numeric(informal_camps$ms_b_c)
+informal_camps$vida_b_c<- as.numeric(informal_camps$vida_b_c)
+informal_camps$osm_b_c <- as.numeric(informal_camps$osm_b_c)
+informal_camps$gpw_UN<-as.numeric(informal_camps$gpw_UN)
+
+
+# Calculate correlation coefficients
+corr_g_b_HH_if <- cor(informal_camps$N_HH,informal_camps$g_b_c)
+corr_ms_b_HH_if<-cor(informal_camps$N_HH,informal_camps$ms_b_c)
+corr_vida_HH_if<-cor(informal_camps$N_HH,informal_camps$vida_b_c)
+corr_osm_HH_if<-cor(informal_camps$N_HH,informal_camps$osm_b_c)
+
+# View correlation coefficients
+
+print(paste("Google:",corr_g_b_HH_if))
+print(paste("Microsoft:",corr_ms_b_HH_if))
+print(paste("Vida",corr_vida_HH_if))
+print(paste("osm:",corr_osm_HH_if))
+
+
+
+```
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_hh_if_b <- matrix(c(corr_g_b_HH_if, corr_ms_b_HH_if, corr_vida_HH_if, corr_osm_HH_if),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("google", "ms", "vida", "osm")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_hh_if_b, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+#formal camp household buildstat correlation
+```{r}
+
+formal_camps$N_HH <- as.numeric(formal_camps$N_HH)
+formal_camps$g_b_c <- as.numeric(formal_camps$g_b_c)
+formal_camps$ms_b_c <- as.numeric(formal_camps$ms_b_c)
+formal_camps$vida_b_c<- as.numeric(formal_camps$vida_b_c)
+formal_camps$osm_b_c <- as.numeric(formal_camps$osm_b_c)
+
+
+
+# Calculate correlation coefficients
+corr_g_b_HH_f <- cor(formal_camps$N_HH,formal_camps$g_b_c)
+corr_ms_b_HH_f<-cor(formal_camps$N_HH,formal_camps$ms_b_c)
+corr_vida_HH_f<-cor(formal_camps$N_HH,formal_camps$vida_b_c)
+corr_osm_HH_f<-cor(formal_camps$N_HH,formal_camps$osm_b_c)
+
+# View correlation coefficients
+
+print(paste("Google:",corr_g_b_HH_f))
+print(paste("Microsoft:",corr_ms_b_HH_f))
+print(paste("Vida",corr_vida_HH_f))
+print(paste("osm:",corr_osm_HH_f))
+
+
+
+```
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_hh_f_b <- matrix(c(corr_g_b_HH_f, corr_ms_b_HH_f, corr_vida_HH_f, corr_osm_HH_f),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("google", "ms", "vida", "osm")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_hh_f_b, method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
+
+
+
 # BUILDING STATS-HOUSEHOLD DIFFERENCE 
 #BUILDING difference e summary
 ```{r}
