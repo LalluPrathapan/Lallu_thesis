@@ -6824,7 +6824,46 @@ cor_matrix_hh_f_b <- matrix(c(corr_g_b_HH_f, corr_ms_b_HH_f, corr_vida_HH_f, cor
 corrplot(cor_matrix_hh_f_b, method = "color", type = "upper", 
          addCoef.col = "black", tl.col = "black", tl.srt = 45)
 ```
+#A<10000 Correlation(calculation correlation for N_HH and building footprint for area less than 10,000)
+```{r}
+#correlation for the area>10000msq and area<10000msq
 
+subset_data_2$N_HH<- as.numeric(subset_data_2$N_HH)
+subset_data_2$g_b_c <- as.numeric(subset_data_2$g_b_c)
+subset_data_2$ms_b_c <- as.numeric(subset_data_2$ms_b_c)
+subset_data_2$vida_b_c<- as.numeric(subset_data_2$vida_b_c)
+subset_data_2$osm_b_c <- as.numeric(subset_data_2$osm_b_c)
+
+
+# Calculate correlation coefficients
+corr_gbc_areal_hh <- cor(subset_data_2$N_HH,subset_data_2$g_b_c)
+corr_msbc_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$ms_b_c)
+corr_vidabc_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$vida_b_c)
+corr_osm_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$osm_b_c)
+
+#View correlation coefficients
+
+print(paste("google:",corr_gbc_areal_hh))
+print(paste("ms:",corr_msbc_areal_hh))
+print(paste("vida",corr_vidabc_areal_hh))
+print(paste("osm:",corr_osm_areal_hh))
+
+
+
+```
+
+# one line corr_mtrix doing the correlation matrix n_hh and building stats for area<10000
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_areal_hh_b<- matrix(c(corr_gbc_areal_hh, corr_msbc_areal_hh, corr_vidabc_areal_hh, corr_osm_areal_hh),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("google", "microsoft", "vida", "osm")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_areal_hh_b , method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt = 45)
+```
 
 
 # BUILDING STATS-HOUSEHOLD DIFFERENCE 
