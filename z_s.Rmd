@@ -6851,7 +6851,6 @@ print(paste("osm:",corr_osm_areal_hh))
 
 
 ```
-
 # one line corr_mtrix doing the correlation matrix n_hh and building stats for area<10000
 
 ```{r}
@@ -6865,7 +6864,55 @@ corrplot(cor_matrix_areal_hh_b , method = "color", type = "upper",
          addCoef.col = "black", tl.col = "black", tl.srt = 45)
 ```
 
+#A>10000 Correlation(calculation correlation for N_HH and building count for area greater than 10,000)
+```{r}
+#correlation for the area>10000msq and area<10000msq
 
+subset_data$N_HH<- as.numeric(subset_data$N_HH)
+subset_data$g_b_c <- as.numeric(subset_data$g_b_c)
+subset_data$ms_b_c <- as.numeric(subset_data$ms_b_c)
+subset_data$vida_b_c<- as.numeric(subset_data$vida_b_c)
+subset_data$osm_b_c <- as.numeric(subset_data$osm_b_c)
+
+
+# Calculate correlation coefficients
+corr_g_b_c_areag_hh_b <- cor(subset_data$N_HH,subset_data$g_b_c)
+corr_ms_b_c_areag_hh_b <-cor(subset_data$N_HH,subset_data$ms_b_c)
+corr_vida_b_c_areag_hh_b <-cor(subset_data$N_HH,subset_data$vida_b_c)
+corr_osm_b_c_areag_hh_b <-cor(subset_data$N_HH,subset_data$osm_b_c)
+
+# View correlation coefficients
+
+print(paste("Google:",corr_g_b_c_areag_hh_b))
+print(paste("Microsoft:",corr_ms_b_c_areag_hh_b))
+print(paste("Vida:",corr_vida_b_c_areag_hh_b))
+print(paste("Osm:",corr_osm_b_c_areag_hh_b))
+
+# [1] "Google: 0.712686937465869"
+# [1] "Microsoft: 0.802959860658037"
+# [1] "Vida: 0.750913351069896"
+# [1] "Osm: 0.323667228656864"
+
+
+```
+
+
+# one line corr_mtrix doing the correlation matrix n_indvi and estimated populations for area>10000
+
+```{r}
+# Create a matrix of correlation coefficients
+cor_matrix_areag_hh_b <- matrix(c(corr_g_b_c_areag_hh_b , corr_ms_b_c_areag_hh_b,corr_vida_b_c_areag_hh_b, corr_osm_b_c_areag_hh_b),
+                     nrow = 1, byrow = TRUE,
+                     dimnames = list(c("N_HH"), c("google", "microsoft", "vida", "osm")))
+
+# Plot the correlation matrix
+corrplot(cor_matrix_areag_hh_b , method = "color", type = "upper", 
+         addCoef.col = "black", tl.col = "black", tl.srt =45)
+```
+
+
+           
+           
 # BUILDING STATS-HOUSEHOLD DIFFERENCE 
 #BUILDING difference e summary
 ```{r}
