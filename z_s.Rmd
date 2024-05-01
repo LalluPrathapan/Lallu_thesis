@@ -48,7 +48,7 @@ library(orca)
 
 
 ```{r}
-build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camps_EO/camps_eo1.shp")
+build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camps_EO/camps_eo1/camps_eo1.shp")
 camps<-st_read(build_stat_path2)
 head(camps)
 ```
@@ -192,8 +192,8 @@ print(dig_ar)
 library(ggplot2)
 
 # Summary statistics
-survey_stats <- c(Min = 934.1, Q1 = 6741.2, Median = 26100.6, Mean = 114271.1, Q3 = 104571.3, Max = 1606318.8)
-calculated_stats <- c(Min = 913.1, Q1 = 7747.7, Median = 27405.4, Mean = 122524.5, Q3 = 132531.1, Max = 1654478.8)
+survey_stats <- c(Min = 934.1, Q1 = 6990.4, Median = 30423.1 , Mean = 120320.3, Q3 = 111391.7, Max =1606318.8 )
+calculated_stats <- c(Min = 913.1 , Q1 =  8130.3, Median = 32858.4 , Mean = 128595.3, Q3 =  139927.7, Max = 1654478.8 )
 
 # Combine statistics into a data frame
 stats_data <- data.frame(
@@ -239,7 +239,7 @@ print(subset_data)
 st_sub_camps<-summary(as.numeric(subset_data$cl_Shp_a))
 print(st_sub_camps)
 
-#Simple feature collection with 154 features and 37 fields
+#Simple feature collection with 147 features 
 ```
 
 #subsetting the camps higher than 10000 square meter area
@@ -256,7 +256,7 @@ print(subset_data_2)
 st_sub_camps_2<-summary(as.numeric(subset_data$cl_Shp_a))
 print(st_sub_camps_2)
 
-#Simple feature collection with 69 features and 37 fields
+#Simple feature collection with 64 features and 
 ```
 
 
@@ -271,7 +271,7 @@ print(surv_sta)
 
 ```{r}
 # Summary statistics
-surv_sta <- c(Min = 26.0, Q1 = 327.5, Median = 1058.0, Mean = 4134.3, Q3 = 4575.5, Max = 43074.0)
+surv_sta <- c(Min = 26.0, Q1 = 332.5, Median = 1246.5, Mean =  4285.2, Q3 = 4664.8, Max = 43074.0  )
 
 # Create a box plot
 b<-boxplot(surv_sta,
@@ -304,35 +304,7 @@ print(variance_N_INDVI)
 #Analysis about the data N_INDVI
 
 
-With a variance of 55688371 and the summary statistics you provided earlier for the N_INDVI variable:
 
-Minimum: 26.0
-1st Quartile: 327.5
-Median: 1058.0
-Mean: 4134.3
-3rd Quartile: 4575.5
-Maximum: 43074.0
-We can infer the following about the data:
-
-Spread: The data has a wide spread, as indicated by the large difference between the minimum and maximum values.
-
-Central Tendency: The mean (4134.3) is much higher than the median (1058.0), suggesting that the data might be positively skewed.
-
-Variability: The variance (55688371) is quite large, indicating that the data points are spread out over a wide range from the mean.
-
-Outliers: The presence of outliers at the higher end of the distribution is suggested by the large difference between the 3rd quartile (4575.5) and the maximum (43074.0).
-
-Overall, these statistics suggest that the data is positively skewed, with a few very high values driving up the mean and variance, while the majority of the data is clustered towards the lower end of the distribution.
-
-Positively skewed data means that the distribution of the data is skewed towards the right side, or the tail of the distribution is longer on the right side. In other words, the majority of the data points are concentrated on the left side of the distribution, with a few extremely high values pulling the mean towards the right.
-
-In a positively skewed distribution:
-
-The mean is typically greater than the median.
-The tail of the distribution extends towards the higher values.
-Most of the data points are clustered towards the lower end of the distribution.
-Outliers are more likely to be present on the higher end of the scale.
-Positively skewed distributions are also sometimes referred to as right-skewed distributions.
 
 # bar plot formal camps with area greater than 10000
 
@@ -3899,7 +3871,22 @@ camps<-st_read(build_stat_path2)
 head(camps)
 ```
 
-#____________________________________
+
+#deleting the small camp with high popultion so that there is only 222 camps
+
+```{r}
+# Assuming "Name" is the column name where the names are stored
+#camps <- subset(camps, Name != "BO_S294")
+head(camps)
+
+```
+
+
+
+#_____________________
+
+
+_______________
 #******Plots for the EO datasets****************
 
 #_____ALL_BOX_VIOLIN_NO_NEED_____
@@ -5329,7 +5316,7 @@ ggsave("Plots/bar_plot_error_rmse.png", plot =bar_plot_error_rmse, width = 8, he
 ```
 
 #__RATIOS OF ERROR____
-
+#ratio of error for EO datasets 
 ```{r}
 # Calculate the ratio of the difference to the surveyed population
 difference_data$ratio <- difference_data$Population_Difference / camps$N_INDVI
@@ -6935,7 +6922,7 @@ summary(as.numeric(camps$osm_bc_df))
 
 
 ```
-#Boxplot of the difference of eo population pdt and N_INDVI
+#Boxplot of the difference of building fooft print n pdt and N_HH
 
 
 
@@ -6945,8 +6932,8 @@ library(ggplot2)
 
 # Combine all population difference columns into one data frame
 difference_data_building <- data.frame(
-  Dataset_build = rep(c("GOOGLE", "MICROSOFT", "OSM", "VIDA"), each = nrow(camps)),
-  Building_Difference = c(as.numeric(camps$g_bc_df), as.numeric(camps$ms_bc_df),as.numeric(camps$vida_bc_df), as.numeric(camps$osm_bc_df)))
+  Dataset_build = rep(c("GOOGLE",  "OSM","MICROSOFT", "VIDA"), each = nrow(camps)),
+  Building_Difference = c(as.numeric(camps$g_bc_df), as.numeric(camps$osm_bc_df), as.numeric(camps$ms_bc_df),as.numeric(camps$vida_bc_df)))
 
 
 # Calculate mean values
@@ -6968,6 +6955,164 @@ print(boxplot_build_diff)
 
 
 ```
+
+```{r}
+
+# Save the plot to a file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/error_building_hh .png", plot =boxplot_build_diff , width = 8, height = 6, dpi = 400)
+```
+
+
+#__RATIOS OF ERROR____
+#ratio of error for EO datasets 
+```{r}
+# Calculate the ratio of the difference to the surveyed population
+difference_data_building$ratio <- difference_data_building$Building_Difference / camps$N_HH
+
+# Aggregate mean ratio values
+mean_ratio_values_build <- aggregate(ratio ~ Dataset_build, data = difference_data_building, mean)
+
+# Create a box plot for the ratios
+boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = ratio)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 1, color = "red") +
+  geom_text(data = mean_ratio_values_build, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 2,color='Red') +
+  labs(title = "Ratio of Difference to Survey Household for Different Buildingin footprint Data Products",
+       x = "Dataset", y = "Ratio of Difference to Survey Household number") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10))
+
+# Print the box plot
+print(boxplot_ratio_build)
+
+
+
+
+```
+
+```{r}
+
+# Save the plot to a file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/ratio_error_building_hh .png", plot =boxplot_ratio_build , width = 8, height = 6, dpi = 400)
+```
+
+#BUILDING AND SHELTER TYPE
+
+```{r}
+# Reshape the data to long format for easier plotting
+buildings_long <- camps %>%
+  select(Shlt_ty, g_b_c, ms_b_c, vida_b_c, osm_b_c) %>%
+  pivot_longer(cols = c(g_b_c, ms_b_c, vida_b_c, osm_b_c), names_to = "Building_Source", values_to = "Total_Buildings")
+
+# Plotting a grouped bar plot
+build_shlt_typ<-ggplot(buildings_long, aes(x = Shlt_ty, y = Total_Buildings, fill = Building_Source)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Shelter Type", y = "Count", title = "Number of Buildings by Shelter Type and Source") +
+  theme_minimal() +
+  theme(legend.position = "top", axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(build_shlt_typ)
+```
+
+
+```{r}
+# Load the dplyr package
+library(dplyr)
+
+# Convert the sf object to a data frame
+camps_df <- as.data.frame(camps)
+
+# Reshape the data to long format for easier plotting
+data_long <- camps_df %>%
+  dplyr::select(Shlt_ty, g_b_c, ms_b_c, vida_b_c, osm_b_c, N_HH) %>%
+  pivot_longer(cols = c(g_b_c, ms_b_c, vida_b_c, osm_b_c, N_HH), 
+               names_to = "Variable", 
+               values_to = "Value")
+
+# Plotting a grouped bar plot
+plot <- ggplot(data_long, aes(x = Shlt_ty, y = Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(x = "Shelter Type", y = "Count", title = "Number of Buildings and Survey Households by Shelter Type and Source") +
+  theme_minimal() +
+  theme(legend.position = "top", axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(plot)
+
+```
+
+
+
+#(BAR PLOT SAVE)
+```{r}
+# Save the plot to a file
+ggsave("Plots/building_count_shelter_type.png", plot =plot , width = 8, height = 6, dpi = 400)
+```
+
+# BUILDING AND SITE TYPE
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Reshape the data to long format for easier plotting
+buildings_long <- camps %>%
+  select(Sit_Typ, g_b_c, ms_b_c, vida_b_c, osm_b_c) %>%
+  pivot_longer(cols = c(g_b_c, ms_b_c, vida_b_c, osm_b_c), names_to = "Building_Source", values_to = "Total_Buildings")
+
+# Calculate the maximum value for each source separately for each site type
+max_values <- buildings_long %>%
+  group_by(Sit_Typ, Building_Source) %>%
+  summarise(max_buildings = max(Total_Buildings, na.rm = TRUE))
+
+# Plotting a grouped bar plot
+buildings_plot <- ggplot(buildings_long, aes(x = Sit_Typ, y = Total_Buildings, fill = Building_Source)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(data = max_values, aes(label = max_buildings, y = max_buildings), vjust = -0.5, size = 2, position = position_dodge(width = 0.9)) +
+  labs(x = "Site Type", y = "Number of Buildings", title = "Number of Buildings by Site Type and Source") +
+  theme_minimal() +
+  theme(legend.position = "top", axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(buildings_plot)
+
+
+```
+
+
+
+
+
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(sf)
+
+# Convert the 'camps' sf object to a data frame
+camps_df <- st_drop_geometry(camps)
+
+# Reshape the data to long format for easier plotting
+buildings_long <- camps_df %>%
+  select(Name, Sit_Typ, g_b_c, ms_b_c, vida_b_c, osm_b_c) %>%
+  pivot_longer(cols = c(g_b_c, ms_b_c, vida_b_c, osm_b_c), names_to = "Building_Source", values_to = "Total_Buildings")
+
+# Calculate the maximum value for each source separately for each site type
+max_values <- buildings_long %>%
+  group_by(Sit_Typ, Building_Source) %>%
+  summarise(max_buildings = max(Total_Buildings, na.rm = TRUE))
+
+# Plotting a grouped bar plot
+buildings_plot <- ggplot(buildings_long, aes(x = Sit_Typ, y = Total_Buildings, fill = Building_Source)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(data = max_values, aes(label = max_buildings, y = max_buildings), vjust = -0.5, size = 3, position = position_dodge(width = 0.9)) +
+  labs(x = "Site Type", y = "Number of Buildings", title = "Number of Buildings by Site Type and Source") +
+  theme_minimal() +
+  theme(legend.position = "top", axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(buildings_plot)
+
+```
+
 
 
 #___________________________________
@@ -7227,6 +7372,118 @@ if (nrow(camp_final) > 0) {
   print("No data available in camp_final.")
 }
 
+```
+#site status and dou1 level
+
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+
+# Create a new data frame to summarize counts of formal and informal camps by dou_level1
+plot_data <- camp_final %>%
+  group_by(dou_level1, Sit_Stt) %>%
+  summarise(count = n()) %>%
+  pivot_wider(names_from = Sit_Stt, values_from = count, values_fill = 0) %>%
+  mutate(total = Formal + Informal) %>%
+  mutate(formal_prop = Formal / total,
+         informal_prop = Informal / total)
+
+# Plot stacked bar plot
+ggplot(plot_data, aes(x = dou_level1)) +
+  geom_bar(aes(y = formal_prop, fill = "Formal"), stat = "identity") +
+  geom_bar(aes(y = informal_prop, fill = "Informal"), stat = "identity") +
+  scale_fill_manual(values = c("Formal" = "lightblue", "Informal" = "coral")) +
+  labs(x = "Dou Level 1", y = "Proportion", title = "Proportion of Formal and Informal Camps by Dou Level 1") +
+  theme_minimal()
+
+```
+# Heat map for the site_status and dou_level
+```{r}
+# Load necessary libraries
+library(ggplot2)
+
+# Create a data frame with counts of formal and informal camps by dou_level1 and Sit_Stt
+plot_data <- with(camp_final, table(dou_level1, Sit_Stt))
+
+# Convert the table to a data frame
+plot_data <- as.data.frame.table(plot_data)
+
+# Create a heatmap
+heat_map<-ggplot(plot_data, aes(x = dou_level1, y = Sit_Stt, fill = Freq)) +
+  geom_tile() +
+   geom_text(aes(label = Freq), color = "black") +  # Add text annotations
+  scale_fill_gradient(low = "white", high = "steelblue") +
+  labs(title = "Heatmap of Formal and Informal Camps by degree of urbanisation and Site_Status",
+       x = "dou_level1", y = "Sit_Stt", fill = "Count")
+print(heat_map)
+```
+#heat map save
+
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/heatmap.png", plot = heat_map, width = 8, height = 6, dpi = 300)
+```
+
+#Error ratio based on the site status level
+```{r}
+
+library(ggplot2)
+
+# Combine all population difference columns into one data frame
+difference_data_dou <- data.frame(
+  Dataset = rep(c("WP_CON", "WP_UNCON", "GPW", "GHSL", "GPW_UN"), each = nrow(camp_final)),
+  Population_Difference_dou = c(as.numeric(camp_final$wp_c_df), as.numeric(camp_final$wp_uc_df),as.numeric(camp_final$gpw_dff), as.numeric(camp_final$ghsl_df),as.numeric(camp_final$gpwU_df)),
+  dou_level1 = camp_final$dou_level1  # Adding dou_level1 column
+)
+
+# Calculate the ratio of the difference to the surveyed population
+difference_data_dou$ratio <- difference_data_dou$Population_Difference_dou / camp_final$N_INDVI
+
+# Aggregate mean ratio values
+mean_ratio_values <- aggregate(ratio ~ Dataset + dou_level1, data = difference_data_dou, mean)
+
+# Create a box plot for the ratios grouped by dou_level
+boxplot_ratio <- ggplot(difference_data_dou, aes(x = Dataset, y = ratio, fill = dou_level1)) +
+  geom_boxplot(width = 1) +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 0.5, color = "green") +
+  geom_text(data = mean_ratio_values, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 3, color = "red") +
+  labs(title = "Ratio of Difference to Survey Population by EO Population Data Products and dou_level",
+       x = "Dataset", y = "Ratio of Difference to Survey Population", fill = "dou_level") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10))
+
+# Print the box plot
+print(boxplot_ratio)
+
+```
+
+```{r}
+## Create a box plot for the ratios grouped by dou_level
+boxplot_ratio <- ggplot(difference_data_dou, aes(x = Dataset, y = ratio, fill = dou_level1)) +
+  geom_boxplot(width = 0.6) +  # Adjust the width here
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 0.5, color = "green") +
+  stat_summary(fun.data = mean_cl_normal, geom = "text", 
+               aes(label = round(..y.., digits = 2), group = dou_level1), 
+               position = position_dodge(width = 0.75),  # Use position_dodge with appropriate width
+               vjust = -0.5, size = 2, color = "red") +  # Add mean values
+  labs(title = "Ratio of Difference to Survey Population by EO Population Data Products and dou_level",
+       x = "Dataset", y = "Ratio of Difference to Survey Population", fill = "dou_level") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10))
+
+# Print the box plot
+print(boxplot_ratio)
+
+
+```
+#save error plot ratio for different dou level
+
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/boxplot_ratio_error.png", plot = boxplot_ratio, width = 8, height = 6, dpi = 300)
 ```
 
 
