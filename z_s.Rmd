@@ -1012,8 +1012,8 @@ corr_ind_HH<-cor(camps$N_INDVI,camps$N_HH)
 print(corr_ghsl_HH)
 print(corr_ind_HH)
 
-#[1] 0.6947949
-#[1] 0.9409748
+# [1] 0.6935888
+# [1] 0.9404327
 
 ```
 #Analysis
@@ -1205,7 +1205,7 @@ print(corr_wp_uc_f)
 
 
 #correlation result
-#[1] 0.6239074
+# [1] 0.6195409
 ```
 
 
@@ -1235,7 +1235,7 @@ corr_wp_uc_inf_ls5<-cor(as.numeric(informal_camps_filtered$N_INDVI),as.numeric(i
 print(corr_wp_uc_inf_ls5)
 
 #correlation result
-#[1] 0.4159303
+# [1] 0.4073201
 ```
 
 
@@ -1257,7 +1257,7 @@ corr_wp_uc_ath<-cor(as.numeric(subset_data$N_INDVI),as.numeric(subset_data$wp_uc
 print(corr_wp_uc_ath)
 
 #correlation result
-#[1]0.5932672
+# [1] 0.5909898
   
 ```
 
@@ -1281,7 +1281,7 @@ corr_wp_uc_als<-cor(as.numeric(subset_data_2$N_INDVI),as.numeric(subset_data_2$w
 print(corr_wp_uc_als)
 
 #correlation result
-#[1][1] 0.2369614
+# [1] 0.2207847
 ```
 
 
@@ -3165,7 +3165,7 @@ create_scatter_plot <- function(data, x_var) {
           axis.title.y = element_text(size = 5)) +
     scale_x_continuous(limits = c(min_value, max_value), 
                        breaks = seq(min_value, max_value, by = (max_value - min_value) / 5)) +
-    coord_fixed(ratio = 1)  # Set equal aspect ratio
+    coord_fixed(ratio = 1) + coord_flip() # Set equal aspect ratio
 }
 
 # Scatter plot with site_status for gpw
@@ -3883,358 +3883,8 @@ head(camps)
 
 
 
-#_____________________
+#____________________
 
-
-_______________
-#******Plots for the EO datasets****************
-
-#_____ALL_BOX_VIOLIN_NO_NEED_____
-#BOX+VIOLIN plot for the IOM survey population for different Site Type informal camps
-
-
-```{r}
-# Create a boxplot for N_INDVI
-plot_camp_pop <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = N_INDVI, fill = "N_INDVI"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Site Population", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = N_INDVI, fill = "N_INDVI",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site population from IOM survey for different Site Status", x = "Site Status", y = "Site Population") +
-  geom_violin(aes(x = Sit_Stt, y = N_INDVI, fill = "N_INDVI"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 9,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-  #median pointed code if needed
-  #  stat_summary(
-  #   aes(x = Sit_Stt, y = as.numeric(N_INDVI), fill = "N_INDVI"),
-  #   fun = median,
-  #   geom = "point",
-  #   shape = 23,
-  #   size = 2,
-  #   color = "black",
-  #   position = position_dodge(width = 0.5)
-  # )
-  
-  
- # !!!!if needed to display then have to run the median code below first 
-  # geom_text(
-  #   data = median_values,
-  #   aes(x = Sit_Stt, y = median_ghsl, label = sprintf("%.1f", median_ghsl)),
-  #   vjust = -1,
-  #   size = 1,
-  #   color = "black",
-  #   hjust = 0.5
-  # ) 
-#   # Calculate median values for each Sit_Stt group
-# median_values <- camps %>%
-#   group_by(Sit_Stt) %>%
-#   summarize(median_N_INDVI = median(as.numeric(N_INDVI)))
-#   
-
-# stat_summary(
-  #   aes(x = Sit_Stt, y = as.numeric(N_INDVI)),
-  #   fun = median,
-  #   geom = "crossbar",
-  #   width = 0.4,
-  #   col = "red",
-  #   show.legend = FALSE
-  # )
-
-print(plot_camp_pop)
-```
-#Analysis :
-1.It is totally evident that the population in the informal survey sites are lesser than that of the formal survey sites
-2.One of the outliers for the formal camps ranges greater than 4000 for the site population
-
-
-
-#saving the N_INDVI plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/N_INDVI.png", plot = plot_camp_pop, width = 8, height = 6, dpi = 400)
-```
-
-#BOX+VIOLIN plot for the calculated ghsl population for classified as formal and informal camps
-
-
-```{r}
-# Create a boxplot for ghsl
-ghsl_plot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(ghsl), fill = "ghsl"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Calculated GHSL Population", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(ghsl), fill ="ghsl",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site population calculated from GHS POP  for different Site Status", x = "Site Status", y = "Calculated GHSL Population") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(ghsl), fill = "ghsl"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 9,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-
-print(ghsl_plot)
-  
-```
-#saving the ghsl plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/ghsl_box.png", plot = ghsl_plot, width = 8, height = 6, dpi = 400)
-```
-
-
-#BOX+VIOLIN plot for the calculated Worldpop(Unconstrained) population for classified as formal and informal camps
-
-
-```{r}
-# Create a boxplot for wp_unconstrained
-wp_u_plot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(wp_uc), fill = "wp_uc"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Calculated worldpop Population(unconstrained)", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(wp_uc), fill ="wp_uc",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site population calculated from Worlpop(Unconstrained) for different Site Status", x = "Site Status", y = "Calculated worldpop Population(unconstrained)") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(wp_uc), fill = "wp_uc"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 9,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-
-print(wp_u_plot)
-```
-
-#saving the wp_uc plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/box_wp_uc.png", plot = wp_u_plot, width = 8, height = 6, dpi = 400)
-```
-
-#BOX+VIOLIN plot for the calculated Worldpop(constrained) population for classified as formal and informal camps
-
-```{r}
-# Create a boxplot for wp_constrained
-wp_c_plot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(wp_c), fill = "wp_c"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Calculated worldpop Population(Constrained)", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(wp_c), fill ="wp_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site population calculated from Worlpop(Constrained) for different Site Status", x = "Site Status", y = "Calculated worldpop Population(Constrained)") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(wp_c), fill = "wp_c"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 9,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-
-print(wp_c_plot)
-```
-#saving the wp_c plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/box_wp_c.png", plot = wp_c_plot, width = 8, height = 6, dpi = 400)
-```
-
-#BOX+VIOLIN plot for the calculated GPW population for different site status
-
-```{r}
-# Create a boxplot forgpw
-gpw_plot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(gpw), fill = "gpw"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Calculated GPW population", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(gpw), fill ="gpw",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site population calculated from GPW data for different Site Status", x = "Site Status", y = "Calculated GPW population") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(gpw), fill = "gpw"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 9,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-
-print(gpw_plot)
-```
-
-
-#saving the gpw plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/box_gpw.png", plot =gpw_plot, width = 8, height = 6, dpi = 400)
-```
-
-
-#**BUILDING DATA PLOTS*************
-
-#BOX+VIOLIN plot for number of households in Survey data  for different site status
-
-```{r}
-N_HHplot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(N_HH), fill = "N_HH"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Survey Household number", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(N_HH), fill ="N_HH",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site IOM surveyed household numbers", x = "Site Status", y = "Surveyed household number") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(N_HH), fill = "N_HH"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-
-print(N_HHplot)
-```
-
-#saving the google building count plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/N_HHplot.png", plot =N_HHplot, width = 8, height = 6, dpi = 400)
-```
-
-
-
-#BOX+VIOLIN plot for calculated buildings in Google building footprint data for different site status
-
-
-```{r}
-goog_plot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(g_b_c), fill = "g_b_c"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Calculated Building count form GOOGLE data", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(g_b_c), fill ="g_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site building count calculated from Google building data for different Site Status", x = "Site Status", y = "Calculated Google building count") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(g_b_c), fill = "g_b_c"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-
-print(goog_plot)
-```
-
-#saving the google building count plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/box_goog.png", plot =goog_plot, width = 8, height = 6, dpi = 400)
-```
-
-#BOX+VIOLIN plot for calculated buildings in OSM building footprint data for different site status
-
-```{r}
-osm_plot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(osm_b_c), fill = "osm_b_c"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Calculated Building count form Open Street Map data", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(osm_b_c), fill ="osm_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site building count calculated from Open Street map building data for different Site Status", x = "Site Status", y = "Calculated Open Street Map building count") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(osm_b_c), fill = "osm_b_c"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-
-print(osm_plot)
-```
-#saving the OSM building count plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/box_osm.png", plot =osm_plot, width = 8, height = 6, dpi = 400)
-```
-
-#BOX+VIOLIN plot for calculated buildings in Microsoft building footprint data for different site status
-
-```{r}
-msplot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(ms_b_c), fill = "ms_b_c"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Calculated Building count form Microsoft data", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(ms_b_c), fill ="ms_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site building count calculated from Microsoft building data for different Site Status", x = "Site Status", y = "Calculated Microsoft building count") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(ms_b_c), fill = "ms_b_c"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-
-print(msplot)
-```
-
-#saving the Microsoft building count plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/box_ms.png", plot =msplot, width = 8, height = 6, dpi = 400)
-```
-
-
-#BOX+VIOLIN plot for calculated buildings in vida MS_gOOGLE data for different site status
-
-```{r}
-vida_plot <- ggplot(camps) + 
-  geom_boxplot(aes(x = Sit_Stt, y = as.numeric(vida_b_c), fill = "vida_b_c"), alpha = 0.2, width = 0.5) +
-  #scale_fill_viridis`(discrete = TRUE, alpha = 0.6) +
-  scale_fill_viridis_d(name = "Calculated Building count form Vida Google-Microsoft data", alpha = 0.6) +
-  theme_ipsum()+
-  geom_jitter(aes(x = Sit_Stt, y = as.numeric(vida_b_c), fill ="vida_b_c",color = Sit_Stt), size = 0.2, alpha = 0.9,show.legend = FALSE) +
-  coord_flip() +
-  labs(title = "Refugee site building count calculated from Vida Google-Microsoft building data for different Site Status", x = "Site Status", y = "Calculated Microsoft building count") +
-  geom_violin(aes(x = Sit_Stt, y = as.numeric(vida_b_c), fill = "vida_b_c"), alpha = 0.3) +
-  
-  theme(plot.title = element_text(size = 7,color="Blue",hjust=0.5),
-        axis.title.x = element_text(size = 6,hjust = 0.5),
-        axis.title.y=element_text(size = 6,hjust = 0.5),
-        axis.text.x = element_text(size=5),
-        axis.text.y=element_text(size = 5),
-        )+ guides(fill = FALSE)
-
-print(vida_plot)
-```
-
-
-#saving the vida building count plot 
-```{r}
-# Save the plot to a file
-ggsave("plots/box_vida.png", plot =vida_plot, width = 8, height = 6, dpi = 400)
-```
 
 #________________________________________________
 #________________________________________________
@@ -5347,6 +4997,26 @@ print(boxplot_ratio)
 ```{r}
 # Save the plot to a file
 ggsave("Plots/boxplot_ratio.png", plot =boxplot_ratio, width = 8, height = 6, dpi = 400)
+```
+
+#trying to make the area beteween 0 and 1 significant
+
+```{r}
+# Create the box plot with adjusted y-axis limits and outlier color
+boxplot_ratio <- ggplot(difference_data, aes(x = Dataset, y = ratio)) +
+  geom_boxplot(fill = "skyblue", color = "black", outlier.color = "lightgray") +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 1, color = "red") +
+  geom_text(data = mean_ratio_values, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 2,color='Red') +
+  labs(title = "Ratio of Difference to Survey Population for Different EO Population Data Products",
+       x = "Dataset", y = "Ratio of Difference to Survey Population") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10)) +
+  scale_y_continuous(limits = c(0, 1))
+
+# Print the adjusted box plot
+print(boxplot_ratio)
+
 ```
 
 
