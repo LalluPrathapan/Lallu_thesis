@@ -5004,9 +5004,9 @@ ggsave("Plots/boxplot_ratio.png", plot =boxplot_ratio, width = 8, height = 6, dp
 ```{r}
 # Create the box plot with adjusted y-axis limits and outlier color
 boxplot_ratio <- ggplot(difference_data, aes(x = Dataset, y = ratio)) +
-  geom_boxplot(fill = "skyblue", color = "black", outlier.color = "lightgray") +
-  stat_summary(fun = mean, geom = "point", shape = 23, size = 1, color = "red") +
-  geom_text(data = mean_ratio_values, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 2,color='Red') +
+  geom_boxplot(fill = "coral", color = "black", outlier.color = "lightgray") +
+  stat_summary(fun = mean, geom = "point", shape = 3, size = 1, color = "blue") +
+  geom_text(data = mean_ratio_values, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 2,color='blue') +
   labs(title = "Ratio of Difference to Survey Population for Different EO Population Data Products",
        x = "Dataset", y = "Ratio of Difference to Survey Population") +
   theme_minimal() +
