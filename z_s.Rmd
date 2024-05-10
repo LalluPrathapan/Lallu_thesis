@@ -5658,9 +5658,9 @@ camps$N_HH<-as.numeric(camps$N_HH)
 camps$cl_Shp_a<-as.numeric(camps$cl_Shp_a)
 
 print("g_b_c")
-summary(camps$ms_b_c)
+summary(camps$g_b_c)
 print("g_b_a")
-summary(camps$ms_b_a)
+summary(camps$g_b_a)
 print("N_HH")
 summary(camps$N_HH)
 print("cl_Shp_a")
@@ -6307,7 +6307,7 @@ summarized_data <- camps %>%
 
 summarized_data <- data.frame(
   source = c("Google", "OSM", "Microsoft", "VIDA"),
-  building_count = c(170437, 26323, 67317, 185608)
+  building_count = c(170437, 26323, 67317, 185603)
 )
 
 # Plotting
@@ -6315,7 +6315,7 @@ bar_plot <- ggplot(summarized_data, aes(x = source, y = building_count, fill = s
   geom_bar(stat = "identity") +
   geom_text(aes(label = building_count), vjust = -0.5) +  # Add text labels above the bars
   labs(x = "Data Source", y = "Building Count", title = "Total Building Counts by Data Source") +
-  scale_fill_manual(values = c("Google" = "skyblue", "OSM" = "orange", "Microsoft" = "green", "VIDA" = "red")) +
+  scale_fill_manual(values = c("Google" = "skyblue", "OSM" = "pink", "Microsoft" = "lightgreen", "VIDA" = "coral")) +
   theme_minimal() +
   theme(legend.position = "none")
 
@@ -6626,6 +6626,39 @@ print(boxplot_build_diff)
 
 ```
 
+
+
+
+```{r}
+library(ggplot2)
+
+# Combine all population difference columns into one data frame
+difference_data_building <- data.frame(
+  Dataset_build = rep(c("GOOGLE",  "OSM", "MICROSOFT", "VIDA"), each = nrow(camps)),
+  Building_Difference = c(as.numeric(camps$g_bc_df), as.numeric(camps$osm_bc_df), as.numeric(camps$ms_bc_df), as.numeric(camps$vida_bc_df))
+)
+
+# Calculate mean values
+mean_values <- aggregate(Building_Difference ~ Dataset_build, data = difference_data_building, mean)
+
+# Create a box plot
+boxplot_build_diff <- ggplot(difference_data_building, aes(x = Dataset_build, y = Building_Difference)) +
+  geom_boxplot(fill = "skyblue", color = "black", outlier.alpha = 0.2, width = 2) + # Increase box width
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 2, color = "red") + # Adding mean points with larger size
+  geom_text(data = mean_values, aes(label = round(Building_Difference, digits = 2)), vjust = -0.5, size = 3, color = "red") + # Adding larger text labels
+  labs(title = "Difference between Surveyed Household and Building Count (Survey-Estimate) for Different Building Footprint Data Products",
+       x = "Dataset", y = "Building Count Difference") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        plot.title = element_text(size = 10),
+        plot.margin = margin(1, 1, 1, 1, "cm")) # Add more margin space around the plot
+
+# Print the box plot
+print(boxplot_build_diff)
+
+
+```
+
 ```{r}
 
 # Save the plot to a file
@@ -6660,6 +6693,66 @@ print(boxplot_ratio_build)
 
 
 ```
+
+
+
+```{r}
+# Calculate the ratio of the difference to the surveyed population
+difference_data_building$ratio <- difference_data_building$Building_Difference / camps$N_HH
+
+# Aggregate mean ratio values
+mean_ratio_values_build <- aggregate(ratio ~ Dataset_build, data = difference_data_building, mean)
+
+# Create a box plot for the ratios
+boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = ratio)) +
+  geom_boxplot(fill = "skyblue", color = "black", outlier.alpha = 0.2) + # Adjust outlier transparency
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 2, color = "red") + # Adding mean points with larger size
+  geom_text(data = mean_ratio_values_build, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 3, color = "red") + # Adding larger text labels
+  labs(title = "Ratio of Difference to Survey Household for Different Building Footprint Data Products",
+       x = "Dataset", y = "Ratio of Difference to Survey Household number") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10),
+        plot.margin = margin(1, 1, 1, 1, "cm")) + # Add more margin space around the plot
+  coord_cartesian(ylim = c(0, max(difference_data_building$ratio, na.rm = TRUE) * 1.1)) # Adjusting ylim to include some padding
+
+# Print the box plot
+print(boxplot_ratio_build)
+
+
+
+```
+
+```{r}
+# Calculate the ratio of the difference to the surveyed population
+difference_data_building$ratio <- difference_data_building$Building_Difference / camps$N_HH
+
+# Aggregate mean ratio values
+mean_ratio_values_build <- aggregate(ratio ~ Dataset_build, data = difference_data_building, mean)
+
+# Create a box plot for the ratios
+boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = ratio)) +
+  geom_boxplot(fill = "skyblue", color = "black") + # Adjust outlier transparency
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 2, color = "red") + # Adding mean points with larger size
+  geom_text(data = mean_ratio_values_build, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 3, color = "red") + # Adding larger text labels
+  geom_point(position = position_jitter(width = 0.2), color = "red", alpha = 0.5) + # Representing outliers as dots
+  labs(title = "Ratio of Difference to Survey Household for Different Building Footprint Data Products",
+       x = "Dataset", y = "Ratio of Difference to Survey Household number") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10),
+        plot.margin = margin(1, 1, 1, 1, "cm")) + # Add more margin space around the plot
+  coord_cartesian(ylim = c(1.5, -10)) + # Adjusting ylim with buffer
+  guides(fill=FALSE) # Hiding legend for fill color
+
+# Print the box plot
+print(boxplot_ratio_build)
+
+
+```
+
+
+
 
 ```{r}
 
