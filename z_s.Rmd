@@ -6732,26 +6732,57 @@ mean_ratio_values_build <- aggregate(ratio ~ Dataset_build, data = difference_da
 
 # Create a box plot for the ratios
 boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = ratio)) +
-  geom_boxplot(fill = "skyblue", color = "black") + # Adjust outlier transparency
+  geom_boxplot(fill = "pink", color = "black") + # Adjust outlier transparency
   stat_summary(fun = mean, geom = "point", shape = 23, size = 2, color = "red") + # Adding mean points with larger size
   geom_text(data = mean_ratio_values_build, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 3, color = "red") + # Adding larger text labels
-  geom_point(position = position_jitter(width = 0.2), color = "red", alpha = 0.5) + # Representing outliers as dots
   labs(title = "Ratio of Difference to Survey Household for Different Building Footprint Data Products",
        x = "Dataset", y = "Ratio of Difference to Survey Household number") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(size = 10),
         plot.margin = margin(1, 1, 1, 1, "cm")) + # Add more margin space around the plot
-  coord_cartesian(ylim = c(1.5, -10)) + # Adjusting ylim with buffer
+  coord_cartesian(ylim = c(-2, 2)) # Adjusting ylim to focus on the main distribution area
+
+# Print the box plot
+print(boxplot_ratio_build)
+
+```
+
+```{r}
+# Calculate the ratio of the difference to the surveyed population
+difference_data_building$ratio <- difference_data_building$Building_Difference / camps$N_HH
+
+# Aggregate mean ratio values
+mean_ratio_values_build <- aggregate(ratio ~ Dataset_build, data = difference_data_building, mean)
+
+# Define outlier symbol
+outlier_symbol <- geom_point(shape = 4, color = "red", size = 2)
+
+# Create a box plot for the ratios
+boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = ratio)) +
+  geom_boxplot(fill = "pink", color = "black", outlier.shape = NA) + # Hide outliers in the boxplot
+  geom_point(position = position_jitter(width = 0.2), color = "pink", alpha = 0.3) + # Lighten outlier color
+  stat_summary(fun = mean, geom = "point", shape = 2, size = 2, color = "blue") + # Changing mean point color to blue
+  geom_text(data = mean_ratio_values_build, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 3, color = "blue") + # Changing mean text color to blue
+  labs(title = "Ratio of Difference to Survey Household for Different Building Footprint Data Products",
+       x = "Dataset", y = "Ratio of Difference to Survey Household number") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10),
+        plot.margin = margin(1, 1, 1, 1, "cm")) + # Add more margin space around the plot
+  coord_cartesian(ylim = c(-2, 2)) + # Adjusting ylim to focus on the main distribution area
+  geom_errorbar(aes(ymin = -2, ymax = -2), width = 0.2, color = "red", size = 1) + # Adding error bars at ylim for outliers
+  geom_errorbar(aes(ymin = 2, ymax = 2), width = 0.2, color = "red", size = 1) + # Adding error bars at ylim for outliers
   guides(fill=FALSE) # Hiding legend for fill color
 
 # Print the box plot
 print(boxplot_ratio_build)
 
-
 ```
 
+```{r}
 
+```
 
 
 ```{r}
