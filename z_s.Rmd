@@ -48,9 +48,51 @@ library(orca)
 
 
 ```{r}
-build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camps_EO/camps_eo1/camps_eo1.shp")
+build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camps_EO/camps_eo2/camps_eo2.shp")
 camps<-st_read(build_stat_path2)
-head(camps)
+str(camps)
+```
+#converting as.numeric for many columns
+
+```{r}
+camps$wp_c_df<-as.numeric(camps$wp_c_df)
+camps$g_d_75_to_<-as.numeric(camps$g_d_75_to_)
+camps$g_c_70_to_<-as.numeric(camps$g_c_70_to_)
+camps$vida_b_a<-as.numeric(camps$vida_b_a)
+camps$vida_b_c<-as.numeric(camps$vida_b_c)
+camps$vida_b_d<-as.numeric(camps$vida_b_d)
+camps$g_d_70_to_<-as.numeric(camps$g_d_70_to_)
+camps$g_c_75_to_<-as.numeric(camps$g_c_75_to_)
+camps$ms_b_a<-as.numeric(camps$ms_b_a)
+camps$ms_b_c<-as.numeric(camps$ms_b_c)
+camps$osm_b_d<-as.numeric(camps$osm_b_d)
+camps$osm_b_c<-as.numeric(camps$osm_b_c)
+camps$ms_b_d<-as.numeric(camps$ms_b_d)
+camps$gpwU_df<-as.numeric(camps$gpwU_df)
+camps$osm_b_a<-as.numeric(camps$osm_b_a)
+camps$g_b_a<-as.numeric(camps$g_b_a)
+camps$N_HH<-as.numeric(camps$N_HH)
+camps$wrld_p_<-as.numeric(camps$wrld_p_)
+camps$g_b_c<-as.numeric(camps$g_b_c)
+camps$g_b_d<-as.numeric(camps$g_b_d)
+camps$g_d_65_to_<-as.numeric(camps$g_d_65_to_)
+camps$ghsl_df<-as.numeric(camps$ghsl_df)
+camps$ghsl<-as.numeric(camps$ghsl)
+camps$wp_c<-as.numeric(camps$wp_c)
+camps$wp_uc_df<-as.numeric(camps$wp_uc_df)
+camps$Site_Ar<-as.numeric(camps$Site_Ar)
+camps$st_pp_d<-as.numeric(camps$st_pp_d)
+camps$g_c_65_to_<-as.numeric(camps$g_c_65_to_)
+camps$Ar_diff<-as.numeric(camps$Ar_diff)
+camps$gpw_dff<-as.numeric(camps$gpw_dff)
+camps$N_INDVI<-as.numeric(camps$N_INDVI)
+camps$gpw_UN<-as.numeric(camps$gpw_UN)
+camps$g_a_75_to_<-as.numeric(camps$g_a_75_to_)
+camps$cl_Shp_a<-as.numeric(camps$cl_Shp_a)
+camps$wp_uc<-as.numeric(camps$wp_uc)
+camps$g_a_70_to_<-as.numeric(camps$g_a_70_to_)
+camps$g_a_65_to_<-as.numeric(camps$g_a_65_to_)
+
 ```
 
 #removing the camp with less area and high population("BO_S294")
@@ -242,7 +284,7 @@ print(st_sub_camps)
 #Simple feature collection with 147 features 
 ```
 
-#subsetting the camps higher than 10000 square meter area
+#subsetting the camps less than 10000 square meter area
 
 ```{r}
 # Subset the data
@@ -687,74 +729,7 @@ print(corr_ghsl_als)
 
 
 
-#____NO NEED_______
-#Ratio of survey population to estimated population
 
-```{r}
-# Calculate the ratio between ghsl and N_INDVI
-camps <- camps %>%
-  mutate(ghsl_N_INDVI_ratio = as.numeric(ghsl) / as.numeric(N_INDVI))
-```
-
-
-```{r}
-# Assuming you have two vectors ghsl and N_INDVI containing the respective values
-# Calculate the ratio of ghsl to N_INDVI
-ratios <- as.numeric(camps$ghsl_N_INDVI_ratio)
-
-# Find ratios close to 1 (within a tolerance)
-tolerance <- 0.05  # Define a tolerance level
-ratios_close_to_1 <- ratios[abs(ratios - 1) < tolerance]
-
-# Find ratios greater than 1
-ratios_greater_than_1 <- ratios[ratios > 1]
-
-# Find ratios less than 1
-ratios_less_than_1 <- ratios[ratios < 1]
-
-# Print the results
-print("Ratios close to 1:")
-print(ratios_close_to_1)
-
-print("Ratios greater than 1:")
-print(ratios_greater_than_1)
-
-print("Ratios less than 1:")
-print(ratios_less_than_1)
-```
-
-Analysis of the ratio
-Ratio close to 1: This suggests that the estimated population closely matches the calculated population, indicating a high level of accuracy in the estimation method.
-
-Ratio greater than 1: If the estimated population is consistently higher than the calculated population, it could indicate that the estimation method tends to overestimate the population.
-
-Ratio less than 1: Conversely, if the estimated population is consistently lower than the calculated population, it suggests that the estimation method tends to underestimate the population.
-
-Variability in the ratio: Fluctuations or variability in the ratio across different regions or time periods may indicate inconsistencies or biases in the estimation method.
-
-
-So in the ratio taken there are 
-
-18 sites with ratios greater than 1, which implies for these 18 sites GHSL tends to overestimate the population
-#?(have a check on the area [whether it si comparitably small camp for the data]and formal, informal relationship for this sites)
-
-"Ratios greater than 1:"
-[1]  1.500790  2.237274 23.769992
- [4]  4.782971  4.615672  2.163938
- [7]  1.012266  1.145288  3.547234
-[10]  1.001431  2.421267  1.034403
-[13]  1.141190  1.155286  2.332230
-[16]  1.602557 14.624572 12.684516
-
-and the rest 205 ratios which are less than 1, which implies there is a considerable understimation of the population by GHSL for all the other sites
-
-And among them only 4 sites with ratios closer to 1 , which shows that GHSL estimate and survey population matches a bit for these camps. These are the camps that GHSL accurately estimated
-#?check the area, Shelter status, as well as the rural-urban status of these sites
-
-"Ratios close to 1:"
-
-[1] 0.9845018 1.0122658 1.0014311
-[4] 1.0344027
 
 #Linear regression
 
@@ -775,7 +750,7 @@ lr <- ggplot(camps, aes(x = N_INDVI, y = ghsl_N_INDVI_ratio)) +
 print(lr)
 
 ```
-#________NO NEED__________________________
+
 #_________________________
 # splitting the population estimates for <10000 and > 10000
 
@@ -1123,7 +1098,8 @@ camps <- extract_sum(World_pop_uc,camps,"Name")
 # Adjust the column name if needed
 
 # Subtract N_INDVID from ras_name
-camps$wp_uc_df <- as.numeric(camps$N_INDVI) - as.numeric(camps$wp_uc)
+#!!!!!! careful different dataset
+camp_final$wp_uc_df <- as.numeric(camp_final$N_INDVI) - as.numeric(camp_final$wp_uc)
 
 # View the resulting data frame with the new "difference" column
 print(camps)
@@ -1599,7 +1575,7 @@ camps <- extract_sum(World_pop_constr,camps,"Name")
 
 
 # Subtract N_INDVID from ras_name
-camps$wp_c_df <- camps$N_INDVI - camps$wp_c
+camp_final$wp_c_df <- camps$N_INDVI - camp_final$wp_c
 
 # View the resulting data frame with the new "difference" column
 print(camps)
@@ -3078,15 +3054,15 @@ cat("Percentage error:",percentage_error_gpw_UN)
 ```{r}
 library(gridExtra)
 
-# Scatter plot with site_status for gpw
-scatter_gpw <- ggplot(camps, aes(x= gpw, y= N_INDVI, color = Sit_Stt)) +
-  geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(gpw)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
-  labs(title = "Comparison between estimated and survey iom populations",
-       x = "Estimated population (GPW)",
-       y = "Survey_population") +  # No y-axis label
-  theme_minimal()+theme(plot.title = (element_text(size = 9,colour = "Red")),axis.text.x = element_text(size=5),
-        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
-        axis.title.y=element_text(size=5))
+# # Scatter plot with site_status for gpw
+# scatter_gpw <- ggplot(camps, aes(x= gpw, y= N_INDVI, color = Sit_Stt)) +
+#   geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(gpw)), size = 0.6, alpha = 0.8, show.legend = TRUE) +
+#   labs(title = "Comparison between estimated and survey iom populations",
+#        x = "Estimated population (GPW)",
+#        y = "Survey_population") +  # No y-axis label
+#   theme_minimal()+theme(plot.title = (element_text(size = 9,colour = "Red")),axis.text.x = element_text(size=5),
+#         axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+#         axis.title.y=element_text(size=5))
 
 # Scatter plot with site_status for wp_con
 scatter_wp_con <- ggplot(camps, aes(x = wp_c, y = N_INDVI, color = Sit_Stt)) +
@@ -3130,7 +3106,7 @@ scatter_gpw_UN<- ggplot(camps, aes(x = gpw_UN, y = N_INDVI, color = Sit_Stt)) +
         axis.title.y=element_text(size=5))
 
 # Combine all scatter plots into one
-combined_plot1 <- grid.arrange(scatter_gpw,scatter_gpw_UN, scatter_wp_con, scatter_wp_uncon, scatter_ghsl, nrow = 3, ncol = 2)
+combined_plot1 <- grid.arrange(scatter_gpw_UN, scatter_wp_con, scatter_wp_uncon, scatter_ghsl, nrow = 2, ncol = 2)
 
 # Print the combined plot
 print(combined_plot1)
@@ -3145,8 +3121,8 @@ library(ggplot2)
 library(gridExtra)
 
 # Find the minimum and maximum values of the estimated population variable across all datasets
-min_value <- min(c(min(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
-max_value <- max(c(max(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+min_value <- min(c(min( camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+max_value <- max(c(max( camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
 
 # Define the x-value for the vertical line
 vertical_line_x <- 15000
@@ -3168,8 +3144,8 @@ create_scatter_plot <- function(data, x_var) {
     coord_fixed(ratio = 1) + coord_flip() # Set equal aspect ratio
 }
 
-# Scatter plot with site_status for gpw
-scatter_gpw <- create_scatter_plot(camps, "gpw")
+# # Scatter plot with site_status for gpw
+# scatter_gpw <- create_scatter_plot(camps, "gpw")
 
 # Scatter plot with site_status for wp_con
 scatter_wp_con <- create_scatter_plot(camps, "wp_c")
@@ -3184,8 +3160,8 @@ scatter_ghsl <- create_scatter_plot(camps, "ghsl")
 scatter_gpw_UN <- create_scatter_plot(camps, "gpw_UN")
 
 # Arrange the plots using grid.arrange
-combined_plot_scale_adj <- grid.arrange(scatter_gpw, scatter_wp_con, scatter_wp_uncon, scatter_ghsl, scatter_gpw_UN,
-                               nrow = 3, ncol = 2)
+combined_plot_scale_adj <- grid.arrange( scatter_wp_con, scatter_wp_uncon, scatter_ghsl, scatter_gpw_UN,
+                               nrow = 2, ncol = 2)
 
 # Print the combined plot
 print(combined_plot_scale_adj)
@@ -3210,8 +3186,8 @@ ggsave("Plots/combined_plot_scale_adj.png", plot = combined_plot_scale_adj, widt
 library(ggplot2)
 
 # Find the minimum and maximum values of the estimated population variable across all datasets
-min_value <- min(c(min(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
-max_value <- max(c(max(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+min_value <- min(c(min( camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+max_value <- max(c(max( camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
 
 # Function to create scatter plot with fit line and consistent x-axis scale
 create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
@@ -3228,8 +3204,8 @@ create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
     scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
 }
 
-# Scatter plot with fit line for gpw
-scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw", "GPW", min_value, max_value)
+# # Scatter plot with fit line for gpw
+# scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw", "GPW", min_value, max_value)
 
 # Scatter plot with fit line for wp_con
 scatter_wp_con <- create_scatter_plot_with_fit(camps, "wp_c", "WP_CON", min_value, max_value)
@@ -3244,8 +3220,8 @@ scatter_ghsl <- create_scatter_plot_with_fit(camps, "ghsl", "GHSL", min_value, m
 scatter_gpw_UN <- create_scatter_plot_with_fit(camps, "gpw_UN", "GPW_UN", min_value, max_value)
 
 # Arrange the plots using grid.arrange
-combined_smooth <- grid.arrange(scatter_gpw,scatter_gpw_UN,  scatter_ghsl, scatter_wp_con, scatter_wp_uncon,
-                              nrow = 3, ncol = 2)
+combined_smooth <- grid.arrange(scatter_gpw_UN,  scatter_ghsl, scatter_wp_con, scatter_wp_uncon,
+                              nrow = 2, ncol = 2)
 
 # Print the combined plot
 print(combined_smooth)
@@ -3262,8 +3238,8 @@ ggsave("Plots/combined_smooth.png", plot = combined_smooth, width = 8, height = 
 library(ggplot2)
 
 # Find the minimum and maximum values of the estimated population variable across all datasets
-min_value <- min(c(min(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
-max_value <- max(c(max(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+min_value <- min(c(min( camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
+max_value <- max(c(max( camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN)))
 
 # Function to create scatter plot with fit line and consistent x-axis scale
 create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
@@ -3281,8 +3257,8 @@ create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
     scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
 }
 
-# Scatter plot with fit line for gpw
-scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw", "GPW", min_value, max_value)
+# # Scatter plot with fit line for gpw
+# scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw", "GPW", min_value, max_value)
 
 # Scatter plot with fit line for wp_con
 scatter_wp_con <- create_scatter_plot_with_fit(camps, "wp_c", "WP_CON", min_value, max_value)
@@ -3297,8 +3273,8 @@ scatter_ghsl <- create_scatter_plot_with_fit(camps, "ghsl", "GHSL", min_value, m
 scatter_gpw_UN <- create_scatter_plot_with_fit(camps, "gpw_UN", "GPW_UN", min_value, max_value)
 
 # Arrange the plots using grid.arrange
-combined_plot_smooth_line <- grid.arrange(scatter_gpw, scatter_gpw_UN,scatter_ghsl,scatter_wp_con, scatter_wp_uncon,  
-                              nrow = 3, ncol = 2)
+combined_plot_smooth_line <- grid.arrange( scatter_gpw_UN,scatter_ghsl,scatter_wp_con, scatter_wp_uncon,  
+                              nrow = 2, ncol = 2)
 
 # Print the combined plot
 print(combined_plot_smooth_line)
@@ -3400,15 +3376,15 @@ scatter_nindvi_hh<- ggplot(camps, aes(x= N_INDVI, y= N_HH, color = Sit_Stt)) +
         axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
         axis.title.y=element_text(size=5))
 
-# Scatter plot with site_status for gpw
-scatter_gpw_hh<- ggplot(camps, aes(x= gpw, y= N_HH, color = Sit_Stt)) +
-  geom_jitter(aes(y = as.numeric(N_HH), x = as.numeric(gpw)), size = 0.6, alpha = 0.8, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
-  labs(title = NULL,
-       x = "Estimated population (GPW)",
-       y = "Survey_House holdnumbers") +  # No y-axis label
-  theme_minimal()+theme(axis.text.x = element_text(size=5),
-        axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
-        axis.title.y=element_text(size=5))
+# # Scatter plot with site_status for gpw
+# scatter_gpw_hh<- ggplot(camps, aes(x= gpw, y= N_HH, color = Sit_Stt)) +
+#   geom_jitter(aes(y = as.numeric(N_HH), x = as.numeric(gpw)), size = 0.6, alpha = 0.8, show.legend = TRUE) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+#   labs(title = NULL,
+#        x = "Estimated population (GPW)",
+#        y = "Survey_House holdnumbers") +  # No y-axis label
+#   theme_minimal()+theme(axis.text.x = element_text(size=5),
+#         axis.text.y = element_text(size = 5),axis.title.x = element_text(size = 5),
+#         axis.title.y=element_text(size=5))
 
 # Scatter plot with site_status for wp_con
 scatter_wp_con_hh <- ggplot(camps, aes(x = wp_c, y = N_HH, color = Sit_Stt)) +
@@ -3452,7 +3428,7 @@ scatter_gpw_UN_hh<- ggplot(camps, aes(x = gpw_UN, y = N_HH, color = Sit_Stt)) +
         axis.title.y=element_text(size=5))
 
 # Combine all scatter plots into one
-combined_plot_hh <- grid.arrange(scatter_nindvi_hh,scatter_gpw_hh,scatter_gpw_UN_hh, scatter_wp_con_hh, scatter_wp_uncon_hh, scatter_ghsl_hh, nrow = 2, ncol = 3)
+combined_plot_hh <- grid.arrange(scatter_nindvi_hh,scatter_gpw_UN_hh, scatter_wp_con_hh, scatter_wp_uncon_hh, scatter_ghsl_hh, nrow = 2, ncol = 3)
 
 
 print(combined_plot_hh)
@@ -3461,8 +3437,8 @@ print(combined_plot_hh)
 #Same scale for hh plots
 ```{r}
 # Find the minimum and maximum values of the estimated population variable across all datasets
-min_value <- min(c(min(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN,camps$N_INDVI)))
-max_value <- max(c(max(camps$gpw, camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN,camps$N_INDVI)))
+min_value <- min(c(min( camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN,camps$N_INDVI)))
+max_value <- max(c(max(camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN,camps$N_INDVI)))
 
 # Function to create scatter plot with fit line and consistent x-axis scale
 create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
@@ -3483,8 +3459,8 @@ create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
 scatter_nind_nhh<-
 create_scatter_plot_with_fit(camps, "N_INDVI", "Survey population", min_value, max_value)  
 
-# Scatter plot with fit line for gpw
-scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw", "GPW", min_value, max_value)
+# # Scatter plot with fit line for gpw
+# scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw", "GPW", min_value, max_value)
 
 # Scatter plot with fit line for wp_con
 scatter_wp_con <- create_scatter_plot_with_fit(camps, "wp_c", "WP_CON", min_value, max_value)
@@ -3499,8 +3475,8 @@ scatter_ghsl <- create_scatter_plot_with_fit(camps, "ghsl", "GHSL", min_value, m
 scatter_gpw_UN <- create_scatter_plot_with_fit(camps, "gpw_UN", "GPW_UN", min_value, max_value)
 
 # Arrange the plots using grid.arrange
-combined_plot_smooth_line_hh <- grid.arrange(scatter_nind_nhh,scatter_gpw, scatter_gpw_UN,scatter_ghsl,scatter_wp_con, scatter_wp_uncon,  
-                              nrow = 2, ncol = 3)
+combined_plot_smooth_line_hh <- grid.arrange(scatter_nind_nhh, scatter_gpw_UN,scatter_ghsl,scatter_wp_con, scatter_wp_uncon,  
+                              nrow = 3, ncol = 2)
 
 # Print the combined plot
 print(combined_plot_smooth_line_hh)
@@ -3523,8 +3499,8 @@ ggsave("Plots/combined_plot_smooth_line_hh.png", plot = combined_plot_smooth_lin
 #(area_wise>10000)
 ```{r}
 # Find the minimum and maximum values of the estimated population variable across all datasets
-min_value <- min(c(min(subset_data$gpw, subset_data$wp_c, subset_data$wp_uc, subset_data$ghsl, subset_data$gpw_UN)))
-max_value <- max(c(max(subset_data$gpw, subset_data$wp_c, subset_data$wp_uc, subset_data$ghsl, subset_data$gpw_UN)))
+min_value <- min(c(min( subset_data$wp_c, subset_data$wp_uc, subset_data$ghsl, subset_data$gpw_UN)))
+max_value <- max(c(max( subset_data$wp_c, subset_data$wp_uc, subset_data$ghsl, subset_data$gpw_UN)))
 
 # Function to create scatter plot with fit line and consistent x-axis scale
 create_scatter_plot_with_fit_g1 <- function(data, x_var, title, min_x, max_x) {
@@ -3542,8 +3518,8 @@ create_scatter_plot_with_fit_g1 <- function(data, x_var, title, min_x, max_x) {
     scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
 }
 
-# Scatter plot with fit line for gpw
-scatter_gpw_g1 <- create_scatter_plot_with_fit_g1(subset_data, "gpw", "GPW", min_value, max_value)
+# # Scatter plot with fit line for gpw
+# scatter_gpw_g1 <- create_scatter_plot_with_fit_g1(subset_data, "gpw", "GPW", min_value, max_value)
 
 # Scatter plot with fit line for wp_con
 scatter_wp_con_g1 <- create_scatter_plot_with_fit_g1(subset_data, "wp_c", "WP_CON", min_value, max_value)
@@ -3558,7 +3534,7 @@ scatter_ghsl_g1 <- create_scatter_plot_with_fit_g1(subset_data, "ghsl", "GHSL", 
 scatter_gpw_UN_g1 <- create_scatter_plot_with_fit_g1(subset_data, "gpw_UN", "GPW_UN", min_value, max_value)
 
 # Arrange the plots using grid.arrange
-combined_plot_smooth_line_g1 <- grid.arrange(scatter_gpw_g1, scatter_gpw_UN_g1,scatter_ghsl_g1,scatter_wp_con_g1, scatter_wp_uncon_g1,  
+combined_plot_smooth_line_g1 <- grid.arrange( scatter_gpw_UN_g1,scatter_ghsl_g1,scatter_wp_con_g1, scatter_wp_uncon_g1,  
                               nrow = 3, ncol = 2)
 
 # Print the combined plot
@@ -3570,8 +3546,8 @@ print(combined_plot_smooth_line_g1)
 #(area_wise<10000)
 ```{r}
 # Find the minimum and maximum values of the estimated population variable across all datasets
-min_value <- min(c(min(subset_data_2$gpw, subset_data_2$wp_c, subset_data_2$wp_uc, subset_data_2$ghsl, subset_data_2$gpw_UN)))
-max_value <- max(c(max(subset_data_2$gpw, subset_data_2$wp_c, subset_data_2$wp_uc, subset_data_2$ghsl, subset_data_2$gpw_UN)))
+min_value <- min(c(min( subset_data_2$wp_c, subset_data_2$wp_uc, subset_data_2$ghsl, subset_data_2$gpw_UN)))
+max_value <- max(c(max( subset_data_2$wp_c, subset_data_2$wp_uc, subset_data_2$ghsl, subset_data_2$gpw_UN)))
 
 # Function to create scatter plot with fit line and consistent x-axis scale
 create_scatter_plot_with_fit_l1 <- function(data, x_var, title, min_x, max_x) {
@@ -3589,8 +3565,8 @@ create_scatter_plot_with_fit_l1 <- function(data, x_var, title, min_x, max_x) {
     scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
 }
 
-# Scatter plot with fit line for gpw
-scatter_gpw_l1 <- create_scatter_plot_with_fit_l1(subset_data_2, "gpw", "GPW", min_value, max_value)
+# # Scatter plot with fit line for gpw
+# scatter_gpw_l1 <- create_scatter_plot_with_fit_l1(subset_data_2, "gpw", "GPW", min_value, max_value)
 
 # Scatter plot with fit line for wp_con
 scatter_wp_con_l1 <- create_scatter_plot_with_fit_l1(subset_data_2, "wp_c", "WP_CON", min_value, max_value)
@@ -3605,8 +3581,8 @@ scatter_ghsl_l1 <- create_scatter_plot_with_fit_l1(subset_data_2, "ghsl", "GHSL"
 scatter_gpw_UN_l1 <- create_scatter_plot_with_fit_g1(subset_data_2, "gpw_UN", "GPW_UN", min_value, max_value)
 
 # Arrange the plots using grid.arrange
-combined_plot_smooth_line_l1 <- grid.arrange(scatter_gpw_l1, scatter_gpw_UN_l1,scatter_ghsl_l1,scatter_wp_con_l1, scatter_wp_uncon_l1,  
-                              nrow = 3, ncol = 2)
+combined_plot_smooth_line_l1 <- grid.arrange( scatter_gpw_UN_l1,scatter_ghsl_l1,scatter_wp_con_l1, scatter_wp_uncon_l1,  
+                              nrow = 2, ncol = 2)
 
 # Print the combined plot
 print(combined_plot_smooth_line_l1)
@@ -3633,8 +3609,8 @@ campls10000 <- subset(camps, N_INDVI < 10000)
 #population <10000
 ```{r}
 # Find the minimum and maximum values of the estimated population variable across all datasets
-min_value <- min(c(min(campls10000 $gpw, campls10000 $wp_c, campls10000 $wp_uc, campls10000 $ghsl, campls10000 $gpw_UN)))
-max_value <- max(c(max(campls10000 $gpw, campls10000$wp_c, campls10000$wp_uc, campls10000 $ghsl, campls10000$gpw_UN)))
+min_value <- min(c(min( campls10000 $wp_c, campls10000 $wp_uc, campls10000 $ghsl, campls10000 $gpw_UN)))
+max_value <- max(c(max( campls10000$wp_c, campls10000$wp_uc, campls10000 $ghsl, campls10000$gpw_UN)))
 
 # Function to create scatter plot with fit line and consistent x-axis scale
 create_scatter_plot_with_fit_pl1 <- function(data, x_var, title, min_x, max_x) {
@@ -3652,8 +3628,8 @@ create_scatter_plot_with_fit_pl1 <- function(data, x_var, title, min_x, max_x) {
     scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
 }
 
-# Scatter plot with fit line for gpw
-scatter_gpw_pl1 <- create_scatter_plot_with_fit_pl1(campls10000 , "gpw", "GPW", min_value, max_value)
+# # Scatter plot with fit line for gpw
+# scatter_gpw_pl1 <- create_scatter_plot_with_fit_pl1(campls10000 , "gpw", "GPW", min_value, max_value)
 
 # Scatter plot with fit line for wp_con
 scatter_wp_con_pl1 <- create_scatter_plot_with_fit_pl1(campls10000 , "wp_c", "WP_CON", min_value, max_value)
@@ -3668,8 +3644,8 @@ scatter_ghsl_pl1 <- create_scatter_plot_with_fit_pl1(campls10000 , "ghsl", "GHSL
 scatter_gpw_UN_pl1 <- create_scatter_plot_with_fit_pl1(campls10000 , "gpw_UN", "GPW_UN", min_value, max_value)
 
 # Arrange the plots using grid.arrange
-combined_plot_smooth_line_pl1 <- grid.arrange(scatter_gpw_pl1, scatter_gpw_UN_pl1,scatter_ghsl_pl1,scatter_wp_con_pl1, scatter_wp_uncon_pl1,  
-                              nrow = 3, ncol = 2)
+combined_plot_smooth_line_pl1 <- grid.arrange( scatter_gpw_UN_pl1,scatter_ghsl_pl1,scatter_wp_con_pl1, scatter_wp_uncon_pl1,  
+                              nrow = 2, ncol = 2)
 
 # Print the combined plot
 print(combined_plot_smooth_line_pl1)
@@ -3679,8 +3655,8 @@ print(combined_plot_smooth_line_pl1)
 ```{r}
 
 # Find the minimum and maximum values of the estimated population variable across all datasets
-min_value <- min(c(min(campsgt10000$gpw, campsgt10000$wp_c, campsgt10000$wp_uc, campsgt10000$ghsl, campsgt10000$gpw_UN)))
-max_value <- max(c(max(campsgt10000$gpw, campsgt10000$wp_c, campsgt10000$wp_uc, campsgt10000$ghsl, campsgt10000$gpw_UN)))
+min_value <- min(c(min( campsgt10000$wp_c, campsgt10000$wp_uc, campsgt10000$ghsl, campsgt10000$gpw_UN)))
+max_value <- max(c(max( campsgt10000$wp_c, campsgt10000$wp_uc, campsgt10000$ghsl, campsgt10000$gpw_UN)))
 
 # Function to create scatter plot with fit line and consistent x-axis scale
 create_scatter_plot_with_fit_pg1 <- function(data, x_var, title, min_x, max_x) {
@@ -3698,8 +3674,8 @@ create_scatter_plot_with_fit_pg1 <- function(data, x_var, title, min_x, max_x) {
     scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
 }
 
-# Scatter plot with fit line for gpw
-scatter_gpw_pg1 <- create_scatter_plot_with_fit_pg1(campsgt10000, "gpw", "GPW", min_value, max_value)
+# # Scatter plot with fit line for gpw
+# scatter_gpw_pg1 <- create_scatter_plot_with_fit_pg1(campsgt10000, "gpw", "GPW", min_value, max_value)
 
 # Scatter plot with fit line for wp_con
 scatter_wp_con_pg1 <- create_scatter_plot_with_fit_pg1(campsgt10000, "wp_c", "WP_CON", min_value, max_value)
@@ -3714,8 +3690,8 @@ scatter_ghsl_pg1 <- create_scatter_plot_with_fit_pg1(campsgt10000, "ghsl", "GHSL
 scatter_gpw_UN_pg1 <- create_scatter_plot_with_fit_pg1(campsgt10000, "gpw_UN", "GPW_UN", min_value, max_value)
 
 # Arrange the plots using grid.arrange
-combined_plot_smooth_line_pg1 <- grid.arrange(scatter_gpw_pg1, scatter_gpw_UN_pg1,scatter_ghsl_pg1,scatter_wp_con_pg1, scatter_wp_uncon_pg1,  
-                              nrow = 3, ncol = 2)
+combined_plot_smooth_line_pg1 <- grid.arrange( scatter_gpw_UN_pg1,scatter_ghsl_pg1,scatter_wp_con_pg1, scatter_wp_uncon_pg1,  
+                              nrow = 2, ncol = 2)
 
 # Print the combined plot
 print(combined_plot_smooth_line_pg1)
@@ -3897,35 +3873,34 @@ camps$N_INDVI <- as.numeric(camps$N_INDVI)
 camps$ghsl <- as.numeric(camps$ghsl)
 camps$wp_c <- as.numeric(camps$wp_c)
 camps$wp_uc<- as.numeric(camps$wp_uc)
-camps$gpw <- as.numeric(camps$gpw)
+# camps$gpw <- as.numeric(camps$gpw)
 camps$gpw_UN<-as.numeric(camps$gpw_UN)
 
 
 # Check the data types again
-str(camps[, c("N_INDVI", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")])
+str(camps[, c("N_INDVI", "ghsl", "wp_c", "wp_uc", "gpw_UN")])
 
 # Check for missing values
-summary(camps[, c("N_INDVI", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")])
+summary(camps[, c("N_INDVI", "ghsl", "wp_c", "wp_uc", "gpw_UN")])
 
 # Calculate correlation coefficients
 corr_ghsl <- cor(camps$N_INDVI,camps$ghsl)
 corr_wp_c<-cor(camps$N_INDVI,camps$wp_c)
 corr_wp_uc<-cor(camps$N_INDVI,camps$wp_uc)
-corr_gpw<-cor(camps$N_INDVI,camps$gpw)
+# corr_gpw<-cor(camps$N_INDVI,camps$gpw)
 corr_gpw_UN<-cor(camps$N_INDVI,camps$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl))
 print(paste("wp_uc:",corr_wp_uc))
 print(paste("wp_c",corr_wp_c))
-print(paste("gpw:",corr_gpw))
+# print(paste("gpw:",corr_gpw))
 print(paste("gpw_UN:",corr_gpw_UN))
 
-# [1] "GHSL: 0.669789737777376"
-# [1] "wp_uc: 0.624792200593656"
-# [1] "wp_c 0.551139435664867"
-# [1] "gpw: 0.155070313136419"
-# [1] "gpw_UN: 0.154896612345902"
+# [1] "GHSL: 0.669402024307656"
+# [1] "wp_uc: 0.623507203215818"
+# [1] "wp_c 0.548952555768835"
+# [1] "gpw_UN: 0.151183078493222"
 
 
 ```
@@ -3933,9 +3908,9 @@ print(paste("gpw_UN:",corr_gpw_UN))
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix <- matrix(c(corr_ghsl, corr_wp_c, corr_wp_uc, corr_gpw,corr_gpw_UN),
+cor_matrix <- matrix(c(corr_ghsl, corr_wp_c, corr_wp_uc, corr_gpw_UN),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix, method = "color", type = "upper", 
@@ -3952,7 +3927,7 @@ corrplot(cor_matrix, method = "color", type = "upper",
 camps_data_nogeom <- st_drop_geometry(camps)
 
 # Define numeric columns
-numeric_cols <- c("N_INDVI","N_HH", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")
+numeric_cols <- c("N_INDVI","N_HH", "ghsl", "wp_c", "wp_uc", "gpw_UN")
 
 # Convert selected columns to numeric, handling non-numeric values
 for (col in numeric_cols) {
@@ -3964,16 +3939,24 @@ correlation_matrix <- cor(camps_data_nogeom[, numeric_cols])
 print(correlation_matrix)
 ```
 # Analysis correlation matrix
-N_INDVI vs. ghsl: The correlation coefficient is 0.6701, indicating a moderate positive correlation between N_INDVI and ghsl.
-N_INDVI vs. wp_con: The correlation coefficient is 0.6251, indicating a moderate positive correlation between N_INDVI and wp_con.
-ghsl vs. wp_con: The correlation coefficient is 0.8905, indicating a strong positive correlation between ghsl and wp_con.
-wp_uncon vs. N_INDVI: The correlation coefficient is 0.5516, indicating a moderate positive correlation between wp_uncon and N_INDVI.
-wp_uncon vs. ghsl: The correlation coefficient is 0.6079, indicating a moderate positive correlation between wp_uncon and ghsl.
-wp_uncon vs. wp_con: The correlation coefficient is 0.6640, indicating a moderate positive correlation between wp_uncon and wp_con.
-gpw vs. N_INDVI: The correlation coefficient is 0.1556, indicating a weak positive correlation between gpw and N_INDVI.
-gpw vs. ghsl: The correlation coefficient is 0.1361, indicating a weak positive correlation between gpw and ghsl.
-gpw vs. wp_con: The correlation coefficient is 0.1953, indicating a weak positive correlation between gpw and wp_con.
-wp_uncon vs. gpw: The correlation coefficient is 0.7454, indicating a strong positive correlation between wp_uncon and gpw.
+High Positive Correlations:
+N_INDVI and N_HH (0.940): There is a very strong positive correlation between the survey population and the number of households. This suggests that as the survey population increases, the number of households also increases almost proportionately.
+N_HH and ghsl (0.694): There is a strong positive correlation between the number of households and the global human settlement layer. This implies that areas with more households are strongly related to the density or presence of human settlements.
+ghsl and wp_uc (0.890): A very strong positive relationship between the global human settlement layer and urban classification, indicating that regions classified as human settlements are predominantly urban areas.
+Moderate Positive Correlations:
+N_INDVI and ghsl (0.669): A moderate positive correlation between the survey population and the global human settlement layer. This suggests that areas with higher survey populations tend to have more significant human settlement presence.
+N_INDVI and wp_c (0.549): A moderate positive correlation between the survey population and WorldPop population count, indicating a reasonable alignment between survey population numbers and WorldPop estimates.
+ghsl and wp_c (0.604): A moderate positive correlation between human settlements and WorldPop population count, suggesting a decent alignment between human settlement data and population estimates.
+wp_c and wp_uc (0.661): A moderate positive correlation between WorldPop population count and urban classification, indicating that higher population counts are often found in urban areas.
+Lower Positive Correlations:
+wp_uc and gpw_UN (0.191): A low positive correlation between WorldPop urban classification and GPW UN population, suggesting some relationship but not very strong.
+N_INDVI and gpw_UN (0.151): A low positive correlation between the survey population and GPW UN population, indicating some alignment but not strong.
+N_HH and gpw_UN (0.097): A very low positive correlation between the number of households and GPW UN population, suggesting minimal relationship.
+ghsl and gpw_UN (0.131): A low positive correlation between human settlements and GPW UN population, indicating some level of alignment but weak.
+Noteworthy Observations:
+wp_c and gpw_UN (0.744): A strong positive correlation between WorldPop population count and GPW UN population, indicating that these two datasets are in strong agreement regarding population estimates.
+Summary:
+The survey population (N_INDVI) has a very strong correlation with the number of households (N_HH), indicating that household numbers are a reliable indicator of the survey population. There is also a notable correlation between the survey population and the global human settlement layer (ghsl), as well as a moderate correlation with WorldPop population counts (wp_c). Lower correlations with GPW UN population data suggest some differences in how populations are accounted for or estimated in these datasets compared to the survey data.
 
 #Heat map of correlation matrix
 
@@ -3985,7 +3968,7 @@ wp_uncon vs. gpw: The correlation coefficient is 0.7454, indicating a strong pos
 # Convert the correlation matrix to a dataframe
 corr_matrix <- correlation_matrix
 # Assign row and column names
-rownames(corr_matrix) <- colnames(corr_matrix) <- c("N_INDVI","N_HH", "ghsl", "wp_con", "wp_uncon", "gpw","gpw_UN")
+rownames(corr_matrix) <- colnames(corr_matrix) <- c("N_INDVI","N_HH", "ghsl", "wp_con", "wp_uncon", "gpw_UN")
 # Convert the correlation matrix to long format
 corr_matrix_long <- melt(corr_matrix)
 
@@ -4007,34 +3990,6 @@ print(heat_map_corr)
 ```
 
 
-#Analysis heat map
-
-N_INDVI (Survey Population):
-
-Strong positive correlation with ghsl (0.67), indicating that areas with higher surveyed population tend to have higher estimated population according to the Global Human Settlement Layer (GHSL).
-Moderate positive correlation with wp_con (0.63) and wp_uncon (0.55), suggesting that areas with higher surveyed population (N_INDVI) also tend to have higher estimated world population, both constrained and unconstrained.
-GHSL (Global Human Settlement Layer):
-
-Strong positive correlation with N_INDVI (0.67), indicating that areas with higher estimated population according to GHSL tend to have higher surveyed population.
-Strong positive correlation with wp_con (0.89) and wp_uncon (0.61), suggesting that areas with higher estimated population according to GHSL also tend to have higher estimated world population, both constrained and unconstrained.
-WP_CON (World Population Constrained):
-
-Moderate positive correlation with N_INDVI (0.63) and ghsl (0.89), indicating that areas with higher surveyed population and higher estimated population according to GHSL also tend to have higher estimated world population (constrained).
-Strong positive correlation with wp_uncon (0.66), suggesting that areas with higher estimated world population (unconstrained) tend to have higher estimated world population (constrained).
-WP_UNCON (World Population Unconstrained):
-
-Moderate positive correlation with N_INDVI (0.55) and ghsl (0.61), indicating that areas with higher surveyed population and higher estimated population according to GHSL also tend to have higher estimated world population (unconstrained).
-Strong positive correlation with wp_con (0.66), suggesting that areas with higher estimated world population (constrained) tend to have higher estimated world population (unconstrained).
-GPW (Gridded Population of the World):
-
-Weak positive correlation with N_INDVI (0.16) and ghsl (0.14), suggesting a limited relationship between GPW and surveyed population or estimated population according to GHSL.
-Weak positive correlation with wp_con (0.20) and wp_uncon (0.75), indicating a slight association with estimated world population, especially in unconstrained conditions.
-GPW_UN (Gridded Population of the World Unconstrained):
-
-Weak positive correlation with N_INDVI (0.16) and ghsl (0.14), similar to GPW, indicating a limited relationship with surveyed population or estimated population according to GHSL.
-Strong positive correlation with wp_con (0.20) and wp_uncon (0.75), similar to GPW, suggesting a notable association with estimated world population, particularly in unconstrained conditions.
-
-
 
 
 #Save heat map coorelation matrix
@@ -4052,37 +4007,36 @@ subset_data_2$N_INDVI <- as.numeric(subset_data_2$N_INDVI)
 subset_data_2$ghsl <- as.numeric(subset_data_2$ghsl)
 subset_data_2$wp_c <- as.numeric(subset_data_2$wp_c)
 subset_data_2$wp_uc<- as.numeric(subset_data_2$wp_uc)
-subset_data_2$gpw <- as.numeric(subset_data_2$gpw_UN)
+# subset_data_2$gpw <- as.numeric(subset_data_2$gpw_UN)
 
 
 # Calculate correlation coefficients
 corr_ghsl_areal <- cor(subset_data_2$N_INDVI,subset_data_2$ghsl)
 corr_wp_c_areal <-cor(subset_data_2$N_INDVI,subset_data_2$wp_c)
 corr_wp_uc_areal <-cor(subset_data_2$N_INDVI,subset_data_2$wp_uc)
-corr_gpw_areal <-cor(subset_data_2$N_INDVI,subset_data_2$gpw)
+# corr_gpw_areal <-cor(subset_data_2$N_INDVI,subset_data_2$gpw)
 corr_gpw_UN_areal <-cor(subset_data_2$N_INDVI,subset_data_2$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl_areal))
 print(paste("wp_uc:",corr_wp_uc_areal))
 print(paste("wp_c",corr_wp_c_areal))
-print(paste("gpw:",corr_gpw_areal))
+# print(paste("gpw:",corr_gpw_areal))
 print(paste("gpw_UN:",corr_gpw_UN_areal))
 
-# [1] "GHSL: 0.0213130853907562"
-# [1] "wp_uc: 0.233885533437088"
-# [1] "wp_c 0.125185506026443"
-# [1] "gpw: 0.0566241801378073"
-# [1] "gpw_UN: 0.0566241801378073"
+# [1] "GHSL: 0.00690077041185157"
+# [1] "wp_uc: 0.220784729400368"
+# [1] "wp_c 0.104199783346568"
+# [1] "gpw_UN: 0.0436065237844927"
 ```
 
 # one line corr_mtrix doing the correlation matrix n_indvi and estimated populations for area<10000
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_areal <- matrix(c(corr_ghsl_areal, corr_wp_c_areal, corr_wp_uc_areal, corr_gpw_areal,corr_gpw_UN_areal),
+cor_matrix_areal <- matrix(c(corr_ghsl_areal, corr_wp_c_areal, corr_wp_uc_areal ,corr_gpw_UN_areal),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_areal , method = "color", type = "upper", 
@@ -4098,37 +4052,36 @@ subset_data$N_INDVI <- as.numeric(subset_data$N_INDVI)
 subset_data$ghsl <- as.numeric(subset_data$ghsl)
 subset_data$wp_c <- as.numeric(subset_data$wp_c)
 subset_data$wp_uc<- as.numeric(subset_data$wp_uc)
-subset_data$gpw <- as.numeric(subset_data$gpw_UN)
+# subset_data$gpw <- as.numeric(subset_data$gpw_UN)
 
 
 # Calculate correlation coefficients
 corr_ghsl_areag <- cor(subset_data$N_INDVI,subset_data$ghsl)
 corr_wp_c_areag <-cor(subset_data$N_INDVI,subset_data$wp_c)
 corr_wp_uc_areag <-cor(subset_data$N_INDVI,subset_data$wp_uc)
-corr_gpw_areag <-cor(subset_data$N_INDVI,subset_data$gpw)
+# corr_gpw_areag <-cor(subset_data$N_INDVI,subset_data$gpw)
 corr_gpw_UN_areag <-cor(subset_data$N_INDVI,subset_data$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl_areag))
 print(paste("wp_uc:",corr_wp_uc_areag))
 print(paste("wp_c",corr_wp_c_areag))
-print(paste("gpw:",corr_gpw_areag))
+# print(paste("gpw:",corr_gpw_areag))
 print(paste("gpw_UN:",corr_gpw_UN_areag))
 
-# [1] "GHSL: 0.642902555892121"
-# [1] "wp_uc: 0.593267199366151"
-# [1] "wp_c 0.50654517342998"
-# [1] "gpw: 0.112049137071047"
-# [1] "gpw_UN: 0.112049137071047"
+# [1] "GHSL: 0.641742641716055"
+# [1] "wp_uc: 0.5909897941457"
+# [1] "wp_c 0.502923085012834"
+# [1] "gpw_UN: 0.107084792910909"
 ```
 
 # one line corr_mtrix doing the correlation matrix n_indvi and estimated populations for area>10000
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_areag <- matrix(c(corr_ghsl_areag, corr_wp_c_areag, corr_wp_uc_areag, corr_gpw_areag,corr_gpw_UN_areag),
+cor_matrix_areag <- matrix(c(corr_ghsl_areag, corr_wp_c_areag, corr_wp_uc_areag, corr_gpw_UN_areag),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_areag , method = "color", type = "upper", 
@@ -4144,35 +4097,34 @@ campsgt10000$N_INDVI <- as.numeric(campsgt10000$N_INDVI)
 campsgt10000$ghsl <- as.numeric(campsgt10000$ghsl)
 campsgt10000$wp_c <- as.numeric(campsgt10000$wp_c)
 campsgt10000$wp_uc<- as.numeric(campsgt10000$wp_uc)
-campsgt10000$gpw <- as.numeric(campsgt10000$gpw_UN)
+# campsgt10000$gpw <- as.numeric(campsgt10000$gpw_UN)
 
 
 # Calculate correlation coefficients
 corr_ghsl_pg <- cor(campsgt10000$N_INDVI,campsgt10000$ghsl)
 corr_wp_c_pg <-cor(campsgt10000$N_INDVI,campsgt10000$wp_c)
 corr_wp_uc_pg <-cor(campsgt10000$N_INDVI,campsgt10000$wp_uc)
-corr_gpw_pg <-cor(campsgt10000$N_INDVI,campsgt10000$gpw)
+# corr_gpw_pg <-cor(campsgt10000$N_INDVI,campsgt10000$gpw)
 corr_gpw_UN_pg <-cor(campsgt10000$N_INDVI,campsgt10000$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl_pg))
 print(paste("wp_uc:",corr_wp_uc_pg))
 print(paste("wp_c",corr_wp_c_pg))
-print(paste("gpw:",corr_gpw_pg))
+# print(paste("gpw:",corr_gpw_pg))
 print(paste("gpw_UN:",corr_gpw_UN_pg))
 
-# [1] "GHSL: 0.642902555892121"
-# [1] "wp_uc: 0.593267199366151"
-# [1] "wp_c 0.50654517342998"
-# [1] "gpw: 0.112049137071047"
-# [1] "gpw_UN: 0.112049137071047"
+# [1] "GHSL: 0.509565129232103"
+# [1] "wp_uc: 0.381366770819244"
+# [1] "wp_c 0.212715927904344"
+# [1] "gpw_UN: -0.134095801917998"
 ```
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_pg <- matrix(c(corr_ghsl_pg, corr_wp_c_pg, corr_wp_uc_pg, corr_gpw_pg,corr_gpw_UN_pg),
+cor_matrix_pg <- matrix(c(corr_ghsl_pg, corr_wp_c_pg, corr_wp_uc_pg,corr_gpw_UN_pg),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_pg , method = "color", type = "upper", 
@@ -4192,29 +4144,28 @@ campls10000$gpw <- as.numeric(campls10000$gpw_UN)
 corr_ghsl_pl <- cor(campls10000$N_INDVI,campls10000$ghsl)
 corr_wp_c_pl <-cor(campls10000$N_INDVI,campls10000$wp_c)
 corr_wp_uc_pl <-cor(campls10000$N_INDVI,campls10000$wp_uc)
-corr_gpw_pl <-cor(campls10000$N_INDVI,campls10000$gpw)
+# corr_gpw_pl <-cor(campls10000$N_INDVI,campls10000$gpw)
 corr_gpw_UN_pl <-cor(campls10000$N_INDVI,campls10000$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl_pl))
 print(paste("wp_uc:",corr_wp_uc_pl))
 print(paste("wp_c",corr_wp_c_pl))
-print(paste("gpw:",corr_gpw_pl))
+# print(paste("gpw:",corr_gpw_pl))
 print(paste("gpw_UN:",corr_gpw_UN_pl))
 
-# [1] "GHSL: 0.394858142687066"
-# [1] "wp_uc: 0.496829664295204"
-# [1] "wp_c 0.303849036966698"
-# [1] "gpw: 0.0717318653127183"
-# [1] "gpw_UN: 0.0717318653127183"
+# [1] "GHSL: 0.407094645924059"
+# [1] "wp_uc: 0.510279634549507"
+# [1] "wp_c 0.310321687917034"
+# [1] "gpw_UN: 0.0711666429556592"
 
 ```
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_pl <- matrix(c(corr_ghsl_pl, corr_wp_c_pl, corr_wp_uc_pl, corr_gpw_pl,corr_gpw_UN_pl),
+cor_matrix_pl <- matrix(c(corr_ghsl_pl, corr_wp_c_pl, corr_wp_uc_pl, corr_gpw_UN_pl),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_pl , method = "color", type = "upper", 
@@ -4225,9 +4176,9 @@ corrplot(cor_matrix_pl , method = "color", type = "upper",
 #formal camp_correlation
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_f <- matrix(c(corr_ghsl_f, corr_wp_c_f, corr_wp_uc_f, corr_gpw_f,corr_gpw_UN_f),
+cor_matrix_f <- matrix(c(corr_ghsl_f, corr_wp_c_f, corr_wp_uc_f, corr_gpw_UN_f),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_f, method = "color", type = "upper", 
@@ -4238,9 +4189,9 @@ corrplot(cor_matrix_f, method = "color", type = "upper",
 #informal camp_correlation
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_inf <- matrix(c(corr_ghsl_inf, corr_wp_c_inf, corr_wp_uc_inf, corr_gpw_inf,corr_gpw_UN_inf),
+cor_matrix_inf <- matrix(c(corr_ghsl_inf, corr_wp_c_inf, corr_wp_uc_inf, corr_gpw_UN_inf),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_INDVI"), c("ghsl", "wp_c", "wp_uc", "gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_inf, method = "color", type = "upper", 
@@ -4261,12 +4212,12 @@ camps$N_HH <- as.numeric(camps$N_HH)
 camps$ghsl <- as.numeric(camps$ghsl)
 camps$wp_c <- as.numeric(camps$wp_c)
 camps$wp_uc<- as.numeric(camps$wp_uc)
-camps$gpw <- as.numeric(camps$gpw)
+# camps$gpw <- as.numeric(camps$gpw)
 camps$gpw_UN<-as.numeric(camps$gpw_UN)
 
 
 # Check the data types again
-str(camps[, c("N_HH", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")])
+str(camps[, c("N_HH", "ghsl", "wp_c", "wp_uc", "gpw_UN")])
 
 # Check for missing values
 summary(camps[, c("N_HH", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")])
@@ -4275,28 +4226,27 @@ summary(camps[, c("N_HH", "ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")])
 corr_ghsl_HH <- cor(camps$N_HH,camps$ghsl)
 corr_wp_c_HH<-cor(camps$N_HH,camps$wp_c)
 corr_wp_uc_HH<-cor(camps$N_HH,camps$wp_uc)
-corr_gpw_HH<-cor(camps$N_HH,camps$gpw)
+# corr_gpw_HH<-cor(camps$N_HH,camps$gpw)
 corr_gpw_UN_HH<-cor(camps$N_HH,camps$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl_HH))
 print(paste("wp_uc:",corr_wp_uc_HH))
 print(paste("wp_c",corr_wp_c_HH))
-print(paste("gpw:",corr_gpw_HH))
+# print(paste("gpw:",corr_gpw_HH))
 print(paste("gpw_UN:",corr_gpw_UN_HH))
 
-# [1] "GHSL: 0.694545351305014"
-# [1] "wp_uc: 0.618515091659853"
-# [1] "wp_c 0.523798604122295"
-# [1] "gpw: 0.101174748926628"
-# [1] "gpw_UN: 0.101001439700283"
+# [1] "GHSL: 0.693588796841264"
+# [1] "wp_uc: 0.616542204420976"
+# [1] "wp_c 0.520772828563885"
+# [1] "gpw_UN: 0.0968625748524237"
 ```
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_hh <- matrix(c(corr_ghsl_HH, corr_wp_c_HH, corr_wp_uc_HH, corr_gpw_HH,corr_gpw_UN_HH),
+cor_matrix_hh <- matrix(c(corr_ghsl_HH, corr_wp_c_HH, corr_wp_uc_HH,corr_gpw_UN_HH),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_hh, method = "color", type = "upper", 
@@ -4310,37 +4260,36 @@ subset_data_2$N_HH<- as.numeric(subset_data_2$N_HH)
 subset_data_2$ghsl <- as.numeric(subset_data_2$ghsl)
 subset_data_2$wp_c <- as.numeric(subset_data_2$wp_c)
 subset_data_2$wp_uc<- as.numeric(subset_data_2$wp_uc)
-subset_data_2$gpw <- as.numeric(subset_data_2$gpw_UN)
+subset_data_2$gpw_UN <- as.numeric(subset_data_2$gpw_UN)
 
 
 # Calculate correlation coefficients
 corr_ghsl_areal_hh <- cor(subset_data_2$N_HH,subset_data_2$ghsl)
 corr_wp_c_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$wp_c)
 corr_wp_uc_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$wp_uc)
-corr_gpw_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$gpw)
+# corr_gpw_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$gpw)
 corr_gpw_UN_areal_hh <-cor(subset_data_2$N_HH,subset_data_2$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl_areal_hh))
 print(paste("wp_uc:",corr_wp_uc_areal_hh))
 print(paste("wp_c",corr_wp_c_areal_hh))
-print(paste("gpw:",corr_gpw_areal_hh))
+# print(paste("gpw:",corr_gpw_areal_hh))
 print(paste("gpw_UN:",corr_gpw_UN_areal_hh))
 
-# [1] "GHSL: 0.0735245533503374"
-# [1] "wp_uc: 0.258855419585444"
-# [1] "wp_c 0.233787523829022"
-# [1] "gpw: 0.129592074410419"
-# [1] "gpw_UN: 0.129592074410419"
+# [1] "GHSL: 0.0514408723002811"
+# [1] "wp_uc: 0.225983847913498"
+# [1] "wp_c 0.187571646495442"
+# [1] "gpw_UN: 0.102660033468945"
 ```
 
 # one line corr_mtrix doing the correlation matrix n_indvi and estimated populations for area<10000
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_areal_hh <- matrix(c(corr_ghsl_areal_hh, corr_wp_c_areal_hh, corr_wp_uc_areal_hh, corr_gpw_areal_hh,corr_gpw_UN_areal_hh),
+cor_matrix_areal_hh <- matrix(c(corr_ghsl_areal_hh, corr_wp_c_areal_hh, corr_wp_uc_areal_hh, corr_gpw_UN_areal_hh),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc","gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_areal_hh , method = "color", type = "upper", 
@@ -4354,7 +4303,7 @@ subset_data$N_HH<- as.numeric(subset_data$N_HH)
 subset_data$ghsl <- as.numeric(subset_data$ghsl)
 subset_data$wp_c <- as.numeric(subset_data$wp_c)
 subset_data$wp_uc<- as.numeric(subset_data$wp_uc)
-subset_data$gpw <- as.numeric(subset_data$gpw_UN)
+subset_data$gpw_UN <- as.numeric(subset_data$gpw_UN)
 
 
 # Calculate correlation coefficients
@@ -4370,21 +4319,21 @@ print(paste("wp_uc:",corr_wp_uc_areag_hh))
 print(paste("wp_c",corr_wp_c_areag_hh))
 print(paste("gpw:",corr_gpw_areag_hh))
 print(paste("gpw_UN:",corr_gpw_UN_areag_hh))
-
-# [1] "GHSL: 0.670731723075656"
-# [1] "wp_uc: 0.587894390835026"
-# [1] "wp_c 0.479422951378752"
-# [1] "gpw: 0.0576024744490923"
-# [1] "gpw_UN: 0.0576024744490923"
+# 
+# [1] "GHSL: 0.669011698727262"
+# [1] "wp_uc: 0.584882295136978"
+# [1] "wp_c 0.474898662853394"
+# [1] "gpw: 0.0523313972591817"
+# [1] "gpw_UN: 0.0521537049762277"
 ```
 
 # one line corr_mtrix doing the correlation matrix n_indvi and estimated populations for area>10000
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_areag_hh <- matrix(c(corr_ghsl_areag_hh, corr_wp_c_areag_hh, corr_wp_uc_areag_hh, corr_gpw_areag_hh,corr_gpw_UN_areag_hh),
+cor_matrix_areag_hh <- matrix(c(corr_ghsl_areag_hh, corr_wp_c_areag_hh, corr_wp_uc_areag_hh, corr_gpw_UN_areag_hh),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc","gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_areag_hh , method = "color", type = "upper", 
@@ -4400,7 +4349,7 @@ campsgt10000$N_HH <- as.numeric(campsgt10000$N_HH)
 campsgt10000$ghsl <- as.numeric(campsgt10000$ghsl)
 campsgt10000$wp_c <- as.numeric(campsgt10000$wp_c)
 campsgt10000$wp_uc<- as.numeric(campsgt10000$wp_uc)
-campsgt10000$gpw <- as.numeric(campsgt10000$gpw_UN)
+campsgt10000$gpw_UN <- as.numeric(campsgt10000$gpw_UN)
 
 
 # Calculate correlation coefficients
@@ -4426,9 +4375,9 @@ print(paste("gpw_UN:",corr_gpw_UN_pg_hh))
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_pg_hh <- matrix(c(corr_ghsl_pg_hh, corr_wp_c_pg_hh, corr_wp_uc_pg_hh, corr_gpw_pg_hh,corr_gpw_UN_pg_hh),
+cor_matrix_pg_hh <- matrix(c(corr_ghsl_pg_hh, corr_wp_c_pg_hh, corr_wp_uc_pg_hh, corr_gpw_UN_pg_hh),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc","gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_pg , method = "color", type = "upper", 
@@ -4441,7 +4390,7 @@ campls10000$N_HH <- as.numeric(campls10000$N_HH)
 campls10000$ghsl <- as.numeric(campls10000$ghsl)
 campls10000$wp_c <- as.numeric(campls10000$wp_c)
 campls10000$wp_uc<- as.numeric(campls10000$wp_uc)
-campls10000$gpw <- as.numeric(campls10000$gpw_UN)
+campls10000$gpw_UN <- as.numeric(campls10000$gpw_UN)
 
 
 # Calculate correlation coefficients
@@ -4458,19 +4407,19 @@ print(paste("wp_c",corr_wp_c_pl_hh))
 print(paste("gpw:",corr_gpw_pl_hh))
 print(paste("gpw_UN:",corr_gpw_UN_pl_hh))
 
-# [1] "GHSL: 0.302281019187766"
-# [1] "wp_uc: 0.332565256451791"
-# [1] "wp_c 0.213400682368705"
-# [1] "gpw: 0.0340064921223657"
-# [1] "gpw_UN: 0.0340064921223657"
+# 1] "GHSL: 0.303260527306786"
+# [1] "wp_uc: 0.332038034502622"
+# [1] "wp_c 0.211690642209158"
+# [1] "gpw: 0.0316770805697565"
+# [1] "gpw_UN: 0.0316770805697565"
 
 ```
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_pl_hh <- matrix(c(corr_ghsl_pl_hh, corr_wp_c_pl_hh, corr_wp_uc_pl_hh, corr_gpw_pl_hh,corr_gpw_UN_pl_hh),
+cor_matrix_pl_hh <- matrix(c(corr_ghsl_pl_hh, corr_wp_c_pl_hh, corr_wp_uc_pl_hh, corr_gpw_UN_pl_hh),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_pl , method = "color", type = "upper", 
@@ -4492,28 +4441,27 @@ formal_camps$gpw_UN<-as.numeric(formal_camps$gpw_UN)
 corr_ghsl_HH_f <- cor(formal_camps$N_HH,formal_camps$ghsl)
 corr_wp_c_HH_f<-cor(formal_camps$N_HH,formal_camps$wp_c)
 corr_wp_uc_HH_f<-cor(formal_camps$N_HH,formal_camps$wp_uc)
-corr_gpw_HH_f<-cor(formal_camps$N_HH,formal_camps$gpw)
+# corr_gpw_HH_f<-cor(formal_camps$N_HH,formal_camps$gpw)
 corr_gpw_UN_HH_f<-cor(formal_camps$N_HH,formal_camps$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl_HH_f))
 print(paste("wp_uc:",corr_wp_uc_HH_f))
 print(paste("wp_c",corr_wp_c_HH_f))
-print(paste("gpw:",corr_gpw_HH_f))
+# print(paste("gpw:",corr_gpw_HH_f))
 print(paste("gpw_UN:",corr_gpw_UN_HH_f))
 
-# [1] "GHSL: 0.694545351305014"
-# [1] "wp_uc: 0.618515091659853"
-# [1] "wp_c 0.523798604122295"
-# [1] "gpw: 0.101174748926628"
-# [1] "gpw_UN: 0.101001439700283"
+# [1] "GHSL: 0.710763796377918"
+# [1] "wp_uc: 0.611933291514018"
+# [1] "wp_c 0.550940469244188"
+# [1] "gpw_UN: 0.113474859187085"
 ```
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_hh_f <- matrix(c(corr_ghsl_HH_f, corr_wp_c_HH_f, corr_wp_uc_HH_f, corr_gpw_HH_f,corr_gpw_UN_HH_f),
+cor_matrix_hh_f <- matrix(c(corr_ghsl_HH_f, corr_wp_c_HH_f, corr_wp_uc_HH_f, corr_gpw_UN_HH_f),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc","gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_hh_f, method = "color", type = "upper", 
@@ -4535,34 +4483,59 @@ informal_camps$gpw_UN<-as.numeric(informal_camps$gpw_UN)
 corr_ghsl_HH_if <- cor(informal_camps$N_HH,informal_camps$ghsl)
 corr_wp_c_HH_if<-cor(informal_camps$N_HH,informal_camps$wp_c)
 corr_wp_uc_HH_if<-cor(informal_camps$N_HH,informal_camps$wp_uc)
-corr_gpw_HH_if<-cor(informal_camps$N_HH,informal_camps$gpw)
+# corr_gpw_HH_if<-cor(informal_camps$N_HH,informal_camps$gpw)
 corr_gpw_UN_HH_if<-cor(informal_camps$N_HH,informal_camps$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl_HH_if))
 print(paste("wp_uc:",corr_wp_uc_HH_if))
 print(paste("wp_c",corr_wp_c_HH_if))
-print(paste("gpw:",corr_gpw_HH_if))
+# print(paste("gpw:",corr_gpw_HH_if))
 print(paste("gpw_UN:",corr_gpw_UN_HH_if))
-
-# [1] "GHSL: 0.655305587898169"
-# [1] "wp_uc: 0.707152002283645"
-# [1] "wp_c 0.45873543451475"
-# [1] "gpw: 0.129618099138202"
-# [1] "gpw_UN: 0.129566317570079"
+# 
+# [1] "GHSL: 0.655724406371716"
+# [1] "wp_uc: 0.707478052641468"
+# [1] "wp_c 0.45940791381195"
+# [1] "gpw_UN: 0.1301776717643"
 ```
 
 ```{r}
 # Create a matrix of correlation coefficients
-cor_matrix_hh_if <- matrix(c(corr_ghsl_HH_if, corr_wp_c_HH_if, corr_wp_uc_HH_if, corr_gpw_HH_if,corr_gpw_UN_HH_if),
+cor_matrix_hh_if <- matrix(c(corr_ghsl_HH_if, corr_wp_c_HH_if, corr_wp_uc_HH_if, corr_gpw_UN_HH_if),
                      nrow = 1, byrow = TRUE,
-                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc", "gpw","gpw_UN")))
+                     dimnames = list(c("N_HH"), c("ghsl", "wp_c", "wp_uc","gpw_UN")))
 
 # Plot the correlation matrix
 corrplot(cor_matrix_hh_if, method = "color", type = "upper", 
          addCoef.col = "black", tl.col = "black", tl.srt = 45)
 ```
 
+#POPULATION as box plot
+```{r}
+# Combine all population difference columns into one data frame
+pop_data <- data.frame(
+  Dataset = rep(c("WP_CON", "WP_UNCON",  "GHSL", "GPW_UN","N_INDVI"), each = nrow(camps)),
+  Population = c(as.numeric(camps$wp_c), as.numeric(camps$wp_uc), as.numeric(camps$ghsl),as.numeric(camps$gpwU),as.numeric(camps$N_INDVI))
+)
+
+# Calculate mean values
+mean_values <- aggregate(Population ~ Dataset, data = pop_data, mean)
+
+# Create a box plot
+boxplot_pop <- ggplot(pop_data, aes(x = Dataset, y = Population)) +
+  geom_boxplot(fill = "skyblue", color = "black") +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 1, color = "red") + # Adding mean points
+  geom_text(data = mean_values, aes(label = round(Population, digits = 2)), vjust = -0.5,size=2) + # Adding text labels
+  labs(title = "Population estimates for different global data products",
+       x = "Dataset", y = "Population") +
+  theme_minimal() +
+ theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        plot.title = element_text(size = 10)) # Rotate x-axis labels
+
+# Print the box plot
+print(boxplot_pop)
+
+```
 
 
 #___POPULATION DIFFERENCE___________
@@ -4648,8 +4621,8 @@ library(ggplot2)
 
 # Combine all population difference columns into one data frame
 difference_data <- data.frame(
-  Dataset = rep(c("WP_CON", "WP_UNCON", "GPW", "GHSL", "GPW_UN"), each = nrow(camps)),
-  Population_Difference = c(as.numeric(camps$wp_c_df), as.numeric(camps$wp_uc_df),as.numeric(camps$gpw_dff), as.numeric(camps$ghsl_df),as.numeric(camps$gpwU_df))
+  Dataset = rep(c("WP_CON", "WP_UNCON",  "GHSL", "GPW_UN"), each = nrow(camps)),
+  Population_Difference = c(as.numeric(camps$wp_c_df), as.numeric(camps$wp_uc_df), as.numeric(camps$ghsl_df),as.numeric(camps$gpwU_df))
 )
 
 # Calculate mean values
@@ -4674,7 +4647,11 @@ print(boxplot_pop_diff)
 #Save error boxplot
 
 ```{r}
-# Save the plot to a file
+# Save the population distrib plot to a file
+ggsave("Plots/boxplot_pop.png", plot =boxplot_pop, width = 8, height = 6, dpi = 400)
+
+
+# Save the boxplot diff plot to a file
 ggsave("Plots/boxplot_pop_diff.png", plot =boxplot_pop_diff, width = 8, height = 6, dpi = 400)
 ```
 
@@ -4688,8 +4665,8 @@ library(plotly)
 
 # Combine all population difference columns into one data frame
 difference_data <- data.frame(
-  Dataset = rep(c("WP_CON", "WP_UNCON", "GPW", "GHSL", "GPW_UN"), each = nrow(camps)),
-  Population_Difference = c(as.numeric(camps$wp_c_df), as.numeric(camps$wp_uc_df), as.numeric(camps$gpw_dff), as.numeric(camps$ghsl_df), as.numeric(camps$gpwU_df))
+  Dataset = rep(c("WP_CON", "WP_UNCON",  "GHSL", "GPW_UN"), each = nrow(camps)),
+  Population_Difference = c(as.numeric(camps$wp_c_df), as.numeric(camps$wp_uc_df),  as.numeric(camps$ghsl_df), as.numeric(camps$gpwU_df))
 )
 
 # Calculate mean values
@@ -4727,8 +4704,8 @@ boxplot_pop_diff_interactive
 ```{r}
 # Combine all population difference columns into one data frame
 difference_data_formal <- data.frame(
-  Dataset = rep(c("WP_CON", "WP_UNCON", "GPW", "GHSL", "GPW_UN"), each = nrow(formal_camps)),
-  Population_Difference = c(as.numeric(formal_camps$wp_c_df), as.numeric(formal_camps$wp_uc_df),as.numeric(formal_camps$gpw_dff), as.numeric(formal_camps$ghsl_df),as.numeric(formal_camps$gpwU_df))
+  Dataset = rep(c("WP_CON", "WP_UNCON",  "GHSL", "GPW_UN"), each = nrow(formal_camps)),
+  Population_Difference = c(as.numeric(formal_camps$wp_c_df), as.numeric(formal_camps$wp_uc_df),as.numeric(formal_camps$ghsl_df),as.numeric(formal_camps$gpwU_df))
 )
 
 # Calculate mean values
@@ -4749,6 +4726,14 @@ boxplot_pop_diff_formal<- ggplot(difference_data_formal, aes(x = Dataset, y = Po
 print(boxplot_pop_diff_formal)
 
 ```
+
+
+```{r}
+
+```
+
+
+
 #Save error boxplot
 
 ```{r}
@@ -4897,8 +4882,8 @@ ggsave("Plots/boxplot_pop_diff_pg.png", plot =boxplot_pop_diff_pg, width = 8, he
 ```{r}
 # Combine all population difference columns into one data frame
 difference_data_pl <- data.frame(
-  Dataset = rep(c("WP_CON", "WP_UNCON", "GPW", "GHSL", "GPW_UN"), each = nrow(campls10000)),
-  Population_Difference = c(as.numeric(campls10000$wp_c_df), as.numeric(campls10000$wp_uc_df),as.numeric(campls10000$gpw_dff), as.numeric(campls10000$ghsl_df),as.numeric(campls10000$gpwU_df))
+  Dataset = rep(c("WP_CON", "WP_UNCON",  "GHSL", "GPW_UN"), each = nrow(campls10000)),
+  Population_Difference = c(as.numeric(campls10000$wp_c_df), as.numeric(campls10000$wp_uc_df), as.numeric(campls10000$ghsl_df),as.numeric(campls10000$gpwU_df))
 )
 
 # Calculate mean values
@@ -5002,20 +4987,22 @@ ggsave("Plots/boxplot_ratio.png", plot =boxplot_ratio, width = 8, height = 6, dp
 #trying to make the area beteween 0 and 1 significant
 
 ```{r}
-# Create the box plot with adjusted y-axis limits and outlier color
-boxplot_ratio <- ggplot(difference_data, aes(x = Dataset, y = ratio)) +
-  geom_boxplot(fill = "coral", color = "black", outlier.color = "lightgray") +
+# Create the box plot with adjusted y-axis limits and outlier color, and multiply y-axis by -1
+boxplot_ratio <- ggplot(difference_data, aes(x = Dataset, y = -ratio)) +
+  geom_boxplot(fill = "lightblue", color = "black", outlier.color = "lightgray") +
   stat_summary(fun = mean, geom = "point", shape = 3, size = 1, color = "blue") +
-  geom_text(data = mean_ratio_values, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 2,color='blue') +
+  geom_text(data = mean_ratio_values, aes(label = round(-ratio, digits = 2)), 
+            vjust = -0.5, size = 2, color = 'blue') +  # Note: -ratio to reflect the y-axis flip
   labs(title = "Ratio of Difference to Survey Population for Different EO Population Data Products",
        x = "Dataset", y = "Ratio of Difference to Survey Population") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(size = 10)) +
-  scale_y_continuous(limits = c(0, 1))
+  scale_y_continuous(limits = c(-1.5, .5))  # Adjust the y-axis limits to focus on the box region
 
 # Print the adjusted box plot
 print(boxplot_ratio)
+
 
 ```
 
@@ -6131,7 +6118,7 @@ sum(camps$osm_b_c)
 ```{r}
 library(gridExtra)
 # Scatter plot with site_status
-ms_b_surv<-ggplot(camps, aes(y = ms_b_c, x = N_INDVI, color = Sit_Stt)) +
+ms_b_surv<-ggplot(camps, aes(y = as.numeric(ms_b_c), x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
@@ -6147,7 +6134,7 @@ ms_b_surv<-ggplot(camps, aes(y = ms_b_c, x = N_INDVI, color = Sit_Stt)) +
 
 
 # Scatter plot with site_status
-g_b_surv<-ggplot(camps, aes(y = g_b_c, x = N_INDVI, color = Sit_Stt)) +
+g_b_surv<-ggplot(camps, aes(y = as.numeric(g_b_c), x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(g_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
@@ -6161,7 +6148,7 @@ g_b_surv<-ggplot(camps, aes(y = g_b_c, x = N_INDVI, color = Sit_Stt)) +
  
   
  # Scatter plot with site_status
-vida_b_surv<-ggplot(camps, aes(y = vida_b_c, x = N_INDVI, color = Sit_Stt)) +
+vida_b_surv<-ggplot(camps, aes(y = as.numeric(vida_b_c), x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(vida_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
@@ -6175,7 +6162,7 @@ vida_b_surv<-ggplot(camps, aes(y = vida_b_c, x = N_INDVI, color = Sit_Stt)) +
   
   
   # Scatter plot with site_status
-osm_b_surv<-ggplot(camps, aes(y = osm_b_c, x = N_INDVI, color = Sit_Stt)) +
+osm_b_surv<-ggplot(camps, aes(y = as.numeric(osm_b_c), x = N_INDVI, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(osm_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   
@@ -6193,9 +6180,86 @@ combined_plot_b <- grid.arrange(ms_b_surv,g_b_surv, vida_b_surv, osm_b_surv, nro
 # Print the combined plot
 print(combined_plot_b)
   
-  
-  
 ```
+
+# with slope using geoabline
+
+```{r}
+library(ggplot2)
+library(gridExtra)
+
+# Scatter plot with site_status and slope of 45 degrees
+ms_b_surv <- ggplot(camps, aes(y = as.numeric(ms_b_c), x = as.numeric(N_INDVI), color = Sit_Stt)) +
+  geom_jitter(shape = 7, size = 0.5, alpha = 2, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
+  labs(title = "Comparison between MS building count and survey IOM populations",
+       y = "Microsoft building count",
+       x = "IOM surveyed population") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0, 0)) +
+  theme(plot.title = element_text(size = 9, colour = "Red"),
+        axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status and slope of 45 degrees
+g_b_surv <- ggplot(camps, aes(y = as.numeric(g_b_c), x = as.numeric(N_INDVI), color = Sit_Stt)) +
+  geom_jitter(shape = 7, size = 0.5, alpha = 2, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
+  labs(title = NULL,
+       y = "Google building count",
+       x = "IOM surveyed population") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0, 0)) +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status and slope of 45 degrees
+vida_b_surv <- ggplot(camps, aes(y = as.numeric(vida_b_c), x = as.numeric(N_INDVI), color = Sit_Stt)) +
+  geom_jitter(shape = 7, size = 0.5, alpha = 2, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
+  labs(title = NULL,
+       y = "Vida building count",
+       x = "IOM surveyed population") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0, 0)) +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status and slope of 45 degrees
+osm_b_surv <- ggplot(camps, aes(y = as.numeric(osm_b_c), x = as.numeric(N_INDVI), color = Sit_Stt)) +
+  geom_jitter(shape = 7, size = 0.5, alpha = 2, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
+  labs(title = NULL,
+       y = "OSM building count",
+       x = "IOM surveyed population") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0, 0)) +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Combine all scatter plots into one
+combined_plot_b <- grid.arrange(ms_b_surv, g_b_surv, vida_b_surv, osm_b_surv, nrow = 2, ncol = 2)
+
+combined_plot_b <- grid.arrange(ms_b_surv + ylim(0, 10000), g_b_surv + ylim(0, 10000), vida_b_surv + ylim(0, 10000), osm_b_surv + ylim(0, 10000), nrow = 2, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_b)
+
+
+```
+
 
 
 #COMBINED PLOT SAVE
@@ -6211,12 +6275,17 @@ ggsave("Plots/building_survey_pop_comb.png", plot =combined_plot_b , width = 8, 
 ##**%%%Combining the scatterplots for all the Building datsets+ Household in one plot%%%%%
 
 ```{r}
+camps$ms_b_c=as.numeric(camps$ms_b_c)
+camps$g_b_c=as.numeric(camps$g_b_c)
+camps$osm_b_c=as.numeric(camps$osm_b_c)
+camps$vida_b_c=as.numeric(camps$vida_b_c)
 library(gridExtra)
 # Scatter plot with site_status
 # Scatter plot with site_status
 ms_b_surv_hh<-ggplot(camps, aes(y = ms_b_c, x = N_HH, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(ms_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
   
   labs(title = "Comparison between MS building count and survey household number",
        y = "Microsoft building count",
@@ -6234,7 +6303,7 @@ ms_b_surv_hh<-ggplot(camps, aes(y = ms_b_c, x = N_HH, color = Sit_Stt)) +
 g_b_hh<-ggplot(camps, aes(y = g_b_c, x = N_HH, color = Sit_Stt)) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(g_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
-  
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
   labs(title = NULL,
        y = "Google building count",
        x = "Iom surveyed household count") +scale_x_continuous(expand = c(0,0))+
@@ -6247,7 +6316,7 @@ g_b_hh<-ggplot(camps, aes(y = g_b_c, x = N_HH, color = Sit_Stt)) +
 vida_b_hh<-ggplot(camps, aes(y = vida_b_c, x = N_HH, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_HH) , y = as.numeric(vida_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
-  
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
   labs(title = NULL,
        y = "Vida building count",
        x = "Iom surveyed household count") +
@@ -6263,7 +6332,7 @@ vida_b_hh<-ggplot(camps, aes(y = vida_b_c, x = N_HH, color = Sit_Stt)) +geom_smo
 osm_b_hh<-ggplot(camps, aes(y = osm_b_c, x = N_INDVI, color = Sit_Stt)) +geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
   #geom_point(alpha=0.2) +
   geom_jitter(aes(x =as.numeric(N_INDVI) , y = as.numeric(osm_b_c)),shape=7,size = 0.5, alpha = 2,show.legend = TRUE)+
-  
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
   labs(title = NULL,
        y = "OSM building count",
        x = "Iom surveyed household count") +
@@ -6275,12 +6344,90 @@ osm_b_hh<-ggplot(camps, aes(y = osm_b_c, x = N_INDVI, color = Sit_Stt)) +geom_sm
 # Combine all scatter plots into one
 combined_plot_b_hh <- grid.arrange(ms_b_surv_hh,g_b_hh,vida_b_hh, osm_b_hh, nrow = 2, ncol = 2)
 
+# Combine all scatter plots into one
+combined_plot_b_hh <- grid.arrange(ms_b_surv_hh+ylim(0, 10000),g_b_hh+ylim(0, 10000),vida_b_hh+ylim(0, 10000), osm_b_hh+ylim(0, 10000), nrow = 2, ncol = 2)
+
 # Print the combined plot
 print(combined_plot_b_hh)
   
   
   
 ```
+
+
+```{r}
+library(gridExtra)
+
+# Scatter plot with site_status and slope of 45 degrees
+ms_b_surv_hh <- ggplot(camps, aes(y = ms_b_c, x = N_HH, color = Sit_Stt)) +
+  geom_jitter(aes(x = as.numeric(N_HH), y = as.numeric(ms_b_c)), shape = 7, size = 0.5, alpha = 2, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
+  labs(title = "Comparison between MS building count and survey household number",
+       y = "Microsoft building count",
+       x = "Iom surveyed Household count") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0, 0)) +
+  theme(plot.title = (element_text(size = 9, colour = "Red")),
+        axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status and slope of 45 degrees
+g_b_hh <- ggplot(camps, aes(y = g_b_c, x = N_HH, color = Sit_Stt)) +
+  geom_jitter(aes(x = as.numeric(N_HH), y = as.numeric(g_b_c)), shape = 7, size = 0.5, alpha = 2, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
+  labs(title = NULL,
+       y = "Google building count",
+       x = "Iom surveyed household count") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0, 0)) +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status and slope of 45 degrees
+vida_b_hh <- ggplot(camps, aes(y = vida_b_c, x = N_HH, color = Sit_Stt)) +
+  geom_jitter(aes(x = as.numeric(N_HH), y = as.numeric(vida_b_c)), shape = 7, size = 0.5, alpha = 2, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
+  labs(title = NULL,
+       y = "Vida building count",
+       x = "Iom surveyed household count") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0, 0)) +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Scatter plot with site_status and slope of 45 degrees
+osm_b_hh <- ggplot(camps, aes(y = osm_b_c, x = N_HH, color = Sit_Stt)) +
+  geom_jitter(aes(x = as.numeric(N_HH), y = as.numeric(osm_b_c)), shape = 7, size = 0.5, alpha = 2, show.legend = TRUE) +
+  geom_smooth(method = "lm", aes(group = Sit_Stt), se = FALSE) +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # Add a slope of 45 degrees
+  labs(title = NULL,
+       y = "OSM building count",
+       x = "Iom surveyed household count") +
+  theme_minimal() +
+  scale_x_continuous(expand = c(0, 0)) +
+  theme(axis.text.x = element_text(size = 5),
+        axis.text.y = element_text(size = 5),
+        axis.title.x = element_text(size = 5),
+        axis.title.y = element_text(size = 5))
+
+# Combine all scatter plots into one
+combined_plot_b_hh <- grid.arrange(ms_b_surv_hh, g_b_hh, vida_b_hh, osm_b_hh, nrow = 2, ncol = 2)
+
+# Print the combined plot
+print(combined_plot_b_hh)
+
+```
+
+
 
 
 #COMBINED PLOT SAVE
@@ -6307,7 +6454,7 @@ summarized_data <- camps %>%
 
 summarized_data <- data.frame(
   source = c("Google", "OSM", "Microsoft", "VIDA"),
-  building_count = c(170437, 26323, 67317, 185603)
+  building_count = c(169994,26279, 67079, 185140)
 )
 
 # Plotting
@@ -6374,6 +6521,41 @@ for (col in numeric_cols_b) {
 correlation_matrix_building <- cor(camps_data_nogeom[, numeric_cols_b])
 print(correlation_matrix_building)
 ```
+
+```{r}
+# Calculate correlation coefficients
+corr_ms_b_c <- cor(camps$N_INDVI, camps$ms_b_c)
+corr_g_b_c <- cor(camps$N_INDVI, camps$g_b_c)
+corr_vida_b_c <- cor(camps$N_INDVI, camps$vida_b_c)
+corr_osm_b_c <- cor(camps$N_INDVI, camps$osm_b_c)
+corr_ms_b_c_hh <- cor(camps$N_HH, camps$ms_b_c)
+corr_g_b_c_hh <- cor(camps$N_HH, camps$g_b_c)
+corr_vida_b_c_hh <- cor(camps$N_HH, camps$vida_b_c)
+corr_osm_b_c_hh <- cor(camps$N_HH, camps$osm_b_c)
+
+# Calculate coefficient of determination (R-squared)
+rsquared_ms_b_c <- corr_ms_b_c^2
+rsquared_g_b_c <- corr_g_b_c^2
+rsquared_vida_b_c <- corr_vida_b_c^2
+rsquared_osm_b_c <- corr_osm_b_c^2
+rsquared_ms_b_c_hh <- corr_ms_b_c_hh^2
+rsquared_g_b_c_hh <- corr_g_b_c_hh^2
+rsquared_vida_b_c_hh <- corr_vida_b_c_hh^2
+rsquared_osm_b_c_hh <- corr_osm_b_c_hh^2
+
+# View coefficient of determination (R-squared)
+print(rsquared_ms_b_c)
+print(rsquared_g_b_c)
+print(rsquared_vida_b_c)
+print(rsquared_osm_b_c)
+print(rsquared_ms_b_c_hh)
+print(rsquared_g_b_c_hh)
+print(rsquared_vida_b_c_hh)
+print(rsquared_osm_b_c_hh)
+
+```
+
+
 #Coorelation heat map and graph
 
 #Heat map of correlation matrix
@@ -6400,6 +6582,39 @@ heat_map_corr_b <- ggplot(data = corr_matrix_long_b, aes(x = Var1, y = Var2, fil
 print(heat_map_corr_b)
 
 ```
+
+```{r}
+# Convert the correlation matrix to a dataframe
+corr_matrix_b <- correlation_matrix_building
+# Assign row and column names
+rownames(corr_matrix_b) <- colnames(corr_matrix_b) <- c("N_INDVI", "N_HH", "g_b_c", "ms_b_c", "vida_b_c", "osm_b_c")
+# Convert the correlation matrix to long format
+corr_matrix_long_b <- melt(corr_matrix_b)
+
+# Function to calculate R-squared
+rsquared <- function(x) {
+  x^2
+}
+
+# Add R-squared values to the correlation matrix
+corr_matrix_long_b$rsquared <- rsquared(corr_matrix_long_b$value)
+
+# Plot the heatmap with lighter color and correlation values
+heat_map_corr_b <- ggplot(data = corr_matrix_long_b, aes(x = Var1, y = Var2, fill = rsquared, label = round(rsquared, 2))) +
+  geom_tile(color = "white") +
+  geom_text(color = "black", size = 2) +
+  scale_fill_gradient(low = "lightblue", high = "lightcoral") +
+  labs(title = "Correlation Matrix Heatmap with R-squared Values",
+       x = "Variables",
+       y = "Variables",
+       fill = "R-squared") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(heat_map_corr_b)
+
+```
+
 #save correlation matrix
 ```{r}
 # Save the plot to a file
@@ -6573,11 +6788,12 @@ corrplot(cor_matrix_areag_hh_b , method = "color", type = "upper",
 # BUILDING STATS-HOUSEHOLD DIFFERENCE 
 #BUILDING difference e summary
 ```{r}
-# Subtract N_INDVID from ras_name
-camps$g_bc_df <- camps$N_HH - camps$g_b_c
-camps$ms_bc_df <- camps$N_HH - camps$ms_b_c
-camps$vida_bc_df <- camps$N_HH - camps$vida_b_c
-camps$osm_bc_df <- camps$N_HH - camps$osm_b_c
+# Subtract N_HH from the respective columns
+camp_final$g_bc_df <- as.numeric(camp_final$N_HH) - as.numeric(camp_final$g_b_c)
+camp_final$ms_bc_df <- as.numeric(camp_final$N_HH) - as.numeric(camp_final$ms_b_c)
+camp_final$vida_bc_df <- as.numeric(camp_final$N_HH) - as.numeric(camp_final$vida_b_c)
+camp_final$osm_bc_df <- as.numeric(camp_final$N_HH) - as.numeric(camp_final$osm_b_c)
+
 
 print('g_c_bdifference')
 summary(camps$g_bc_df)
@@ -6603,8 +6819,11 @@ library(ggplot2)
 # Combine all population difference columns into one data frame
 difference_data_building <- data.frame(
   Dataset_build = rep(c("GOOGLE",  "OSM","MICROSOFT", "VIDA"), each = nrow(camps)),
-  Building_Difference = c(as.numeric(camps$g_bc_df), as.numeric(camps$osm_bc_df), as.numeric(camps$ms_bc_df),as.numeric(camps$vida_bc_df)))
+  Building_Difference = c(as.numeric(camps$g_bc_df), as.numeric(camps$osm_bc_df), as.numeric(camps$ms_bc_df), as.numeric(camps$vida_bc_df))
+)
 
+# Multiply the building differences by -1
+difference_data_building$Building_Difference <- -1 * difference_data_building$Building_Difference
 
 # Calculate mean values
 mean_values <- aggregate(Building_Difference ~ Dataset_build, data = difference_data_building, mean)
@@ -6617,11 +6836,12 @@ boxplot_build_diff <- ggplot(difference_data_building, aes(x = Dataset_build, y 
   labs(title = "Difference between Surveyed Household and Building count(Survey-Estimate) for different Building footprint data products",
        x = "Dataset", y = "Building count Difference") +
   theme_minimal() +
- theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
         plot.title = element_text(size = 10)) # Rotate x-axis labels
 
 # Print the box plot
 print(boxplot_build_diff)
+
 
 
 ```
@@ -6634,30 +6854,75 @@ library(ggplot2)
 
 # Combine all population difference columns into one data frame
 difference_data_building <- data.frame(
-  Dataset_build = rep(c("GOOGLE",  "OSM", "MICROSOFT", "VIDA"), each = nrow(camps)),
+  Dataset_build = rep(c("GOOGLE", "OSM", "MICROSOFT", "VIDA"), each = nrow(camps)),
   Building_Difference = c(as.numeric(camps$g_bc_df), as.numeric(camps$osm_bc_df), as.numeric(camps$ms_bc_df), as.numeric(camps$vida_bc_df))
 )
+
+# Multiply the building differences by -1
+difference_data_building$Building_Difference <- -1 * difference_data_building$Building_Difference
 
 # Calculate mean values
 mean_values <- aggregate(Building_Difference ~ Dataset_build, data = difference_data_building, mean)
 
 # Create a box plot
 boxplot_build_diff <- ggplot(difference_data_building, aes(x = Dataset_build, y = Building_Difference)) +
-  geom_boxplot(fill = "skyblue", color = "black", outlier.alpha = 0.2, width = 2) + # Increase box width
-  stat_summary(fun = mean, geom = "point", shape = 23, size = 2, color = "red") + # Adding mean points with larger size
-  geom_text(data = mean_values, aes(label = round(Building_Difference, digits = 2)), vjust = -0.5, size = 3, color = "red") + # Adding larger text labels
-  labs(title = "Difference between Surveyed Household and Building Count (Survey-Estimate) for Different Building Footprint Data Products",
-       x = "Dataset", y = "Building Count Difference") +
+  geom_boxplot(fill = "skyblue", color = "black", alpha = 0.7) + # Adjust box transparency
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 3, color = "red") + # Adding mean points
+  geom_text(data = mean_values, aes(label = round(Building_Difference, digits = 2)), vjust = -0.5, size = 3, color = "red") + # Adding mean labels
+  labs(title = "Difference between Surveyed Household and Building count (Survey-Estimate) for different Building footprint data products",
+       x = "Dataset", y = "Building count Difference") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        plot.title = element_text(size = 10),
-        plot.margin = margin(1, 1, 1, 1, "cm")) # Add more margin space around the plot
+        plot.title = element_text(size = 10)) + # Rotate x-axis labels
+  ylim(-20, 20)  # Adjust the y-axis limits to focus on the area around 0
 
 # Print the box plot
 print(boxplot_build_diff)
 
 
 ```
+
+```{r}
+library(ggplot2)
+
+# Combine all population difference columns into one data frame
+difference_data_building <- data.frame(
+  Dataset_build = rep(c("GOOGLE", "OSM", "MICROSOFT", "VIDA"), each = nrow(camps)),
+  Building_Difference = c(as.numeric(camps$g_bc_df), as.numeric(camps$osm_bc_df), as.numeric(camps$ms_bc_df), as.numeric(camps$vida_bc_df)))
+
+# Calculate quartiles and interquartile range (IQR)
+quartiles <- tapply(difference_data_building$Building_Difference, difference_data_building$Dataset_build, quantile)
+IQR <- sapply(quartiles, diff)
+
+# Define upper and lower bounds for outliers
+outlier_bounds <- sapply(1:4, function(i) c(min(quartiles[[i]]), max(quartiles[[i]]) + 1.5 * IQR[i]))
+
+# Identify outliers
+outliers <- Map(function(x, q) x[x < q[1] | x > q[2]], 
+                split(difference_data_building$Building_Difference, difference_data_building$Dataset_build), outlier_bounds)
+
+# Create a box plot
+boxplot_build_diff <- ggplot(difference_data_building, aes(x = Dataset_build, y = Building_Difference)) +
+  geom_boxplot(fill = "skyblue", color = "black", alpha = 0.7) + # Adjust box transparency
+  geom_point(data = data.frame(Dataset_build = rep(names(outliers), sapply(outliers, length)),
+                               Building_Difference = unlist(outliers)), 
+             aes(x = Dataset_build, y = Building_Difference),
+             shape = 1, size = 2, alpha = 0.5, color = "red") + # Add outliers separately
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 1, color = "red") + # Adding mean points
+  labs(title = "Difference between Surveyed Household and Building count (Survey-Estimate) for different Building footprint data products",
+       x = "Dataset", y = "Building count Difference") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1), 
+        plot.title = element_text(size = 10)) + # Rotate x-axis labels
+  ylim(-20, 20)  # Adjust the y-axis limits to focus on the area around 0
+
+# Print the box plot
+print(boxplot_build_diff)
+
+```
+
+
+
 
 ```{r}
 
@@ -6667,7 +6932,7 @@ ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/error_building_hh .
 
 
 #__RATIOS OF ERROR____
-#ratio of error for EO datasets 
+#ratio of error for building datasets 
 ```{r}
 # Calculate the ratio of the difference to the surveyed population
 difference_data_building$ratio <- difference_data_building$Building_Difference / camps$N_HH
@@ -6732,9 +6997,9 @@ mean_ratio_values_build <- aggregate(ratio ~ Dataset_build, data = difference_da
 
 # Create a box plot for the ratios
 boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = ratio)) +
-  geom_boxplot(fill = "pink", color = "black") + # Adjust outlier transparency
-  stat_summary(fun = mean, geom = "point", shape = 23, size = 2, color = "red") + # Adding mean points with larger size
-  geom_text(data = mean_ratio_values_build, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 3, color = "red") + # Adding larger text labels
+  geom_boxplot(fill = "pink", color = "coral") + # Adjust outlier transparency
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 2, color = "blue") + # Adding mean points with larger size
+  geom_text(data = mean_ratio_values_build, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 3, color = "blue") + # Adding larger text labels
   labs(title = "Ratio of Difference to Survey Household for Different Building Footprint Data Products",
        x = "Dataset", y = "Ratio of Difference to Survey Household number") +
   theme_minimal() +
@@ -6748,6 +7013,8 @@ print(boxplot_ratio_build)
 
 ```
 
+#fliping the coordinates
+
 ```{r}
 # Calculate the ratio of the difference to the surveyed population
 difference_data_building$ratio <- difference_data_building$Building_Difference / camps$N_HH
@@ -6755,34 +7022,54 @@ difference_data_building$ratio <- difference_data_building$Building_Difference /
 # Aggregate mean ratio values
 mean_ratio_values_build <- aggregate(ratio ~ Dataset_build, data = difference_data_building, mean)
 
-# Define outlier symbol
-outlier_symbol <- geom_point(shape = 4, color = "red", size = 2)
+# Create a box plot for the ratios with reversed y-axis
+boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = -ratio)) +  # Negative sign to reverse y-axis
+  geom_boxplot(fill = "skyblue", color = "black") +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 1, color = "red") +
+  geom_text(data = mean_ratio_values_build, aes(label = round(-ratio, digits = 2)), vjust = 0.5, size = 2, color = 'Red') +  # Adjust vjust to position text correctly
+  labs(title = "Ratio of Difference to Survey Household for Different Building Footprint Data Products",
+       x = "Dataset", y = "Ratio of Difference to Survey Household number") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10)) +
+  scale_y_continuous(labels = abs)  # Display absolute values on y-axis
 
-# Create a box plot for the ratios
-boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = ratio)) +
-  geom_boxplot(fill = "pink", color = "black", outlier.shape = NA) + # Hide outliers in the boxplot
-  geom_point(position = position_jitter(width = 0.2), color = "pink", alpha = 0.3) + # Lighten outlier color
-  stat_summary(fun = mean, geom = "point", shape = 2, size = 2, color = "blue") + # Changing mean point color to blue
-  geom_text(data = mean_ratio_values_build, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 3, color = "blue") + # Changing mean text color to blue
+# Print the box plot
+print(boxplot_ratio_build)
+
+
+```
+
+
+
+#flipping and focusing
+
+```{r}
+# Calculate the ratio of the difference to the surveyed population
+difference_data_building$ratio <- difference_data_building$Building_Difference / camps$N_HH
+
+# Aggregate mean ratio values
+mean_ratio_values_build <- aggregate(ratio ~ Dataset_build, data = difference_data_building, mean)
+
+# Create a box plot for the ratios with flipped y-axis
+boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = -ratio)) +  # Flip the y-axis by multiplying ratio by -1
+  geom_boxplot(fill = "pink", color = "coral") + # Adjust outlier transparency
+  stat_summary(fun = mean, geom = "point", shape = 1, size = 1, color = "black") + # Adding mean points with larger size
+  geom_text(data = mean_ratio_values_build, aes(label = round(-ratio, digits = 2)), vjust = 0.5, size = 3, color = "blue") + # Adding larger text labels
   labs(title = "Ratio of Difference to Survey Household for Different Building Footprint Data Products",
        x = "Dataset", y = "Ratio of Difference to Survey Household number") +
   theme_minimal() +
   theme(axis.text.x = element_text(angle = 45, hjust = 1),
         plot.title = element_text(size = 10),
         plot.margin = margin(1, 1, 1, 1, "cm")) + # Add more margin space around the plot
-  coord_cartesian(ylim = c(-2, 2)) + # Adjusting ylim to focus on the main distribution area
-  geom_errorbar(aes(ymin = -2, ymax = -2), width = 0.2, color = "red", size = 1) + # Adding error bars at ylim for outliers
-  geom_errorbar(aes(ymin = 2, ymax = 2), width = 0.2, color = "red", size = 1) + # Adding error bars at ylim for outliers
-  guides(fill=FALSE) # Hiding legend for fill color
+  coord_cartesian(ylim = c(-2, 2)) # Adjusting ylim to focus on the main distribution area
 
 # Print the box plot
 print(boxplot_ratio_build)
 
 ```
 
-```{r}
 
-```
 
 
 ```{r}
@@ -7097,7 +7384,7 @@ camp_final_sum$Building_Area <- camp_final_sum$Building_Area / 1000
 p <- ggplot(camp_final_sum, aes(x = Source, y = Building_Area, fill = dou_level1)) +
   geom_bar(stat = "identity", position = "stack") +
   labs(x = "Source", y = "Total Building Area (k m^2)", title = "Total Building Area by Source") +
-  scale_fill_manual(values = c("blue", "green", "red", "orange"),
+  scale_fill_manual(values = c( "blue", "lightgreen", "coral"),
                     name = "Dou Level 1") +
   scale_x_discrete(labels = c("Microsoft", "Google", "OSM", "Vida")) +
   scale_y_continuous(labels = comma_format(scale = 0.001)) +  # Set y-axis labels in "k mode"
@@ -7105,7 +7392,98 @@ p <- ggplot(camp_final_sum, aes(x = Source, y = Building_Area, fill = dou_level1
   theme(legend.position = "top")
 
 # Add text labels for the areas on top of each stack
-p + geom_text(aes(label = format(Building_Area, big.mark = ",", scientific = FALSE)), position = position_stack(vjust = 0.5), size = 2.5, color = "black")
+buildings_area<-p + geom_text(aes(label = format(Building_Area, big.mark = ",", scientific = FALSE)), position = position_stack(vjust = 0.5), size = 2.5, color = "black")
+print(buildings_area)
+```
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/dou_1_building_area.png", plot =buildings_area, width = 8, height = 6, dpi = 400)
+```
+
+#dou_level and population density
+```{r}
+library(ggplot2)
+
+# Convert `st_pp_d` and `dou_level1` columns to appropriate types if necessary
+camp_final$st_pp_d <- as.numeric(camp_final$st_pp_d)
+camp_final$dou_level1 <- as.factor(camp_final$dou_level1)
+
+# Calculate mean values
+mean_values <- aggregate(st_pp_d ~ dou_level1, data = camp_final, mean)
+
+# Create a box plot for st_pp_d grouped by dou_level1
+boxplot_st_pp_d <- ggplot(camp_final, aes(x = dou_level1, y = st_pp_d, fill = dou_level1)) +
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 3, color = "red") + # Adding mean points
+  geom_text(data = mean_values, aes(label = round(st_pp_d, digits = 2), y = st_pp_d), 
+            vjust = -0.5, size = 3, color = "blue") + # Adding mean text labels
+  geom_jitter(width = 0.2, size = 1, color = "black", alpha = 0.5) + # Adding jitter for better visibility of individual points
+  labs(title = "Distribution of st_pp_d by dou_level1",
+       x = "Dou Level 1",
+       y = "st_pp_d",
+       fill = "Dou Level 1") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  coord_cartesian(ylim = c(-1, max(camp_final$st_pp_d, na.rm = TRUE))) # Adjusting y-axis limits to start from -1
+
+# Print the box plot
+print(boxplot_st_pp_d)
+
+
+```
+```{r}
+library(ggplot2)
+
+# Ensure the data is numeric
+camp_final$N_INDVI <- as.numeric(camp_final$N_INDVI)
+camp_final$st_pp_d <- as.numeric(camp_final$st_pp_d)
+
+# Create the scatter plot with a linear regression line and a 45-degree slope line
+scatter_plot <- ggplot(camp_final, aes(x = N_INDVI, y = st_pp_d, color = dou_level1)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE) +  # Linear regression line
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "blue") +  # 45-degree slope line
+  scale_y_continuous(limits = c(-1, max(camp_final$st_pp_d, na.rm = TRUE))) +  # Adjust y-axis to start from a negative value
+  labs(title = "Scatter Plot of Site Population Density vs N_INDVI",
+       x = "N_INDVI",
+       y = "Site Population Density (st_pp_d)") +
+  theme_minimal()
+
+# Print the scatter plot
+print(scatter_plot)
+
+
+```
+
+```{r}
+lm_model <- lm(st_pp_d ~ N_INDVI + N_HH + g_b_c + ms_b_c + vida_b_c + osm_b_c + dou_level1, data = camp_final)
+summary(lm_model)
+
+```
+```{r}
+multi_lm_model <- lm(st_pp_d ~ N_INDVI * dou_level1 + N_HH * dou_level1, data = camp_final)
+summary(multi_lm_model)
+
+```
+
+```{r}
+chisq_test <- chisq.test(table(camp_final$dou_level1, camp_final$Site_Ar))
+chisq_test
+
+```
+
+```{r}
+library(cluster)
+kmeans_model <- kmeans(camp_final[, numeric_cols], centers = 3)
+camp_final$cluster <- as.factor(kmeans_model$cluster)
+
+ggplot(camp_final, aes(x = N_INDVI, y = st_pp_d, color = cluster)) +
+  geom_point() +
+  labs(title = "K-Means Clustering of Site Population Density", 
+       x = "N_INDVI", y = "Site Population Density (st_pp_d)") +
+  theme_minimal()
+
 ```
 
 #5. dou_level1 and median footprint stratified by urban, rural classifications
@@ -7226,8 +7604,8 @@ library(ggplot2)
 
 # Combine all population difference columns into one data frame
 difference_data_dou <- data.frame(
-  Dataset = rep(c("WP_CON", "WP_UNCON", "GPW", "GHSL", "GPW_UN"), each = nrow(camp_final)),
-  Population_Difference_dou = c(as.numeric(camp_final$wp_c_df), as.numeric(camp_final$wp_uc_df),as.numeric(camp_final$gpw_dff), as.numeric(camp_final$ghsl_df),as.numeric(camp_final$gpwU_df)),
+  Dataset = rep(c("WP_CON", "WP_UNCON", "GHSL", "GPW_UN"), each = nrow(camp_final)),
+  Population_Difference_dou = c(as.numeric(camp_final$wp_c_df), as.numeric(camp_final$wp_uc_df), as.numeric(camp_final$ghsl_df),as.numeric(camp_final$gpwU_df)),
   dou_level1 = camp_final$dou_level1  # Adding dou_level1 column
 )
 
@@ -7252,6 +7630,35 @@ boxplot_ratio <- ggplot(difference_data_dou, aes(x = Dataset, y = ratio, fill = 
 print(boxplot_ratio)
 
 ```
+
+#building box focus and flipping negative coord
+
+
+
+
+```{r}
+# Create a box plot for the ratios grouped by dou_level with y-axis multiplied by -1 and adjusted y-axis limits
+boxplot_ratio <- ggplot(difference_data_dou, aes(x = Dataset, y = -ratio, fill = dou_level1)) +
+  geom_boxplot(width = 0.6, outlier.alpha = 0.2) +  # Adjust the width and lightening the outliers here
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 0.3, color = "blue") +  # Changing the color of the mean
+  stat_summary(fun.data = mean_cl_normal, geom = "text", 
+               aes(label = round(..y.., digits = 2), group = dou_level1), 
+               position = position_dodge(width = 0.75),  # Use position_dodge with appropriate width
+               vjust = -0.5, size = 2, color = "black") +  # Changing the color of the mean
+  labs(title = "Ratio of Difference to Survey Population by EO Population Data Products and dou_level",
+       x = "Dataset", y = "Ratio of Difference to Survey Population", fill = "dou_level") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10)) +
+  coord_cartesian(ylim = c(-10, 10))  # Adjusting y-axis limits to focus more on the box region
+
+# Print the box plot
+print(boxplot_ratio)
+
+```
+
+
+
 
 ```{r}
 ## Create a box plot for the ratios grouped by dou_level
@@ -7279,6 +7686,49 @@ print(boxplot_ratio)
 # Save the plot as an image file
 ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/boxplot_ratio_error.png", plot = boxplot_ratio, width = 8, height = 6, dpi = 300)
 ```
+
+#building error ratio by urban rural 
+
+
+```{r}
+# Combine all population difference columns into one data frame for building dataset
+difference_data_building <- data.frame(
+  Dataset_build = rep(c("GOOGLE", "OSM", "MICROSOFT", "VIDA"), each = nrow(camp_final)),
+  Building_Difference = c(as.numeric(camp_final$g_bc_df), as.numeric(camp_final$osm_bc_df), as.numeric(camp_final$ms_bc_df), as.numeric(camp_final$vida_bc_df)),
+  dou_level1 = rep(camp_final$dou_level1, 4)  # Adding dou_level1 column
+)
+
+
+# Calculate the ratio of the difference to the surveyed population
+difference_data_building$ratio <- -1 * (difference_data_building$Building_Difference / camps$N_HH)
+
+# Aggregate mean ratio values
+mean_ratio_values_build <- aggregate(ratio ~ Dataset_build + dou_level1, data = difference_data_building, mean)
+
+# Create a box plot for the ratios grouped by dou_level
+boxplot_ratio_build <- ggplot(difference_data_building, aes(x = Dataset_build, y = ratio, fill = dou_level1)) +
+  geom_boxplot(width = 0.6,outlier.colour = "lightgrey") +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = .5, color = "black") +
+  geom_text(data = mean_ratio_values_build, aes(label = round(ratio, digits = 2), group = dou_level1), 
+            position = position_dodge(width = 0.75), vjust = -0.5, size = 3, color = "blue") +
+  labs(title = "Ratio of Difference to Survey Household for Different Building Footprint Data Products",
+       x = "Dataset", y = "Ratio of Difference to Survey Household number", fill = "dou_level") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(size = 10)) +
+  coord_cartesian(ylim = c(-10, 10))  # Adjusting y-axis limits to focus more on the box region
+
+# Print the box plot
+print(boxplot_ratio_build)
+
+
+```
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/boxplot_ratio_error_build.png", plot = boxplot_ratio_build, width = 8, height = 6, dpi = 300)
+```
+
+
 
 
 #__________________________________________
