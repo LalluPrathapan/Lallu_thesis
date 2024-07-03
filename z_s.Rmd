@@ -3493,6 +3493,62 @@ ggsave("Plots/combined_sctr2.png", plot = combined_plot2, width = 8, height = 6,
 ggsave("Plots/combined_plot_hh.png", plot = combined_plot_hh, width = 8, height = 6, dpi = 400)
 ggsave("Plots/combined_plot_smooth_line_hh.png", plot = combined_plot_smooth_line_hh, width = 8, height = 6, dpi = 400)
 ```
+
+#one scatteplot with all the poputalion estimates and survey
+
+```{r}
+# Load necessary libraries
+library(sf)
+library(ggplot2)
+library(tidyr)
+
+# Assuming your data is in the sf object 'camps'
+# Convert to data frame for ggplot2
+camps_df <- as.data.frame(camps)
+
+# Select the relevant columns and reshape the data
+camps_long <- camps_df %>%
+  select(N_INDVI, ghsl, wp_uc, wp_c, gpw_UN) %>%
+  gather(key = "Population_Estimate", value = "Estimate_Value", -N_INDVI)
+
+# Create the scatterplot
+ggplot(camps_long, aes(x = N_INDVI, y = Estimate_Value, color = Population_Estimate)) +
+  geom_point() +
+  labs(x = "Survey Population (N_INDVI)", y = "Estimated Population",
+       title = "Scatterplot of Survey Population vs. Estimated Populations") +
+  theme_minimal()
+
+```
+# same above plot with nindvi less than and equal to 100
+```{r}
+# Load necessary libraries
+library(sf)
+library(ggplot2)
+library(tidyr)
+library(dplyr)  # for the filtering function
+
+# Assuming your data is in the sf object 'camps'
+# Convert to data frame for ggplot2
+camps_df <- as.data.frame(camps)
+
+# Select the relevant columns and reshape the data
+camps_long <- camps_df %>%
+  select(N_INDVI, ghsl, wp_uc, wp_c, gpw_UN) %>%
+  filter(N_INDVI <= 100) %>%  # Filter for N_INDVI <= 100
+  gather(key = "Population_Estimate", value = "Estimate_Value", -N_INDVI)
+
+# Create the scatterplot
+ggplot(camps_long, aes(x = N_INDVI, y = Estimate_Value, color = Population_Estimate)) +
+  geom_point() +
+  geom_abline(slope = 1, intercept = 0, linetype = "dashed", color = "red") +  # 1:1 ratio line
+  labs(x = "Survey Population (N_INDVI)", y = "Estimated Population",
+       title = "Scatterplot of Survey Population vs. Estimated Populations (N_INDVI <= 100)") +
+  theme_minimal()
+
+```
+
+
+
 #_____________________________
 
 #AREA WISE combined scatterplots
@@ -5169,7 +5225,72 @@ summary(camps$osm_b_c)
 
 ```
 
+#-----------------------------------
+#BIAS calculation
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(sf)
 
+# Assuming your data is in the sf object 'camps'
+# Convert to data frame for calculation
+camps_df <- as.data.frame(camps)
+
+# Calculate means using the entire dataset
+mean_survey <- mean(camps_df$N_INDVI, na.rm = TRUE)
+mean_wp_uc <- mean(camps_df$wp_uc, na.rm = TRUE)
+mean_wp_c <- mean(camps_df$wp_c, na.rm = TRUE)
+mean_gpw <- mean(camps_df$gpw_UN, na.rm = TRUE)
+mean_ghsl <- mean(camps_df$ghsl, na.rm = TRUE)
+
+# Calculate biases
+bias_wp_uc <- mean_wp_uc - mean_survey
+bias_wp_c <- mean_wp_c - mean_survey
+bias_gpw <- mean_gpw - mean_survey
+bias_ghsl <- mean_ghsl - mean_survey
+
+# Create a data frame to display the biases
+bias_df <- data.frame(
+  Method = c("wp_uc", "wp_c", "gpw", "ghsl"),
+  Bias = c(bias_wp_uc, bias_wp_c, bias_gpw, bias_ghsl)
+)
+
+# Print the biases
+print(bias_df)
+
+```
+
+#Bias visualisation\
+```{r}
+# Load necessary library
+library(ggplot2)
+
+# Create a data frame with the bias values
+bias_data <- data.frame(
+  Method = c("wp_uc", "wp_c", "gpw", "ghsl"),
+  Bias = c(-2908.171, -4076.333, -4188.786, -3056.205)
+)
+
+# Create a bar plot
+bias<-ggplot(bias_data, aes(x = Method, y = Bias, fill = Method)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = round(Bias, 1)), vjust = -0.5) +
+  theme_minimal() +
+  labs(title = "Bias in Population Estimated",
+       x = "Estimation from population datasets",
+       y = "Bias (Survey Population - Estimated Population)") +
+  scale_fill_brewer(palette = "Set2") +
+  theme(legend.position = "none")
+print(bias)
+
+```
+#save
+```{r}
+# Save the plot to a file
+ggsave("Plots/bias.png", plot = bias, width = 8, height = 6, dpi = 400)
+# Save the plot to a file
+
+```
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #________________________________________
 #____BUILDING STATS__________
@@ -7194,6 +7315,204 @@ print(buildings_plot)
 
 ```
 
+# HOUSEHOLD/BUIDING COUNT
+
+```{r}
+# Ensure necessary libraries are loaded
+library(dplyr)
+
+# Create a new data frame to hold the number of households per building
+households_per_building <- camps %>%
+  mutate(
+   hh_per_building_ms = ifelse(ms_b_c == 0, NA, N_HH / ms_b_c),
+    hh_per_building_osm = ifelse(osm_b_c == 0, NA, N_HH / osm_b_c),
+    hh_per_building_google = ifelse(g_b_c == 0, NA, N_HH / g_b_c),
+    hh_per_building_vida = ifelse(vida_b_c == 0, NA, N_HH / vida_b_c)
+  )
+
+# View the calculated data
+head(households_per_building)
+
+# Reshape the data for visualization
+households_per_building_long <- households_per_building %>%
+  select(Name, N_HH, hh_per_building_ms, hh_per_building_osm, hh_per_building_google, hh_per_building_vida) %>%
+  gather(key = "Dataset", value = "HH_per_Building", hh_per_building_ms:hh_per_building_vida)
+
+# View the reshaped data
+head(households_per_building_long)
+
+
+# Load necessary library for plotting
+library(ggplot2)
+
+# Create the bar plot
+ggplot(households_per_building_long, aes(x = Dataset, y = HH_per_Building, fill = Dataset)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(title = "Number of Households per Building by Dataset",
+       x = "Dataset",
+       y = "Households per Building") +
+  scale_fill_brewer(palette = "Set2") +
+  theme(legend.position = "none")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+```{r}
+library(dplyr)
+library(tidyr)
+
+# Calculate households per building area
+households_per_building_area <- camps %>%
+  mutate(
+    hh_per_area_ms = ifelse(ms_b_a == 0, NA, N_HH / ms_b_a),
+    hh_per_area_osm = ifelse(osm_b_a == 0, NA, N_HH / osm_b_a),
+    hh_per_area_google = ifelse(g_b_a == 0, NA, N_HH / g_b_a),
+    hh_per_area_vida = ifelse(vida_b_a == 0, NA, N_HH / vida_b_a)
+  )
+
+# Convert data to long format for ggplot2
+households_per_building_area_long <- households_per_building_area %>%
+  select(Name, hh_per_area_ms, hh_per_area_osm, hh_per_area_google, hh_per_area_vida) %>%
+  pivot_longer(cols = starts_with("hh_per_area"), 
+               names_to = "Dataset", 
+               values_to = "Households_per_Area")
+
+# Create box plot with slanting x-axis labels
+hh_per_b_a<-ggplot(households_per_building_area_long, aes(x = Dataset, y = Households_per_Area)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Number of Households per Building Area m²",
+    x = "Dataset",
+    y = "Households per Building Area m²"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+print(hh_per_b_a)
+
+```
+#checking fot the NA values
+
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+
+
+
+camps_nonspatial <- camps %>%
+  st_drop_geometry() %>%
+  select(Name, N_HH, ms_b_a, osm_b_a, g_b_a, vida_b_a)
+
+# Calculate household density metrics
+households_per_building_area <- camps_nonspatial %>%
+  mutate(
+    hh_per_area_ms = ifelse(ms_b_a == 0, NA, N_HH / ms_b_a),
+    hh_per_area_osm = ifelse(osm_b_a == 0, NA, N_HH / osm_b_a),
+    hh_per_area_google = ifelse(g_b_a == 0, NA, N_HH / g_b_a),
+    hh_per_area_vida = ifelse(vida_b_a == 0, NA, N_HH / vida_b_a)
+  )
+
+# Count NA values for each dataset
+na_counts <- households_per_building_area %>%
+  summarise(
+    hh_per_area_ms_na = sum(is.na(hh_per_area_ms)),
+    hh_per_area_osm_na = sum(is.na(hh_per_area_osm)),
+    hh_per_area_google_na = sum(is.na(hh_per_area_google)),
+    hh_per_area_vida_na = sum(is.na(hh_per_area_vida))
+  ) %>%
+  pivot_longer(cols = everything(), names_to = "Dataset", values_to = "NA_Count")
+# Visualize NA counts using a bar plot
+na_counts_plot <- ggplot(na_counts, aes(x = Dataset, y = NA_Count, fill = Dataset)) +
+  geom_bar(stat = "identity") +
+  theme_minimal() +
+  labs(
+    title = "Count of NA Values in Household Density Data",
+    x = "Dataset",
+    y = "Count of NA Values"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Display the bar plot
+print(na_counts_plot)
+
+```
+
+
+
+
+#save
+```{r}
+ggsave("Plots/hh_per_b_a.png", plot =hh_per_b_a , width = 8, height = 6, dpi = 400)
+# Save the plot to a file
+ggsave("Plots/na_counts_plot.png", plot =na_counts_plot , width = 8, height = 6, dpi = 400)
+```
+# Population density per building area
+```{r}
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(gridExtra)
+
+# Calculate households and population per building area
+households_and_population_per_building_area <- camps %>%
+  mutate(
+    hh_per_area_ms = ifelse(ms_b_a == 0, NA, N_HH / ms_b_a),
+    hh_per_area_osm = ifelse(osm_b_a == 0, NA, N_HH / osm_b_a),
+    hh_per_area_google = ifelse(g_b_a == 0, NA, N_HH / g_b_a),
+    hh_per_area_vida = ifelse(vida_b_a == 0, NA, N_HH / vida_b_a),
+    pop_per_area_ms = ifelse(ms_b_a == 0, NA, N_INDVI / ms_b_a),
+    pop_per_area_osm = ifelse(osm_b_a == 0, NA, N_INDVI / osm_b_a),
+    pop_per_area_google = ifelse(g_b_a == 0, NA, N_INDVI / g_b_a),
+    pop_per_area_vida = ifelse(vida_b_a == 0, NA, N_INDVI / vida_b_a),
+    osm_no_buildings = ifelse(is.na(osm_b_a) | osm_b_a == 0, 1, 0)
+  )
+
+# Convert data to long format for ggplot2
+households_per_building_area_long <- households_and_population_per_building_area %>%
+  select(Name, hh_per_area_ms, hh_per_area_osm, hh_per_area_google, hh_per_area_vida) %>%
+  pivot_longer(cols = starts_with("hh_per_area"), 
+               names_to = "Dataset", 
+               values_to = "Households_per_Area")
+
+population_per_building_area_long <- households_and_population_per_building_area %>%
+  select(Name, pop_per_area_ms, pop_per_area_osm, pop_per_area_google, pop_per_area_vida) %>%
+  pivot_longer(cols = starts_with("pop_per_area"), 
+               names_to = "Dataset", 
+               values_to = "Population_per_Area")
+
+# Create box plots
+households_plot <- ggplot(households_per_building_area_long, aes(x = Dataset, y = Households_per_Area)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Number of Households per Building Area (m²)",
+    x = "Dataset",
+    y = "Households per Building Area (m²)"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+population_plot <- ggplot(population_per_building_area_long, aes(x = Dataset, y = Population_per_Area)) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Number of Individuals per Building Area (m²)",
+    x = "Dataset",
+    y = "Individuals per Building Area (m²)"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Arrange plots using grid.arrange
+pop_hh_per_ba<-grid.arrange(households_plot, population_plot, ncol = 2)
+print(pop_hh_per_ba)
+
+```
+
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/pop_hh_per_ba.png", plot =pop_hh_per_ba , width = 8, height = 6, dpi = 400)
+```
 
 
 #___________________________________
