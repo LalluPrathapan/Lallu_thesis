@@ -50,6 +50,7 @@ library(orca)
 ```{r}
 build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camps_EO/camps_eo2/camps_eo2.shp")
 camps<-st_read(build_stat_path2)
+
 str(camps)
 ```
 #converting as.numeric for many columns
@@ -550,7 +551,7 @@ polygon_camps <- extract_sum(raster_population, polygon_camps,"Name")
 
 
 # Subtract N_INDVID from ras_name
-camps$ghsl_difference <- polygon_camps$N_INDVID - camps$ghsl
+camps$ghsl_difference <-camps$N_INDVID - camps$ghsl
 
 # View the resulting data frame with the new "difference" column
 print(camps)
@@ -1105,6 +1106,16 @@ camp_final$wp_uc_df <- as.numeric(camp_final$N_INDVI) - as.numeric(camp_final$wp
 print(camps)
 
 ```
+
+#for camps dataset correcting differences
+```{r}
+camps$wp_uc_df<- as.numeric(camps$N_INDVI) - as.numeric(camps$wp_uc)
+print(camps$wp_uc_df)
+print(camps$wp_c_df)
+```
+
+
+
 #%%%%Calc Wp_uc END%%%%%%%%%%%%%%%%%%%%%
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -1581,6 +1592,12 @@ camp_final$wp_c_df <- camps$N_INDVI - camp_final$wp_c
 print(camps)
 ```
 
+#for camps dataset correcting differences
+```{r}
+camps$wp_c_df<- as.numeric(camps$N_INDVI) - as.numeric(camps$wp_c)
+print(camps$wp_c_df)
+print(camps$wp_uc_df)
+```
 #%%%%%%%%%WORDPOP CONST END%%%%%%%%%%
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -3280,12 +3297,106 @@ combined_plot_smooth_line <- grid.arrange( scatter_gpw_UN,scatter_ghsl,scatter_w
 print(combined_plot_smooth_line)
 
 ```
+```{r}
+library(ggplot2)
+library(gridExtra)  # For grid.arrange
+
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN), na.rm = TRUE)
+max_value <- max(c(camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN), na.rm = TRUE)
+
+# Function to create scatter plot with fit line and consistent x-axis scale
+create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI", color = "Sit_Stt")) +
+    geom_jitter(aes_string(y = "as.numeric(N_INDVI)", x = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE) +  # Add fit line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    labs(title = title,
+         x = "Estimated Population",
+         y = "Survey Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          legend.position = "none") +
+    scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
+}
+
+# Scatter plot for GPW
+scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw_UN", "GPW ", min_value, max_value)
+
+# Scatter plot for GHS-POP
+scatter_ghsl <- create_scatter_plot_with_fit(camps, "ghsl", "GHS-POP ", min_value, max_value)
+
+# Scatter plot for WorldPop Unconstrained
+scatter_wp_uncon <- create_scatter_plot_with_fit(camps, "wp_uc", "WorldPop Unconstrained", min_value, max_value)
+
+# Scatter plot for WorldPop Constrained
+scatter_wp_con <- create_scatter_plot_with_fit(camps, "wp_c", "WorldPop Constrained", min_value, max_value)
+
+# Arrange the plots in the specified order using grid.arrange
+combined_plot_smooth_line <- grid.arrange(
+  scatter_gpw, scatter_ghsl,
+  scatter_wp_uncon, scatter_wp_con,
+  nrow = 2, ncol = 2
+)
+
+# Print the combined plot
+print(combined_plot_smooth_line)
+
+```
 
 
 ```{r}
-ggsave("Plots/combined_plot_smooth_line.png", plot = combined_plot_smooth_line, width = 8, height = 6, dpi = 400)
+ggsave("Plots/combined_plot_smooth_line_switch.png", plot = combined_plot_smooth_line_switch, width = 8, height = 6, dpi = 400)
 ```
 
+```{r}
+library(ggplot2)
+library(gridExtra)  # For grid.arrange
+
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN), na.rm = TRUE)
+max_value <- max(c(camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN), na.rm = TRUE)
+
+# Function to create scatter plot with fit line and consistent x-axis scale (swapped x and y)
+create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = "N_INDVI", y = x_var, color = "Sit_Stt")) +
+    geom_jitter(aes_string(x = "as.numeric(N_INDVI)", y = paste0("as.numeric(", x_var, ")")), 
+                size = 0.6, alpha = 0.8) +
+    geom_smooth(method = "lm", se = FALSE) +  # Add fit line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    labs(title = title,
+         x = "Survey Population",  # Swapped axis labels
+         y = "Estimated Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          legend.position = "none") +
+    scale_y_continuous(limits = c(min_x, max_x))  # Set y-axis limits
+}
+
+# Scatter plot for GPW
+scatter_gpw <- create_scatter_plot_with_fit(camps, "gpw_UN", "GPW (Gridded Population of the World)", min_value, max_value)
+
+# Scatter plot for GHS-POP
+scatter_ghsl <- create_scatter_plot_with_fit(camps, "ghsl", "GHS-POP (Global Human Settlement Population)", min_value, max_value)
+
+# Scatter plot for WorldPop Unconstrained
+scatter_wp_uncon <- create_scatter_plot_with_fit(camps, "wp_uc", "WorldPop Unconstrained", min_value, max_value)
+
+# Scatter plot for WorldPop Constrained
+scatter_wp_con <- create_scatter_plot_with_fit(camps, "wp_c", "WorldPop Constrained", min_value, max_value)
+
+# Arrange the plots in the specified order using grid.arrange
+combined_plot_smooth_line_switch <- grid.arrange(
+  scatter_gpw, scatter_ghsl,
+  scatter_wp_uncon, scatter_wp_con,
+  nrow = 2, ncol = 2
+)
+
+# Print the combined plot
+print(combined_plot_smooth_line_switch)
+
+```
 
 
 
@@ -4055,6 +4166,58 @@ print(heat_map_corr)
 ggsave("Plots/heat_map_corr.png", plot =heat_map_corr, width = 8, height = 6, dpi = 400)
 ```
 
+#HEAT MAP correlation with coefficient of detemination
+```{r}
+library(dplyr)
+library(reshape2)
+library(ggplot2)
+
+# Convert spatial object to data frame without geometry
+camps_data_nogeom <- st_drop_geometry(camps)
+
+# Define numeric columns
+numeric_cols <- c("N_INDVI", "N_HH", "ghsl", "wp_c", "wp_uc", "gpw_UN")
+
+# Convert selected columns to numeric, handling non-numeric values
+for (col in numeric_cols) {
+  camps_data_nogeom[[col]] <- as.numeric(as.character(camps_data_nogeom[[col]]))
+}
+
+# Calculate correlation coefficients
+correlation_matrix <- cor(camps_data_nogeom[, numeric_cols])
+print(correlation_matrix)
+
+# Calculate the coefficient of determination (R^2)
+r_squared_matrix <- correlation_matrix^2
+
+# Convert the R^2 matrix to a dataframe
+r_squared_matrix_long <- melt(r_squared_matrix)
+
+# Assign row and column names for clarity
+rownames(r_squared_matrix) <- colnames(r_squared_matrix) <- c("N_INDVI", "N_HH", "ghsl", "wp_con", "wp_uncon", "gpw_UN")
+
+# Plot the heatmap with R^2 values
+heat_map_r_squared <- ggplot(data = r_squared_matrix_long, aes(x = Var1, y = Var2, fill = value, label = round(value, 2))) +
+  geom_tile(color = "white") +
+  geom_text(color = "black", size = 2) +
+  scale_fill_gradient(low = "lightblue", high = "lightcoral") +
+  labs(title = "Coefficient of Determination (R^2) Heatmap",
+       x = "Variables",
+       y = "Variables") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Print the heatmap
+print(heat_map_r_squared)
+
+```
+```{r}
+# Save the population distrib plot to a file
+ggsave("Plots/heat_map_r_squared.png", plot =heat_map_r_squared, width = 8, height = 6, dpi = 400)
+```
+
+
+
 #A<10000 Correlation(calculation correlation for N_INDVI and Estimated for area less than 10,000)
 ```{r}
 #correlation for the area>10000msq and area<10000msq
@@ -4669,7 +4832,7 @@ cat("Percentage error:",percentage_error_gpw_UN)
 ```
 #Boxplot of the difference of eo population pdt and N_INDVI
 
-
+#thesis data needed here starts
 
 #box plot with mean value displayed
 ```{r}
@@ -4677,9 +4840,12 @@ library(ggplot2)
 
 # Combine all population difference columns into one data frame
 difference_data <- data.frame(
-  Dataset = rep(c("WP_CON", "WP_UNCON",  "GHSL", "GPW_UN"), each = nrow(camps)),
-  Population_Difference = c(as.numeric(camps$wp_c_df), as.numeric(camps$wp_uc_df), as.numeric(camps$ghsl_df),as.numeric(camps$gpwU_df))
+  Dataset = rep(c("GPW-V4","GHS-POP","WorldPop_unconstrained","WorldPop_Constrained"), each = nrow(camps)),
+  Population_Difference = c(as.numeric(camps$gpwU_df), as.numeric(camps$ghsl_df), as.numeric(camps$wp_uc_df),as.numeric(camps$wp_c_df))
 )
+# to keep the order of gpw, ghs, wpun, wpcon
+# Ensure the correct order of the factors for the Dataset variable
+difference_data$Dataset <- factor(difference_data$Dataset, levels = c("GPW-V4","GHS-POP","WorldPop_unconstrained","WorldPop_Constrained"))
 
 # Calculate mean values
 mean_values <- aggregate(Population_Difference ~ Dataset, data = difference_data, mean)
@@ -4692,10 +4858,10 @@ boxplot_pop_diff <- ggplot(difference_data, aes(x = Dataset, y = Population_Diff
   labs(title = "Difference between Surveyed and Estimated Populations(Survey-Estimate) for different EO population data products",
        x = "Dataset", y = "Population Difference") +
   theme_minimal() +
- theme(axis.text.x = element_text(angle = 45, hjust = 1), 
-        plot.title = element_text(size = 10)) # Rotate x-axis labels
+ theme(axis.text.x = element_text(angle = 0, hjust = 0.5), 
+        plot.title = element_text(size = 10))+  # Focus on a specific range without altering data
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 7))  # Wrap x-axis labels to width of 7 Rotate x-axis labels
 
-# Print the box plot
 print(boxplot_pop_diff)
 
 
@@ -4719,11 +4885,16 @@ ggsave("Plots/boxplot_pop_diff.png", plot =boxplot_pop_diff, width = 8, height =
 ```{r}
 library(plotly)
 
+
+
 # Combine all population difference columns into one data frame
 difference_data <- data.frame(
-  Dataset = rep(c("WP_CON", "WP_UNCON",  "GHSL", "GPW_UN"), each = nrow(camps)),
-  Population_Difference = c(as.numeric(camps$wp_c_df), as.numeric(camps$wp_uc_df),  as.numeric(camps$ghsl_df), as.numeric(camps$gpwU_df))
+  Dataset = rep(c("GPW-V4","GHS-POP","WorldPop_unconstrained","WorldPop_Constrained"), each = nrow(camps)),
+  Population_Difference = c(as.numeric(camps$gpwU_df), as.numeric(camps$ghsl_df), as.numeric(camps$wp_uc_df),as.numeric(camps$wp_c_df))
 )
+# to keep the order of gpw, ghs, wpun, wpcon
+# Ensure the correct order of the factors for the Dataset variable
+difference_data$Dataset <- factor(difference_data$Dataset, levels = c("GPW-V4","GHS-POP","WorldPop_unconstrained","WorldPop_Constrained"))
 
 # Calculate mean values
 mean_values <- aggregate(Population_Difference ~ Dataset, data = difference_data, mean)
@@ -4756,7 +4927,7 @@ boxplot_pop_diff_interactive
 
 
 #Formal camps error
-
+##*
 ```{r}
 # Combine all population difference columns into one data frame
 difference_data_formal <- data.frame(
@@ -4966,7 +5137,7 @@ print(boxplot_pop_diff_pl)
 # Save the plot to a file
 ggsave("Plots/boxplot_pop_diff_pl.png", plot =boxplot_pop_diff_pl, width = 8, height = 6, dpi = 400)
 ```
-
+#*
 #Bar plot of all the errors
 
 ```{r}
@@ -4974,8 +5145,8 @@ library(ggplot2)
 
 # Create a data frame with the summary statistics for Mean Absolute Difference and RMSE
 summary_data <- data.frame(
-  Dataset = c("GHSL", "WP_UC", "WP_C", "GPW"),
-  Mean_Absolute_Difference = c(mean(absolute_difference), mean(absolute_difference_wp_uc), 
+  Dataset = c("GPW-V4","GHS-POP","WorldPop_unconstrained","WorldPop_Constrained"),
+  Mean_Absolute_Difference = c(mean(absolute_difference), mean(absolute_difference_gpw_UN), 
                                mean(absolute_difference_wp_c), mean(absolute_difference_gpw)),
   RMSE = c(rmse, rmse_wp_uc, rmse_wp_c, rmse_gpw)
 )
@@ -5079,11 +5250,40 @@ boxplot_ratio_interactive <- plot_ly(difference_data, x = ~Dataset, y = ~ratio, 
   add_markers(text = ~paste("Dataset:", Dataset, "<br>Name:", camps$Name, "<br>Sit_Stt:", camps$Sit_Stt, "<br>cl_Shp_a:", camps$cl_Shp_a, "<br>Ratio:", ratio)) %>%
   add_markers(data = mean_ratio_values, x = ~Dataset, y = ~ratio, mode = "markers", color = I("red"), 
               text = ~paste("Mean Ratio:", round(ratio, digits = 2)))
+ 
+
 
 # Print the interactive plot
 boxplot_ratio_interactive
 
 
+```
+# thesis used
+# Create the box plot while zooming in on the range of interest and ensuring all data is considered
+```{r}
+# Create the box plot while zooming in on the range of interest and ensuring all data is considered
+boxplot_ratio <- ggplot(difference_data, aes(x = Dataset, y = -ratio)) +
+  geom_boxplot(fill = "lightblue", color = "black", outlier.color = "lightgray") +
+  # Add a point for the median
+  stat_summary(fun = median, geom = "point", shape = 23, size = 1, color = "red", fill = "yellow") +
+  # Add the median value as text
+  stat_summary(fun = median, geom = "text", aes(label = round(..y.., digits = 2)), 
+               vjust = -0.5, size = 3, color = 'black') +
+  labs(
+       x = "Dataset", y = "Ratio of Difference to Survey Population") +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5)
+  ) +
+  coord_cartesian(ylim = c(-1.5, 0.5)) +  # Focus on a specific range without altering data
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 7))  # Wrap x-axis labels to width of 7
+# Print the adjusted box plot
+print(boxplot_ratio)
+```
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/boxplot_ratio.png", plot =boxplot_ratio, width = 8, height = 6, dpi = 400)
 ```
 
 
@@ -5094,7 +5294,75 @@ boxplot_ratio_interactive
 orca(boxplot_ratio_interactive, file = "boxplot_ratio_interactive.html")
 
 ```
+#thesis used
+#boxplotratio shows formal informal
 
+```{r}
+# Combine all population difference columns into one data frame
+difference_data_stt <- data.frame(
+  Dataset = rep(c("GPW-v4", "GHS-POP", "WorldPop_unconstrained", "WorldPop_constrained"), each = nrow(camps)),
+  Population_Difference_stt = c(as.numeric(camps$gpwU_df), as.numeric(camps$ghsl_df), as.numeric(camps$wp_uc_df), as.numeric(camps$wp_c_df)),
+  Sit_Stt = camps$Sit_Stt  # Adding Sit_Stt column
+)
+
+# Ensure the correct order of the factors for the Dataset variable
+difference_data_stt$Dataset <- factor(
+  difference_data_stt$Dataset, 
+  levels = c("GPW-v4", "GHS-POP", "WorldPop_unconstrained", "WorldPop_constrained")
+)
+
+# Calculate the ratio of the difference to the surveyed population
+difference_data_stt$ratio <- difference_data_stt$Population_Difference_stt / camps$N_INDVI
+
+# Create the boxplot
+boxplot_ratio_stat <- ggplot(difference_data_stt, aes(x = Dataset, y = -ratio, fill = Sit_Stt)) +
+  geom_boxplot(color = "black", outlier.color = "lightgray") +  # Box plot with outlier color
+  # Add a point for the median
+  
+  stat_summary(
+    fun = median, 
+    geom = "point", 
+    aes(group = Sit_Stt), 
+    shape = 23, 
+    size = 1.5, 
+    color = "red", 
+    fill = "yellow", 
+    position = position_dodge(width = 0.75)  # Dodge to separate Formal and Informal
+  )+
+  # Add the median value as text for Formal and Informal
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = Sit_Stt), 
+    position = position_dodge(width = 0.75), 
+    vjust = -0.5, 
+    size = 3, 
+    color = 'black '
+  ) +
+  labs(
+    #title = "Ratio of Difference to Survey Population by EO Population Data Products and Site Status",
+    x = "Dataset", 
+    y = "Ratio of Difference to Survey Population", 
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),  # No rotation, centered
+    plot.title = element_text(size = 10)
+  ) +
+  coord_cartesian(ylim = c(-1.5, 0.5)) +  # Focus on a specific range without altering data
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 7))  # Wrap x-axis labels to width of 7
+
+# Print the adjusted box plot
+print(boxplot_ratio_stat)
+
+```
+save ratio error formnal-informal plot
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/boxplot_ratio_stat.png", plot =boxplot_ratio_stat, width = 8, height = 6, dpi = 400)
+```
 
 # underestimation and overestimation plots
 
@@ -7391,6 +7659,71 @@ hh_per_b_a<-ggplot(households_per_building_area_long, aes(x = Dataset, y = House
 print(hh_per_b_a)
 
 ```
+
+```{r}
+# Calculate square meters per household and per person
+sqm_metrics <- camps %>%
+  mutate(
+    # Square meters per household
+    sqm_per_hh_ms = ifelse(ms_b_a == 0, NA, ms_b_a / N_HH),
+    sqm_per_hh_osm = ifelse(osm_b_a == 0, NA, osm_b_a / N_HH),
+    sqm_per_hh_google = ifelse(g_b_a == 0, NA, g_b_a / N_HH),
+    sqm_per_hh_vida = ifelse(vida_b_a == 0, NA, vida_b_a / N_HH),
+    
+    # Square meters per person
+    sqm_per_person_ms = ifelse(ms_b_a == 0, NA, ms_b_a / N_INDVI),
+    sqm_per_person_osm = ifelse(osm_b_a == 0, NA, osm_b_a / N_INDVI),
+    sqm_per_person_google = ifelse(g_b_a == 0, NA, g_b_a / N_INDVI),
+    sqm_per_person_vida = ifelse(vida_b_a == 0, NA, vida_b_a / N_INDVI)
+  )
+
+# Convert to long format for visualization
+sqm_long <- sqm_metrics %>%
+  select(Name, 
+         starts_with("sqm_per_hh"), 
+         starts_with("sqm_per_person")) %>%
+  pivot_longer(
+    cols = starts_with("sqm_"), 
+    names_to = "Metric", 
+    values_to = "Value"
+  ) %>%
+  separate(Metric, into = c("Metric", "Dataset"), sep = "_per_")
+
+# Create separate plots for households and individuals
+# Square meters per household
+sqm_hh_plot <- ggplot(
+  filter(sqm_long, Metric == "sqm"), 
+  aes(x = Dataset, y = Value, fill = Dataset)
+) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Square Meters per Household",
+    x = "Dataset",
+    y = "Square Meters per Household"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(sqm_hh_plot)
+
+# Square meters per person
+sqm_person_plot <- ggplot(
+  filter(sqm_long, Metric == "sqm" & Dataset == "person"), 
+  aes(x = Dataset, y = Value, fill = Dataset)
+) +
+  geom_boxplot() +
+  theme_minimal() +
+  labs(
+    title = "Square Meters per Person",
+    x = "Dataset",
+    y = "Square Meters per Person"
+  ) +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+print(sqm_person_plot)
+```
+
+
 #checking fot the NA values
 
 ```{r}
@@ -7624,7 +7957,7 @@ camp_final$dou_level1 <- as.character(camp_final$dou_level1)
 box_dou_indv<-ggplot(camp_final, aes(x = dou_level1, y = N_INDVI)) +
   geom_boxplot() +
   stat_summary(fun = median, geom = "point", shape = 18, size = 3, color = "red", show.legend = FALSE) +  # Add median point
-  stat_summary(fun = mean, geom = "text", aes(label = round(..y.., 2)), vjust = -0.5, show.legend = FALSE) +  # Add mean text
+  stat_summary(fun = median, geom = "text", aes(label = round(..y.., 2)), vjust = -0.5, show.legend = FALSE) +  # Add mean text
   labs(x = "Dou Level 1", y = "Population (N_INDVI)", title = "Distribution of Population by GRD3 Degree of urbanisation Level 1") +
   theme_minimal()
 
@@ -7738,7 +8071,7 @@ boxplot_st_pp_d <- ggplot(camp_final, aes(x = dou_level1, y = st_pp_d, fill = do
   geom_text(data = mean_values, aes(label = round(st_pp_d, digits = 2), y = st_pp_d), 
             vjust = -0.5, size = 3, color = "blue") + # Adding mean text labels
   geom_jitter(width = 0.2, size = 1, color = "black", alpha = 0.5) + # Adding jitter for better visibility of individual points
-  labs(title = "Distribution of st_pp_d by dou_level1",
+  labs(title = "Distribution of population density (sq m)by dou_level1",
        x = "Dou Level 1",
        y = "st_pp_d",
        fill = "Dou Level 1") +
@@ -7751,6 +8084,15 @@ print(boxplot_st_pp_d)
 
 
 ```
+
+
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/boxplot_st_pp_d.png", plot = boxplot_st_pp_d, width = 8, height = 6, dpi = 300)
+```
+
+
+
 ```{r}
 library(ggplot2)
 
@@ -7775,6 +8117,179 @@ print(scatter_plot)
 
 ```
 
+#calcualte population density with the calculated shape area 
+```{r}
+# Calculate population density
+
+camp_final$cl_Shp_a <- as.numeric(camp_final$cl_Shp_a)
+camp_final$N_INDVI <- as.numeric(camp_final$N_INDVI)
+camp_final$pp_d_cl_a <- (camp_final$N_INDVI) / (camp_final$cl_Shp_a)
+
+# Print the result
+# Print or view the selected camps
+print(camp_final[, c("Name", "N_INDVI", "Site_Ar","pp_d_cl_a")])
+
+```
+
+#population density from calculated area and dou level
+```{r}
+library(ggplot2)
+
+# Convert `st_pp_d` and `dou_level1` columns to appropriate types if necessary
+camp_final$pp_d_cl_a <- as.numeric(camp_final$pp_d_cl_a)
+camp_final$dou_level1 <- as.factor(camp_final$dou_level1)
+
+# Calculate mean values
+mean_values <- aggregate(pp_d_cl_a~ dou_level1, data = camp_final, mean)
+
+# Create a box plot for st_pp_d grouped by dou_level1
+boxplot_pp_d_cl_a <- ggplot(camp_final, aes(x = dou_level1, y = pp_d_cl_a, fill = dou_level1)) +
+  geom_boxplot() +
+  stat_summary(fun = mean, geom = "point", shape = 23, size = 3, color = "red") + # Adding mean points
+  geom_text(data = mean_values, aes(label = round(pp_d_cl_a, digits = 2), y = pp_d_cl_a), 
+            vjust = -0.5, size = 3, color = "blue") + # Adding mean text labels
+  geom_jitter(width = 0.2, size = 1, color = "black", alpha = 0.5) + # Adding jitter for better visibility of individual points
+  labs(title = "Distribution of population density (sq m)by dou_level1",
+       x = "Dou Level 1",
+       y = "pp_d_cl_a",
+       fill = "Dou Level 1") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  coord_cartesian(ylim = c(-1, max(camp_final$pp_d_cl_a, na.rm = TRUE))) # Adjusting y-axis limits to start from -1
+
+# Print the box plot
+print(boxplot_pp_d_cl_a)
+```
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/boxplot_pp_d_cl_a.png", plot = boxplot_pp_d_cl_a, width = 8, height = 6, dpi = 300)
+```
+
+
+# Box plot with estimated pop density from cl shape area for dou level 1
+```{r}
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+
+# Assuming `camp_final` is your dataset containing relevant columns including `cl_Shp_a`, `ghsl`, `gpw_UN`, `wp_c`, `wp_uc`, and `dou_level1`
+# Calculate population density for each variable
+camp_final <- camp_final %>%
+  mutate(
+   den_ghsl= ghsl / cl_Shp_a,
+   den_gpwu= gpw_UN / cl_Shp_a,
+    den_wpc = wp_c / cl_Shp_a,
+    den_wpuc = wp_uc / cl_Shp_a
+  )
+
+# Create a long format of the dataset for plotting
+camp_final_long <- camp_final %>%
+  select(dou_level1,  den_ghsl, den_gpwu, den_wpc, den_wpuc) %>%
+  pivot_longer(cols = starts_with("den"),
+               names_to = "Dataset", 
+               values_to = "Population_Density")
+
+# Create a box plot for the population density estimates grouped by dou_level1
+boxplot_density <- ggplot(camp_final_long, aes(x = dou_level1, y = Population_Density, fill = Dataset)) +
+  geom_boxplot() +
+  labs(title = "Population Density Estimates by Dataset and dou_level1",
+       x = "dou_level1",
+       y = "Population Density",
+       fill = "Dataset") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Print the box plot
+print(boxplot_density)
+
+```
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+# Assuming `camp_final` is your dataset containing relevant columns including `cl_Shp_a`, `ghsl`, `gpw_UN`, `wp_c`, `wp_uc`, and `dou_level1`
+# Calculate population density for each variable
+camp_final <- camp_final %>%
+  mutate(
+    den_ghsl = ghsl / cl_Shp_a,
+    den_gpwu = gpw_UN / cl_Shp_a,
+    den_wpc = wp_c / cl_Shp_a,
+    den_wpuc = wp_uc / cl_Shp_a
+  )
+
+# Create a long format of the dataset for plotting
+camp_final_long <- camp_final %>%
+  select(dou_level1, den_ghsl, den_gpwu, den_wpc, den_wpuc) %>%
+  pivot_longer(cols = starts_with("den"),
+               names_to = "Dataset", 
+               values_to = "Population_Density")
+
+# Create a box plot for the population density estimates grouped by Dataset and colored by dou_level1
+boxplot_density <- ggplot(camp_final_long, aes(x = Dataset, y = Population_Density, fill = dou_level1)) +
+  geom_boxplot() +
+  labs(title = "Population Density Estimates by Dataset and dou_level1",
+       x = "Dataset",
+       y = "Population Density",
+       fill = "dou_level1") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Print the box plot
+print(boxplot_density)
+
+```
+
+
+
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/boxplot_density.png", plot = boxplot_density, width = 8, height = 6, dpi = 300)
+```
+
+
+#google confidence 
+
+```{r}
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+
+# Create a long format of the dataset for plotting
+camps_long <- camps %>%
+  select(g_b_c, g_c_65_to_, g_c_70_to_, g_c_75_to_) %>%
+  pivot_longer(cols = starts_with("g_c_"),
+               names_to = "Group", 
+               values_to = "Count")
+
+# Summarize the data by calculating the mean of g_b_c for each Group and Count
+summary_data <- camps_long %>%
+  group_by(Group, Count) %>%
+  summarize(mean_g_b_c = mean(g_b_c, na.rm = TRUE))
+
+# Create bar plots for each group
+bar_plot <- ggplot(summary_data, aes(x = Count, y = mean_g_b_c, fill = Group)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  facet_wrap(~ Group, scales = "free_x") +
+  labs(title = "Mean g_b_c by Group Counts",
+       x = "Count",
+       y = "Mean g_b_c",
+       fill = "Group") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Print the bar plot
+print(bar_plot)
+
+# Save the plot as an image file
+ggsave("bar_plot_relationship.png", plot = bar_plot, width = 10, height = 6, dpi = 300)
+
+```
+
+
+
+#Linear regression model
 ```{r}
 lm_model <- lm(st_pp_d ~ N_INDVI + N_HH + g_b_c + ms_b_c + vida_b_c + osm_b_c + dou_level1, data = camp_final)
 summary(lm_model)
@@ -7915,42 +8430,69 @@ print(heat_map)
 # Save the plot as an image file
 ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/heatmap.png", plot = heat_map, width = 8, height = 6, dpi = 300)
 ```
+#----
+#correcting the wp_uc difference issue
 
-#Error ratio based on the site status level
+```{r}
+camp_final$wp_c_df<- as.numeric(camps$N_INDVI) - as.numeric(camp_final$wp_c)
+camp_final$wp_uc_df<- as.numeric(camps$N_INDVI) - as.numeric(camp_final$wp_uc)
+print(camp_final$wp_c_df) 
+print(camp_final$wp_uc_df)
+
+```
+```{r}
+
+```
+
+
+#thesis used
+#Error ratio based on the degree of urbanisation
 ```{r}
 
 library(ggplot2)
-
+library(stringr)
 # Combine all population difference columns into one data frame
+
 difference_data_dou <- data.frame(
-  Dataset = rep(c("WP_CON", "WP_UNCON", "GHSL", "GPW_UN"), each = nrow(camp_final)),
-  Population_Difference_dou = c(as.numeric(camp_final$wp_c_df), as.numeric(camp_final$wp_uc_df), as.numeric(camp_final$ghsl_df),as.numeric(camp_final$gpwU_df)),
+  Dataset = rep(c( "GPW-v4","GHS-POP","WorldPop_unconstrained","WorldPop_constrained"), each = nrow(camp_final)),
+  Population_Difference_dou = c(as.numeric(camp_final$gpwU_df), as.numeric(camp_final$ghsl_df), as.numeric(camp_final$wp_uc_df),as.numeric(camp_final$wp_c_df)),
   dou_level1 = camp_final$dou_level1  # Adding dou_level1 column
 )
 
+# Ensure the correct order of the factors for the Dataset variable
+difference_data_dou$Dataset <- factor(difference_data_dou$Dataset, levels = c("GPW-v4","GHS-POP","WorldPop_unconstrained","WorldPop_constrained"))
+
 # Calculate the ratio of the difference to the surveyed population
 difference_data_dou$ratio <- difference_data_dou$Population_Difference_dou / camp_final$N_INDVI
+
 
 # Aggregate mean ratio values
 mean_ratio_values <- aggregate(ratio ~ Dataset + dou_level1, data = difference_data_dou, mean)
 
 # Create a box plot for the ratios grouped by dou_level
-boxplot_ratio <- ggplot(difference_data_dou, aes(x = Dataset, y = ratio, fill = dou_level1)) +
+boxplot_ratio <- ggplot(difference_data_dou, aes(x = Dataset, y = -ratio, fill = dou_level1)) +
   geom_boxplot(width = 1) +
-  stat_summary(fun = mean, geom = "point", shape = 23, size = 0.5, color = "green") +
-  geom_text(data = mean_ratio_values, aes(label = round(ratio, digits = 2)), vjust = -0.5, size = 3, color = "red") +
+  stat_summary(fun = median, geom = "point", shape = 23, size = 0.5, color = "green") +
+ stat_summary(fun = median, geom = "text", aes(label = round(..y.., digits = 2)), 
+               vjust = -0.5, size = 3, color = 'blue') +stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = dou_level1), 
+    position = position_dodge(width = 0.75),  # Use position_dodge to separate the text labels
+    vjust = -0.5, size = 3, color = "black") +
   labs(title = "Ratio of Difference to Survey Population by EO Population Data Products and dou_level",
        x = "Dataset", y = "Ratio of Difference to Survey Population", fill = "dou_level") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
-        plot.title = element_text(size = 10))
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
+        plot.title = element_text(size = 10))+
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) # Wrap x-axis labels
 
 # Print the box plot
 print(boxplot_ratio)
 
 ```
 
-#building box focus and flipping negative coord
+#population box focus and flipping negative coord
 
 
 
@@ -7959,23 +8501,86 @@ print(boxplot_ratio)
 # Create a box plot for the ratios grouped by dou_level with y-axis multiplied by -1 and adjusted y-axis limits
 boxplot_ratio <- ggplot(difference_data_dou, aes(x = Dataset, y = -ratio, fill = dou_level1)) +
   geom_boxplot(width = 0.6, outlier.alpha = 0.2) +  # Adjust the width and lightening the outliers here
-  stat_summary(fun = mean, geom = "point", shape = 23, size = 0.3, color = "blue") +  # Changing the color of the mean
-  stat_summary(fun.data = mean_cl_normal, geom = "text", 
-               aes(label = round(..y.., digits = 2), group = dou_level1), 
-               position = position_dodge(width = 0.75),  # Use position_dodge with appropriate width
-               vjust = -0.5, size = 2, color = "black") +  # Changing the color of the mean
-  labs(title = "Ratio of Difference to Survey Population by EO Population Data Products and dou_level",
-       x = "Dataset", y = "Ratio of Difference to Survey Population", fill = "dou_level") +
+  stat_summary(fun = median, geom = "point", shape = 23, size = 0.3, color = "blue") +  # Changing the color of the mean
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = dou_level1), 
+    position = position_dodge(width = 0.75),  # Use position_dodge to separate the text labels
+    vjust = -0.5, size = 3, color = "black") +
+  labs(title = "Ratio of Difference to Survey Population by EO Population Data Products and dou_level",       x = "Dataset", y = "Ratio of Difference to Survey Population", fill = "dou_level") +
   theme_minimal() +
-  theme(axis.text.x = element_text(angle = 45, hjust = 1),
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5),
         plot.title = element_text(size = 10)) +
-  coord_cartesian(ylim = c(-10, 10))  # Adjusting y-axis limits to focus more on the box region
+  coord_cartesian(ylim = c(-5, 5))+
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 7)) # Wrap x-axis labels  # Adjusting y-axis limits to focus more on the box region
 
 # Print the box plot
 print(boxplot_ratio)
 
 ```
+```{r}
+boxplot_ratio <- ggplot(difference_data_dou, aes(x = Dataset, y = -ratio, fill = dou_level1)) +
+  geom_boxplot(width = 0.6, outlier.alpha = 0.2) +  # Adjust the width and lightening the outliers
+  stat_summary(fun = median, geom = "point", shape = 23, size = 0.3, color = "blue") +  # Median as point
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = dou_level1), 
+    position = position_dodge(width = 0.75),  # Use position_dodge to separate the text labels
+    vjust = -0.5, size = 3, color = "black") +  # Adding the median value as text for each dou_level1
+  labs(
+    #title = "Ratio of Difference to Survey Population by EO Population Data Products and dou_level",
+    x = "Dataset", 
+    y = "Ratio of Difference to Survey Population", 
+    fill = "dou_level"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),
+    plot.title = element_text(size = 10)
+  ) +
+  coord_cartesian(ylim = c(-10, 10)) +  # Adjust y-axis to focus on the middle region, excluding extreme values
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 7))  # Wrap x-axis labels
 
+# Print the box plot
+print(boxplot_ratio)
+```
+
+```{r}
+boxplot_ratio <- ggplot(difference_data_dou, aes(x = Dataset, y = -ratio, fill = dou_level1)) +
+  geom_boxplot(width = 0.6, outlier.alpha = 0.2) + # Adjust the width and lighten the outliers
+  stat_summary(fun = median, geom = "point", shape = 23, size = 0.3, color = "blue") +  # Median as point
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = dou_level1), 
+    position = position_dodge(width = 0.75),  # Use position_dodge to separate the text labels
+     vjust = -0.5, size = 3, color = "black") +  # Adding the median value as text for each dou_level1
+  labs(
+    x = "Dataset", 
+    y = "Ratio of Difference to Survey Population", 
+    fill = "Dou Level"  # Update legend title
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),  # Keep x-axis labels horizontal
+    plot.title = element_text(size = 10)
+  ) +
+  coord_cartesian(ylim = c(-10, 10)) +  # Adjust y-axis to focus on the middle region
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 7)) +  # Wrap x-axis labels
+  scale_fill_manual(
+    values = c(
+      "Rural" = "#A6D854", 
+      "Urban Centre" = "#E2007A", 
+      "Urban Cluster" = "#4169E1"
+    )
+  )  # Assign specific colors to dou_level1 categories
+
+# Print the box plot
+print(boxplot_ratio)
+
+```
 
 
 
@@ -8005,6 +8610,38 @@ print(boxplot_ratio)
 # Save the plot as an image file
 ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/boxplot_ratio_error.png", plot = boxplot_ratio, width = 8, height = 6, dpi = 300)
 ```
+
+
+
+#interactive pop diff ratio with dou
+```{r}
+library(plotly)
+
+# Calculate the ratio of the difference to the surveyed population
+difference_data_dou$ratio <- difference_data_dou$Population_Difference_dou / camp_final$N_INDVI
+
+# Multiply the ratio by -1
+difference_data_dou$ratio <- -difference_data_dou$ratio
+
+# Aggregate mean ratio values
+mean_ratio_values <- aggregate(ratio ~ Dataset + dou_level1, data = difference_data_dou, mean)
+
+# Create an interactive box plot for the ratios
+boxplot_ratio_interactive <- plot_ly(difference_data_dou, x = ~Dataset, y = ~ratio, color = ~dou_level1, type = "box") %>%
+  add_markers(text = ~paste("Dataset:", Dataset, "<br>Name:", camp_final$Name, "<br>Sit_Stt:", camp_final$Sit_Stt, "<br>cl_Shp_a:", camp_final$cl_Shp_a, "<br>Ratio:", ratio), showlegend = FALSE) %>%
+  add_markers(data = mean_ratio_values, x = ~Dataset, y = ~ratio, mode = "markers", marker = list(color = "blue", symbol = "diamond", size = 10), 
+              text = ~paste("Mean Ratio:", round(ratio, digits = 2)), showlegend = FALSE) %>%
+  layout(title = "Ratio of Difference to Survey Population by EO Population Data Products and dou_level",
+         xaxis = list(title = "Dataset"),
+         yaxis = list(title = "Ratio of Difference to Survey Population", range = c(-10, 10)),
+         legend = list(title = list(text = "dou_level")),
+         barmode = "overlay")
+
+# Print the interactive plot
+boxplot_ratio_interactive
+
+```
+
 
 #building error ratio by urban rural 
 
@@ -8047,6 +8684,22 @@ print(boxplot_ratio_build)
 ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/boxplot_ratio_error_build.png", plot = boxplot_ratio_build, width = 8, height = 6, dpi = 300)
 ```
 
+#SAVING CAMP_FINAL
+
+```{r}
+# Load the sf package
+library(sf)
+
+# Convert camp_final to an sf object if it is not already
+camp_final_sf <- st_as_sf(camp_final)
+
+# Define the file path for saving
+output_directory <- "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/"  
+output_file <- paste0(output_directory, "camp_final_data.shp")
+
+# Save the shapefile
+st_write(camp_final_sf, output_file, delete_dsn = TRUE) 
+```
 
 
 
@@ -8449,5 +9102,505 @@ ggplot(camp_final, aes(x = Shlt_ty, fill = factor(dou_level1))) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels for better readability
 
 
+```
+
+#settlement area
+
+```{r}
+library(sf)
+library(ggplot2)
+
+# Step 1: Calculate adjusted GPW density (per m²) for 1 km resolution
+gpw_density_m2 <- camps$gpw / 1e6  # Convert GPW density from per km² to per m²
+
+# Step 2: Calculate settlement product areas
+camps$gpw_area <- camps$gpw / gpw_density_m2  # GPW area (adjusted for resolution)
+camps$ghsl_area <- camps$ghsl / camps$st_pp_d  # GHS-POP area
+camps$wp_c_area <- camps$wp_c / camps$st_pp_d  # WorldPop constrained area
+camps$wp_uc_area <- camps$wp_uc / camps$st_pp_d  # WorldPop unconstrained area
+
+# Step 3: Calculate ratios of settlement product area to surveyed camp area
+camps$gpw_ratio <- camps$gpw_area / camps$Site_Ar
+camps$ghsl_ratio <- camps$ghsl_area / camps$Site_Ar
+camps$wp_c_ratio <- camps$wp_c_area / camps$Site_Ar
+camps$wp_uc_ratio <- camps$wp_uc_area / camps$Site_Ar
+
+# Step 4: Prepare data for visualization
+coverage_data <- data.frame(
+  Dataset = rep(c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"), each = nrow(camps)),
+  Coverage_Ratio = c(camps$gpw_ratio, camps$ghsl_ratio, camps$wp_c_ratio, camps$wp_uc_ratio),
+  Site_Status = camps$Sit_Stt  # Formal/Informal site status
+)
+
+# Ensure Dataset is a factor with the correct order
+coverage_data$Dataset <- factor(coverage_data$Dataset, levels = c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"))
+
+# Step 5: Visualization - Boxplot of coverage ratios
+coverage_plot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Ratio, fill = Site_Status)) +
+  geom_boxplot(color = "black", outlier.color = "gray") +
+  stat_summary(fun = median, geom = "point", shape = 23, size = 2, color = "red", fill = "yellow") +
+  stat_summary(fun = median, geom = "text", aes(label = round(..y.., 2)), vjust = -0.5, size = 3, color = "blue") +
+  scale_fill_manual(values = c("Formal" = "#76c893", "Informal" = "#f4a582")) +  # Custom colors for site status
+  labs(
+    title = "Coverage Ratios of Population Datasets for Refugee Settlements",
+    x = "Dataset",
+    y = "Coverage Ratio (Settlement Area / Surveyed Area)",
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(size = 12, face = "bold")
+  ) +
+  coord_cartesian(ylim = c(0, 5))  # Adjust y-axis range if needed
+
+# Print the plot
+print(coverage_plot)
+
+```
+
+#populatin percentage coverage
+```{r}
+library(sf)
+library(ggplot2)
+
+# Step 1: Calculate adjusted GPW density (per m²) for 1 km resolution
+gpw_density_m2 <- camps$gpw / 1e6  # Convert GPW density from per km² to per m²
+
+# Step 2: Calculate settlement product areas
+camps$gpw_area <- camps$gpw / gpw_density_m2  # GPW area (adjusted for resolution)
+camps$ghsl_area <- camps$ghsl / camps$st_pp_d  # GHS-POP area
+camps$wp_c_area <- camps$wp_c / camps$st_pp_d  # WorldPop constrained area
+camps$wp_uc_area <- camps$wp_uc / camps$st_pp_d  # WorldPop unconstrained area
+
+# Step 3: Calculate coverage percentages
+camps$gpw_percentage <- (camps$gpw_area / camps$Site_Ar) * 100
+camps$ghsl_percentage <- (camps$ghsl_area / camps$Site_Ar) * 100
+camps$wp_c_percentage <- (camps$wp_c_area / camps$Site_Ar) * 100
+camps$wp_uc_percentage <- (camps$wp_uc_area / camps$Site_Ar) * 100
+
+# Step 4: Prepare data for visualization
+coverage_data <- data.frame(
+  Dataset = rep(c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"), each = nrow(camps)),
+  Coverage_Percentage = c(camps$gpw_percentage, camps$ghsl_percentage, camps$wp_c_percentage, camps$wp_uc_percentage),
+  Site_Status = camps$Sit_Stt  # Formal/Informal site status
+)
+
+# Ensure Dataset is a factor with the correct order
+coverage_data$Dataset <- factor(coverage_data$Dataset, levels = c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"))
+
+# Step 5: Visualization - Violin plot
+coverage_violin_plot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Percentage, fill = Site_Status)) +
+  geom_violin(trim = FALSE, alpha = 0.7) +
+  stat_summary(fun = median, geom = "point", shape = 23, size = 2, color = "black", fill = "yellow") +
+  stat_summary(fun = median, geom = "text", aes(label = round(..y.., 1)), vjust = -0.5, size = 3, color = "blue") +
+  scale_fill_manual(values = c("Formal" = "#76c893", "Informal" = "#f4a582")) +  # Custom colors for site status
+  labs(
+    title = "Population Product Coverage (%) of Refugee Settlement Boundary Area",
+    x = "Dataset",
+    y = "Coverage Percentage (%)",
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(size = 12, face = "bold")
+  ) +
+  coord_cartesian(ylim = c(0, 200))  # Adjust y-axis range if needed
+
+# Print the violin plot
+print(coverage_violin_plot)
+
+```
+
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/coverage_violin_plot.png", plot = coverage_violin_plot, width = 8, height = 6, dpi = 300)
+```
+
+
+```{r}
+library(sf)
+library(ggplot2)
+library(stringr)
+
+# Step 1: Calculate adjusted GPW density (per m²) for 1 km resolution
+gpw_density_m2 <- camps$gpw / 1e6  # Convert GPW density from per km² to per m²
+
+# Step 2: Calculate settlement product areas
+camps$gpw_area <- camps$gpw / gpw_density_m2  # GPW area (adjusted for resolution)
+camps$ghsl_area <- camps$ghsl / camps$st_pp_d  # GHS-POP area
+camps$wp_c_area <- camps$wp_c / camps$st_pp_d  # WorldPop constrained area
+camps$wp_uc_area <- camps$wp_uc / camps$st_pp_d  # WorldPop unconstrained area
+
+# Step 3: Calculate coverage percentages
+camps$gpw_percentage <- (camps$gpw_area / camps$Site_Ar) * 100
+camps$ghsl_percentage <- (camps$ghsl_area / camps$Site_Ar) * 100
+camps$wp_c_percentage <- (camps$wp_c_area / camps$Site_Ar) * 100
+camps$wp_uc_percentage <- (camps$wp_uc_area / camps$Site_Ar) * 100
+
+# Step 4: Prepare data for visualization
+coverage_data <- data.frame(
+  Dataset = rep(c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"), each = nrow(camps)),
+  Coverage_Percentage = c(camps$gpw_percentage, camps$ghsl_percentage, camps$wp_c_percentage, camps$wp_uc_percentage),
+  Site_Status = camps$Sit_Stt  # Formal/Informal site status
+)
+
+# Ensure Dataset is a factor with the correct order
+coverage_data$Dataset <- factor(coverage_data$Dataset, levels = c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"))
+
+# Step 5: Visualization - Violin plot
+coverage_violin_plot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Percentage, fill = Site_Status)) +
+  geom_violin(trim = FALSE, alpha = 0.7) +
+  stat_summary(fun = median, geom = "point", shape = 23, size = 2, color = "black", fill = "yellow") +
+  stat_summary(fun = median, geom = "text", aes(label = round(..y.., 1)), vjust = -0.5, size = 3, color = "blue") +
+  scale_fill_manual(values = c("Formal" = "#76c893", "Informal" = "#f4a582")) +  # Custom colors for site status
+  labs(
+    title = "Population Product Coverage (%) of Refugee Settlement Boundary Area",
+    x = "Dataset",
+    y = "Coverage Percentage (%)",
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 0.5, size = 10),  # Horizontal x-axis labels
+    plot.title = element_text(size = 12, face = "bold"),
+    legend.position = "top"  # Position the legend at the top
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +  # Wrap x-axis labels
+  coord_cartesian(ylim = c(-10, 200))  # Extend y-axis to negative region
+
+# Print the violin plot
+print(coverage_violin_plot)
+
+
+
+
+```
+#boxplot 
+```{r}
+library(sf)
+library(ggplot2)
+library(stringr)
+
+# Step 1: Calculate adjusted GPW density (per m²) for 1 km resolution
+gpw_density_m2 <- camps$gpw / 1e6  # Convert GPW density from per km² to per m²
+
+# Step 2: Calculate settlement product areas
+camps$gpw_area <- camps$gpw / gpw_density_m2  # GPW area (adjusted for resolution)
+camps$ghsl_area <- camps$ghsl / camps$st_pp_d  # GHS-POP area
+camps$wp_c_area <- camps$wp_c / camps$st_pp_d  # WorldPop constrained area
+camps$wp_uc_area <- camps$wp_uc / camps$st_pp_d  # WorldPop unconstrained area
+
+# Step 3: Calculate coverage percentages
+camps$gpw_percentage <- (camps$gpw_area / camps$Site_Ar) * 100
+camps$ghsl_percentage <- (camps$ghsl_area / camps$Site_Ar) * 100
+camps$wp_c_percentage <- (camps$wp_c_area / camps$Site_Ar) * 100
+camps$wp_uc_percentage <- (camps$wp_uc_area / camps$Site_Ar) * 100
+
+# Step 4: Prepare data for visualization
+coverage_data <- data.frame(
+  Dataset = rep(c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"), each = nrow(camps)),
+  Coverage_Percentage = c(camps$gpw_percentage, camps$ghsl_percentage, camps$wp_c_percentage, camps$wp_uc_percentage),
+  Site_Status = camps$Sit_Stt  # Formal/Informal site status
+)
+
+# Ensure Dataset is a factor with the correct order
+coverage_data$Dataset <- factor(coverage_data$Dataset, levels = c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"))
+
+# Step 5: Visualization - Box plot with separate median for Formal and Informal
+coverage_boxplot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Percentage, fill = Site_Status)) +
+  geom_boxplot(alpha = 0.7, outlier.size = 2, outlier.colour = "red") +  # Box plot with outliers
+  stat_summary(data = subset(coverage_data, Site_Status == "Formal"), fun = median, geom = "point", shape = 23, size = 3, color = "blue", fill = "yellow") +  # Median point for Formal
+  stat_summary(data = subset(coverage_data, Site_Status == "Informal"), fun = median, geom = "point", shape = 23, size = 3, color = "blue", fill = "yellow") +  # Median point for Informal
+  stat_summary(data = subset(coverage_data, Site_Status == "Formal"), fun = median, geom = "text", aes(label = round(..y.., 1)), vjust = -1.5, size = 3, color = "blue") +  # Median label for Formal
+  stat_summary(data = subset(coverage_data, Site_Status == "Informal"), fun = median, geom = "text", aes(label = round(..y.., 1)), vjust = -1.5, size = 3, color = "blue") +  # Median label for Informal
+  scale_fill_manual(values = c("Formal" = "#76c893", "Informal" = "#f4a582")) +  # Custom colors for site status
+  labs(
+    title = "Population Product Coverage (%) of Refugee Settlement Boundary Area",
+    x = "Dataset",
+    y = "Coverage Percentage (%)",
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),  # Set x-axis labels to horizontal
+    plot.title = element_text(size = 12, face = "bold"),
+    legend.position = "top"  # Position the legend at the top
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +  # Wrap x-axis labels for readability
+  coord_cartesian(ylim = c(-2, 300))  # Extend y-axis to the range from -2 to 300
+
+# Print the box plot
+print(coverage_boxplot)
+
+
+
+```
+```{r}
+library(sf)
+library(ggplot2)
+library(stringr)
+
+# Step 1: Calculate adjusted GPW density (per m²) for 1 km resolution
+gpw_density_m2 <- camps$gpw / 1e6  # Convert GPW density from per km² to per m²
+
+# Step 2: Calculate settlement product areas
+#camps$gpw_area <- camps$gpw / gpw_density_m2  # GPW area (adjusted for resolution)
+#camps$ghsl_area <- camps$ghsl / camps$st_pp_d  # GHS-POP area
+#camps$wp_c_area <- camps$wp_c / camps$st_pp_d  # WorldPop constrained area
+#camps$wp_uc_area <- camps$wp_uc / camps$st_pp_d  # WorldPop unconstrained area
+
+# GPW: Population product area (adjusted for resolution)
+camps$gpw_area <- camps$gpw * 1e6  # Since GPW is per km², multiply by 1e6 to convert to m²
+
+# GHS-POP: Population product area (adjusted for 100m resolution)
+camps$ghsl_area <- camps$ghsl * 100  # Multiply by 100 to adjust for the 100m resolution, resulting in area in m²
+
+# WorldPop: Population product area (adjusted for 100m resolution)
+camps$wp_c_area <- camps$wp_c * 100  # Multiply by 100 for 100m resolution
+camps$wp_uc_area <- camps$wp_uc * 100  # Multiply by 100 for 100m resolution
+
+# Step 3: Calculate coverage percentages
+camps$gpw_percentage <- (camps$gpw_area / camps$cl_Shp_a) * 100
+camps$ghsl_percentage <- (camps$ghsl_area / camps$cl_Shp_a) * 100
+camps$wp_c_percentage <- (camps$wp_c_area / camps$cl_Shp_a) * 100
+camps$wp_uc_percentage <- (camps$wp_uc_area / camps$cl_Shp_a) * 100
+
+# Step 4: Prepare data for visualization
+coverage_data <- data.frame(
+  Dataset = rep(c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"), each = nrow(camps)),
+  Coverage_Percentage = c(camps$gpw_percentage, camps$ghsl_percentage, camps$wp_c_percentage, camps$wp_uc_percentage),
+  Site_Status = camps$Sit_Stt  # Formal/Informal site status
+)
+
+# Ensure Dataset is a factor with the correct order
+coverage_data$Dataset <- factor(coverage_data$Dataset, levels = c("GPW-v4", "GHS-POP", "WorldPop_unconstrained", "WorldPop_constrained"))
+
+# Step 5: Visualization - Box plot
+coverage_boxplot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Percentage, fill = Site_Status)) +
+  geom_boxplot(alpha = 0.7, outlier.size = 2, outlier.colour = "red") +  # Box plot with outliers
+  stat_summary(fun = median, geom = "point", shape = 23, size = 3, color = "blue", fill = "yellow") +  # Median as point
+  stat_summary(fun = median, geom = "text", 
+               aes(label = round(..y.., 1), group = Site_Status), 
+               position = position_dodge(width = 0.75),  # Use position_dodge to separate the text labels
+               vjust = -0.5, size = 3, color = "black") +  # Adjusted median label position
+  scale_fill_manual(values = c("Formal" = "#76c893", "Informal" = "#f4a582")) +  # Custom colors for site status
+  labs(
+    title = "Population Product Coverage (%) of Refugee Settlement Boundary Area",
+    x = "Dataset",
+    y = "Coverage Percentage (%)",
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),  # Keep x-axis labels horizontal
+    plot.title = element_text(size = 12, face = "bold"),
+    legend.position = "top"  # Position the legend at the top
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +  # Wrap x-axis labels for readability
+  coord_cartesian(ylim = c(-2, 300))  # Extend y-axis to the range from -2 to 300
+
+# Print the box plot
+print(coverage_boxplot)
+
+
+```
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/coverage_boxplot.png", plot = coverage_boxplot, width = 8, height = 6, dpi = 300)
+```
+#violin 
+```{r}
+library(sf)
+library(ggplot2)
+library(stringr)
+
+# Step 1: Calculate adjusted GPW density (per m²) for 1 km resolution
+gpw_density_m2 <- camps$gpw / 1e6  # Convert GPW density from per km² to per m²
+
+# Step 2: Calculate settlement product areas
+# GPW: Population product area (adjusted for resolution)
+camps$gpw_area <- camps$gpw * 1e6  # Since GPW is per km², multiply by 1e6 to convert to m²
+
+# GHS-POP: Population product area (adjusted for 100m resolution)
+camps$ghsl_area <- camps$ghsl * 100  # Multiply by 100 to adjust for the 100m resolution, resulting in area in m²
+
+# WorldPop: Population product area (adjusted for 100m resolution)
+camps$wp_c_area <- camps$wp_c * 100  # Multiply by 100 for 100m resolution
+camps$wp_uc_area <- camps$wp_uc * 100  # Multiply by 100 for 100m resolution
+
+# Step 3: Calculate coverage percentages
+camps$gpw_percentage <- (camps$gpw_area / camps$cl_Shp_a) * 100
+camps$ghsl_percentage <- (camps$ghsl_area / camps$cl_Shp_a) * 100
+camps$wp_c_percentage <- (camps$wp_c_area / camps$cl_Shp_a) * 100
+camps$wp_uc_percentage <- (camps$wp_uc_area / camps$cl_Shp_a) * 100
+
+# Step 4: Prepare data for visualization
+coverage_data <- data.frame(
+  Dataset = rep(c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"), each = nrow(camps)),
+  Coverage_Percentage = c(camps$gpw_percentage, camps$ghsl_percentage, camps$wp_c_percentage, camps$wp_uc_percentage),
+  Site_Status = camps$Sit_Stt  # Formal/Informal site status
+)
+
+# Ensure Dataset is a factor with the correct order
+coverage_data$Dataset <- factor(coverage_data$Dataset, levels = c("GPW-v4", "GHS-POP", "WorldPop_unconstrained", "WorldPop_constrained"))
+
+# Ensure Site_Status is a factor with all possible levels
+coverage_data$Site_Status <- factor(coverage_data$Site_Status, levels = c("Formal", "Informal"))
+
+# Step 5: Visualization - Violin plot
+coverage_violinplot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Percentage, fill = Site_Status)) +
+  geom_violin(alpha = 0.7, trim = TRUE) +  # Violin plot with trimming
+  stat_summary(fun = median, geom = "text", 
+               aes(label = round(..y.., 1), group = Site_Status), 
+               position = position_dodge(width = 0.75),  # Use position_dodge to separate the text labels
+               vjust = -0.5, size = 3, color = "black") +  # Adjusted median label position
+  scale_fill_manual(values = c("Formal" = "#76c893", "Informal" = "#f4a582")) +  # Custom colors for site status
+  labs(
+    title = "Population Product Coverage (%) of Refugee Settlement Boundary Area",
+    x = "Dataset",
+    y = "Coverage Percentage (%)",
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),  # Keep x-axis labels horizontal
+    plot.title = element_text(size = 12, face = "bold"),
+    legend.position = "top"  # Position the legend at the top
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +  # Wrap x-axis labels for readability
+  coord_cartesian(ylim = c(-2, 300))  # Extend y-axis to the range from -2 to 300
+
+# Print the violin plot
+print(coverage_violinplot)
+
+
+
+```
+```{r}
+library(sf)
+library(ggplot2)
+library(stringr)
+
+# Step 1: Calculate adjusted GPW density (per m²) for 1 km resolution
+gpw_density_m2 <- camps$gpw / 1e6  # Convert GPW density from per km² to per m²
+
+# Step 2: Calculate settlement product areas
+# GPW: Population product area (adjusted for resolution)
+camps$gpw_area <- camps$gpw * 1e6  # Since GPW is per km², multiply by 1e6 to convert to m²
+
+# GHS-POP: Population product area (adjusted for 100m resolution)
+camps$ghsl_area <- camps$ghsl * 100  # Multiply by 100 to adjust for the 100m resolution, resulting in area in m²
+
+# WorldPop: Population product area (adjusted for 100m resolution)
+camps$wp_c_area <- camps$wp_c * 100  # Multiply by 100 for 100m resolution
+camps$wp_uc_area <- camps$wp_uc * 100  # Multiply by 100 for 100m resolution
+
+# Step 3: Calculate coverage percentages
+camps$gpw_percentage <- (camps$gpw_area / camps$cl_Shp_a) * 100
+camps$ghsl_percentage <- (camps$ghsl_area / camps$cl_Shp_a) * 100
+camps$wp_c_percentage <- (camps$wp_c_area / camps$cl_Shp_a) * 100
+camps$wp_uc_percentage <- (camps$wp_uc_area / camps$cl_Shp_a) * 100
+
+# Step 4: Prepare data for visualization
+coverage_data <- data.frame(
+  Dataset = rep(c("GPW-v4", "GHS-POP", "WorldPop_constrained", "WorldPop_unconstrained"), each = nrow(camps)),
+  Coverage_Percentage = c(camps$gpw_percentage, camps$ghsl_percentage, camps$wp_c_percentage, camps$wp_uc_percentage),
+  Site_Status = camps$Sit_Stt  # Formal/Informal site status
+)
+
+# Ensure Dataset is a factor with the correct order
+coverage_data$Dataset <- factor(coverage_data$Dataset, levels = c("GPW-v4", "GHS-POP", "WorldPop_unconstrained", "WorldPop_constrained"))
+
+# Ensure Site_Status is a factor with all possible levels (Formal, Informal)
+coverage_data$Site_Status <- factor(coverage_data$Site_Status, levels = c("Formal", "Informal"))
+
+# Debug step: Check the levels of 'Site_Status' for each dataset
+table(coverage_data$Dataset, coverage_data$Site_Status)
+
+# Step 5: Visualization - Violin plot
+coverage_violinplot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Percentage, fill = Site_Status)) +
+  geom_violin(alpha = 0.7, trim = TRUE) +  # Violin plot with trimming
+  stat_summary(fun = median, geom = "text", 
+               aes(label = round(..y.., 1), group = Site_Status), 
+               position = position_dodge(width = 0.75),  # Use position_dodge to separate the text labels
+               vjust = -0.5, size = 3, color = "black") +  # Adjusted median label position
+  scale_fill_manual(values = c("Formal" = "#76c893", "Informal" = "#f4a582")) +  # Custom colors for site status
+  labs(
+    title = "Population Product Coverage (%) of Refugee Settlement Boundary Area",
+    x = "Dataset",
+    y = "Coverage Percentage (%)",
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),  # Keep x-axis labels horizontal
+    plot.title = element_text(size = 12, face = "bold"),
+    legend.position = "top"  # Position the legend at the top
+  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +  # Wrap x-axis labels for readability
+  coord_cartesian(ylim = c(-2, 300))  # Extend y-axis to the range from -2 to 300
+
+# Print the violin plot
+print(coverage_violinplot)
+
+
+```
+
+```{r}
+library(sf)
+library(ggplot2)
+library(stringr)
+
+# Step 1: Calculate adjusted GPW density (per m²) for 1 km resolution
+#gpw_density_m2 <- camps$gpw / 1e6  # Convert GPW density from per km² to per m²
+
+# Step 2: Calculate settlement product areas
+#camps$gpw_area <- camps$gpw / gpw_density_m2  # GPW area (adjusted for resolution)
+
+# Step 3: Calculate coverage percentages
+#camps$gpw_percentage <- (camps$gpw_area / camps$Site_Ar) * 100
+
+# Step 4: Prepare data for visualization (only using GPW dataset)
+coverage_data <- data.frame(
+  Dataset = rep("GPW-v4", each = nrow(camps)),
+  Coverage_Percentage = camps$gpw_percentage,
+  Site_Status = camps$Sit_Stt  # Formal/Informal site status
+)
+
+# Step 5: Visualization - Box plot for only GPW with y-axis extended to max value
+gpw_boxplot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Percentage, fill = Site_Status)) +
+  geom_boxplot(alpha = 0.7, outlier.size = 2, outlier.colour = "red") +  # Box plot with outliers
+  stat_summary(fun = median, geom = "point", shape = 23, size = 3, color = "blue", fill = "yellow") +  # Median as point
+  stat_summary(fun = median, geom = "text", 
+               aes(label = round(..y.., 1), group = Site_Status), 
+               position = position_dodge(width = 0.75),  # Separate the text labels for each Site_Status
+               vjust = -0.5, size = 3, color = "black") +  # Adjusted median label position
+  scale_fill_manual(values = c("Formal" = "#76c893", "Informal" = "#f4a582")) +  # Custom colors for site status
+  labs(
+    title = "GPW Population Product Coverage (%) of Refugee Settlement Boundary Area",
+    x = "Dataset",
+    y = "Coverage Percentage (%)",
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),  # Keep x-axis labels horizontal
+    plot.title = element_text(size = 12, face = "bold"),
+    legend.position = "top"  # Position the legend at the top
+  ) +
+  coord_cartesian(ylim = c(0, max(camps$gpw_percentage)))  # Extend y-axis to max GPW value (no log scale)
+
+# Print the box plot for GPW
+print(gpw_boxplot)
+
+
+```
+
+
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/gpw_boxplot.png", plot = gpw_boxplot, width = 8, height = 6, dpi = 300)
 ```
 
