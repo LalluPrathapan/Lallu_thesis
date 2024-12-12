@@ -3297,6 +3297,9 @@ combined_plot_smooth_line <- grid.arrange( scatter_gpw_UN,scatter_ghsl,scatter_w
 print(combined_plot_smooth_line)
 
 ```
+
+
+#Thesis used
 ```{r}
 library(ggplot2)
 library(gridExtra)  # For grid.arrange
@@ -3344,12 +3347,58 @@ combined_plot_smooth_line <- grid.arrange(
 print(combined_plot_smooth_line)
 
 ```
+#heatmap plot
+
+```{r}
+library(ggplot2)
+library(gridExtra)  # For grid.arrange
+
+# Function to create heatmap with density of camps
+create_heatmap <- function(data, x_var, title, min_x, max_x) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI")) +
+    geom_bin2d(bins = 30) +  # Create the heatmap with density of camps
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    scale_fill_viridis_c() +  # Use a color scale for density
+    labs(title = title,
+         x = "Estimated Population",
+         y = "Survey Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          legend.position = "bottom") +
+    scale_x_continuous(limits = c(min_x, max_x)) +  # Set x-axis limits
+    scale_y_continuous(limits = c(min_x, max_x))    # Set y-axis limits to match x-axis
+}
+
+# Heatmap for GPW
+heatmap_gpw <- create_heatmap(camps, "gpw_UN", "GPW", min_value, max_value)
+
+# Heatmap for GHS-POP
+heatmap_ghsl <- create_heatmap(camps, "ghsl", "GHS-POP", min_value, max_value)
+
+# Heatmap for WorldPop Unconstrained
+heatmap_wp_uncon <- create_heatmap(camps, "wp_uc", "WorldPop Unconstrained", min_value, max_value)
+
+# Heatmap for WorldPop Constrained
+heatmap_wp_con <- create_heatmap(camps, "wp_c", "WorldPop Constrained", min_value, max_value)
+
+# Arrange the heatmaps in the specified order using grid.arrange
+combined_heatmap <- grid.arrange(
+  heatmap_gpw, heatmap_ghsl,
+  heatmap_wp_uncon, heatmap_wp_con,
+  nrow = 2, ncol = 2
+)
+
+# Print the combined heatmap
+print(combined_heatmap)
+
+
+```
 
 
 ```{r}
 ggsave("Plots/combined_plot_smooth_line_switch.png", plot = combined_plot_smooth_line_switch, width = 8, height = 6, dpi = 400)
 ```
-
+#flip coordinate
 ```{r}
 library(ggplot2)
 library(gridExtra)  # For grid.arrange
@@ -7780,7 +7829,8 @@ ggsave("Plots/hh_per_b_a.png", plot =hh_per_b_a , width = 8, height = 6, dpi = 4
 # Save the plot to a file
 ggsave("Plots/na_counts_plot.png", plot =na_counts_plot , width = 8, height = 6, dpi = 400)
 ```
-# Population density per building area
+#thesis used
+#---Population per building area and household/building area of the building footprint dataset
 ```{r}
 library(dplyr)
 library(tidyr)
@@ -7838,6 +7888,96 @@ population_plot <- ggplot(population_per_building_area_long, aes(x = Dataset, y 
 # Arrange plots using grid.arrange
 pop_hh_per_ba<-grid.arrange(households_plot, population_plot, ncol = 2)
 print(pop_hh_per_ba)
+
+```
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(gridExtra)
+
+# Example of spatial analysis for building footprint count based on representative datasets
+# Assuming the datasets have columns `Name`, `ms_b_a`, `osm_b_a`, `g_b_a`, `vida_b_a` (building areas) and `N_HH` (number of households)
+
+# Create a summarized dataset for analysis
+building_footprint_analysis <- camps %>%
+  summarize(
+    count_google = sum(!is.na(g_b_a) & g_b_a > 0),
+    count_ms = sum(!is.na(ms_b_a) & ms_b_a > 0),
+    count_osm = sum(!is.na(osm_b_a) & osm_b_a > 0),
+    count_vida = sum(!is.na(vida_b_a) & vida_b_a > 0),
+    total_google_area = sum(g_b_a, na.rm = TRUE),
+    total_ms_area = sum(ms_b_a, na.rm = TRUE),
+    total_osm_area = sum(osm_b_a, na.rm = TRUE),
+    total_vida_area = sum(vida_b_a, na.rm = TRUE)
+  )
+
+# Add a long-format table for box plot plotting
+households_and_population_per_building_area <- camps %>%
+  mutate(
+    hh_per_area_ms = ifelse(ms_b_a == 0, NA, N_HH / ms_b_a),
+    hh_per_area_osm = ifelse(osm_b_a == 0, NA, N_HH / osm_b_a),
+    hh_per_area_google = ifelse(g_b_a == 0, NA, N_HH / g_b_a),
+    hh_per_area_vida = ifelse(vida_b_a == 0, NA, N_HH / vida_b_a),
+    pop_per_area_ms = ifelse(ms_b_a == 0, NA, N_INDVI / ms_b_a),
+    pop_per_area_osm = ifelse(osm_b_a == 0, NA, N_INDVI / osm_b_a),
+    pop_per_area_google = ifelse(g_b_a == 0, NA, N_INDVI / g_b_a),
+    pop_per_area_vida = ifelse(vida_b_a == 0, NA, N_INDVI / vida_b_a)
+  )
+
+households_per_building_area_long <- households_and_population_per_building_area %>%
+  select(Name, hh_per_area_ms, hh_per_area_osm, hh_per_area_google, hh_per_area_vida) %>%
+  pivot_longer(cols = starts_with("hh_per_area"), 
+               names_to = "Dataset", 
+               values_to = "Households_per_Area")
+
+population_per_building_area_long <- households_and_population_per_building_area %>%
+  select(Name, pop_per_area_ms, pop_per_area_osm, pop_per_area_google, pop_per_area_vida) %>%
+  pivot_longer(cols = starts_with("pop_per_area"), 
+               names_to = "Dataset", 
+               values_to = "Population_per_Area")
+
+# Customize Dataset labels for plotting
+households_per_building_area_long$Dataset <- factor(households_per_building_area_long$Dataset, 
+                                                    levels = c("hh_per_area_google", "hh_per_area_ms", "hh_per_area_osm", "hh_per_area_vida"), 
+                                                    labels = c("Google", "Microsoft", "OSM", "VIDA"))
+
+population_per_building_area_long$Dataset <- factor(population_per_building_area_long$Dataset, 
+                                                    levels = c("pop_per_area_google", "pop_per_area_ms", "pop_per_area_osm", "pop_per_area_vida"), 
+                                                    labels = c("Google", "Microsoft", "OSM", "VIDA"))
+
+# Create box plots with customized colors
+households_plot <- ggplot(households_per_building_area_long, aes(x = Dataset, y = Households_per_Area, fill = Dataset)) +
+  geom_boxplot(outlier.alpha = 0.2) +
+  stat_summary(fun = median, geom = "text", aes(label = round(..y.., 2)), vjust = -0.5, color = "red", size = 3) +
+  scale_fill_manual(values = c("#D1E5F0", "#FEE5D9", "#CCEBC5", "#FFFFCC")) +
+  theme_minimal() +
+  labs(
+    title = "Number of Households per Building Area (m²)",
+    x = "Dataset",
+    y = "Households per Building Area (m²)"
+  ) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+  coord_cartesian(ylim = c(0, 5))
+
+population_plot <- ggplot(population_per_building_area_long, aes(x = Dataset, y = Population_per_Area, fill = Dataset)) +
+  geom_boxplot(outlier.alpha = 0.2) +
+  stat_summary(fun = median, geom = "text", aes(label = round(..y.., 2)), vjust = -0.5, color = "red", size = 3) +
+  scale_fill_manual(values = c("#D1E5F0", "#FEE5D9", "#CCEBC5", "#FFFFCC")) +
+  theme_minimal() +
+  labs(
+    title = "Number of Individuals per Building Area (m²)",
+    x = "Dataset",
+    y = "Individuals per Building Area (m²)"
+  ) +
+  theme(axis.text.x = element_text(angle = 0, hjust = 0.5)) +
+  coord_cartesian(ylim = c(0, 5))
+
+# Arrange plots using grid.arrange
+pop_hh_per_ba <- grid.arrange(households_plot, population_plot, ncol = 2)
+print(pop_hh_per_ba)
+
 
 ```
 
