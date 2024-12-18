@@ -422,6 +422,42 @@ print(bar_plot_combined_in_f_gs_ls)
 
 
 ```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Aggregate counts for each category
+aggregated_data <- camps %>%
+  mutate(
+    AreaCategory = case_when(
+      cl_Shp_a > 10000 ~ "> 10,000",
+      cl_Shp_a <= 10000 ~ "< 10,000"
+    ),
+    Category = paste(Sit_Stt, "(area", AreaCategory, ")")
+  ) %>%
+  group_by(Category, Sit_Stt) %>%
+  summarise(Count = n(), .groups = 'drop')
+
+# Create combined bar plot with counts on the bars
+bar_plot_combined <- ggplot(aggregated_data, aes(x = Category, y = Count, fill = Sit_Stt)) +
+  geom_bar(stat = "identity", alpha = 0.8) +
+  geom_text(aes(label = Count), vjust = -0.5, size = 4) + # Add count labels above bars
+  labs(
+    title = "Count of Camps by Type and Area",
+    x = "Camp Type and Area",
+    y = "Count",
+    fill = "Camp Status"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) # Rotate x-axis labels
+
+# Print the bar plot
+print(bar_plot_combined)
+
+
+```
+
 #save the bar plot
 
 ```{r}
@@ -451,6 +487,7 @@ combined_data <- rbind(
 # Create a bar plot
 bar_plot_combined_f_if_plg <- ggplot(combined_data, aes(x = Type, fill = Sit_Stt)) +
   geom_bar(alpha = 0.5) +
+   
   labs(title = "Count of Camps by Type and N_INDVI",
        x = "Camp Type and N_INDVI",
        y = "Count") +
@@ -461,6 +498,43 @@ bar_plot_combined_f_if_plg <- ggplot(combined_data, aes(x = Type, fill = Sit_Stt
 print(bar_plot_combined_f_if_plg)
 
 ```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# Filter and label data
+formal_large <- camps %>% filter(Sit_Stt == "Formal" & N_INDVI > 10000) %>% mutate(Type = "Formal (N_INDVI > 10000)")
+formal_small <- camps %>% filter(Sit_Stt == "Formal" & N_INDVI < 10000) %>% mutate(Type = "Formal (N_INDVI < 10000)")
+informal_large <- camps %>% filter(Sit_Stt == "Informal" & N_INDVI > 10000) %>% mutate(Type = "Informal (N_INDVI > 10000)")
+informal_small <- camps %>% filter(Sit_Stt == "Informal" & N_INDVI < 10000) %>% mutate(Type = "Informal (N_INDVI < 10000)")
+
+# Combine datasets
+combined_data <- rbind(formal_large, formal_small, informal_large, informal_small)
+
+# Aggregate counts for each category
+aggregated_data <- combined_data %>%
+  group_by(Type, Sit_Stt) %>%
+  summarise(Count = n(), .groups = "drop")
+
+# Create a bar plot with counts on bars
+bar_plot_combined_f_if_plg <- ggplot(aggregated_data, aes(x = Type, y = Count, fill = Sit_Stt)) +
+  geom_bar(stat = "identity", alpha = 0.8) +                # Bar plot
+  geom_text(aes(label = Count), vjust = -0.5, size = 4) +   # Count labels above bars
+  labs(
+    title = "Count of Camps by Type and N_INDVI",
+    x = "Camp Type and N_INDVI",
+    y = "Count",
+    fill = "Camp Status"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))  # Rotate x-axis labels
+
+# Print the bar plot
+print(bar_plot_combined_f_if_plg)
+
+```
+
 #save the bar plot
 
 ```{r}
@@ -3347,6 +3421,574 @@ combined_plot_smooth_line <- grid.arrange(
 print(combined_plot_smooth_line)
 
 ```
+
+```{r}
+library(ggplot2)
+library(gridExtra)  # For grid.arrange
+
+# Filter for formal camps only
+formal_camps <- camps[camps$St_Stt == "formal", ]
+
+# Find the minimum and maximum values of the estimated population variable across all datasets
+min_value <- min(c(formal_camps$wp_c, formal_camps$wp_uc, formal_camps$ghsl, formal_camps$gpw_UN), na.rm = TRUE)
+max_value <- max(c(formal_camps$wp_c, formal_camps$wp_uc, formal_camps$ghsl, formal_camps$gpw_UN), na.rm = TRUE)
+
+# Function to create scatter plot with fit line and consistent x-axis scale
+create_scatter_plot_with_fit <- function(data, x_var, title, min_x, max_x, line_color) {
+  ggplot(data, aes_string(x = x_var, y = "N_INDVI")) +
+    geom_jitter(aes(y = as.numeric(N_INDVI), x = as.numeric(get(x_var))),
+                size = 0.6, alpha = 0.8, color = "darkgray") +  # Use fixed jitter color
+    geom_smooth(method = "lm", se = FALSE, color = line_color) +  # Add fit line with specified color
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add diagonal line
+    labs(title = title,
+         x = "Estimated Population",
+         y = "Survey Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          legend.position = "none") +
+    scale_x_continuous(limits = c(min_x, max_x))  # Set x-axis limits
+}
+
+# Scatter plot for GPW
+scatter_gpw <- create_scatter_plot_with_fit(formal_camps, "gpw_UN", "GPW", min_value, max_value, "blue")
+
+# Scatter plot for GHS-POP
+scatter_ghsl <- create_scatter_plot_with_fit(formal_camps, "ghsl", "GHS-POP", min_value, max_value, "green")
+
+# Scatter plot for WorldPop Unconstrained
+scatter_wp_uncon <- create_scatter_plot_with_fit(formal_camps, "wp_uc", "WorldPop Unconstrained", min_value, max_value, "red")
+
+# Scatter plot for WorldPop Constrained
+scatter_wp_con <- create_scatter_plot_with_fit(formal_camps, "wp_c", "WorldPop Constrained", min_value, max_value, "purple")
+
+# Arrange the plots in the specified order using grid.arrange
+combined_plot_smooth_line <- grid.arrange(
+  scatter_gpw, scatter_ghsl,
+  scatter_wp_uncon, scatter_wp_con,
+  nrow = 2, ncol = 2
+)
+
+# Print the combined plot
+print(combined_plot_smooth_line)
+
+```
+```{r}
+library(ggplot2)
+
+# Filter for formal camps only
+formal_camps <- camps[camps$Sit_Stt == "Formal", ]
+
+# Combine the datasets into a long format for easier plotting
+library(tidyr)
+
+formal_camps_long <- formal_camps %>%
+  pivot_longer(
+    cols = c("gpw_UN", "ghsl","wp_uc","wp_c",),
+    names_to = "Dataset",
+    values_to = "Estimated_Population"
+  )
+
+# Create a scatterplot with different colored lines for each dataset
+form_scatterplot<-ggplot(formal_camps_long, aes(y = as.numeric(Estimated_Population), x = as.numeric(N_INDVI), color = Dataset)) +
+  geom_jitter(size = 0.6, alpha = 0.8) +  # Scatter points
+  geom_smooth(method = "lm", se = FALSE) +  # Add fit lines for each dataset
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Diagonal line
+  labs(
+    title = "Comparison of Population Estimates for Formal Camps",
+    y = "Estimated Population",
+    x = "Survey Population",
+    color = "Dataset"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+print(form_scatterplot)
+ggsave("Plots/form_scatterplot.png", plot = form_scatterplot, width = 8, height = 6, dpi = 400)
+
+```
+
+#_thes Formal scatterplot for all dataset in one
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+# Filter for formal camps only
+formal_camps <- camps %>% filter(Sit_Stt == "Formal")
+
+# Combine the datasets into a long format for easier plotting
+formal_camps_long <- formal_camps %>%
+  pivot_longer(
+    cols = c("gpw_UN", "ghsl", "wp_uc", "wp_c"),
+    names_to = "Dataset",
+    values_to = "Estimated_Population"
+  ) %>%
+  mutate(
+    Dataset = recode(Dataset,
+                     "gpw_UN" = "GPW-V4",
+                     "ghsl" = "GHS-POP",
+                     "wp_uc" = "WorldPop Unconstrained",
+                     "wp_c" = "WorldPop Constrained")
+  )
+
+# Define colorblind-friendly palette for easy visualization
+dataset_colors <- c(
+  "GPW-V4" = "#e9724d",               # pink
+  "GHS-POP" = "#d6d727",              # turquise
+  "WorldPop Unconstrained" = "#92cad1", # majenta
+  "WorldPop Constrained" = "#868686"   #skybleu Orange
+)
+
+# Create a scatterplot with improved aesthetics
+form_scatterplot <- ggplot(formal_camps_long, 
+                           aes(x = as.numeric(N_INDVI), 
+                               y = as.numeric(Estimated_Population), 
+                               color = Dataset)) +
+  geom_jitter(size = 0.8, alpha = 0.7) +  # Scatter points with jitter
+  geom_smooth(method = "lm", se = FALSE) +  # Fit lines for each dataset
+  geom_abline(intercept = 0, slope = 1, 
+              linetype = "dashed", color = "black", linewidth = 0.7) +  # 1:1 reference line
+  scale_color_manual(values = dataset_colors) +  # Apply custom colors
+  labs(
+    title = "Comparison of Population Estimates for Formal Camps",
+    x = "Survey Population",
+    y = "Estimated Population",
+    color = "Dataset"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    legend.position = "bottom"
+  )
+
+# Print the plot
+print(form_scatterplot)
+
+# Save the plot as a high-resolution PNG
+ggsave("Plots/form_scatterplot.png", plot = form_scatterplot, 
+       width = 8, height = 6, dpi = 400)
+
+```
+```{r}
+
+```
+
+#_formal scat<10000pop all inone
+```{r}
+library(ggplot2)
+library(tidyr)
+
+# Filter for formal camps with N_INDVI < 10,000
+formal_camps_ls10000 <- camps[camps$Sit_Stt == "Formal" & camps$N_INDVI < 10000, ]
+
+formal_camps_ls10000_long <- formal_camps_ls10000  %>%
+  pivot_longer(
+    cols = c("gpw_UN", "ghsl", "wp_uc", "wp_c"),
+    names_to = "Dataset",
+    values_to = "Estimated_Population"
+  ) %>%
+  mutate(
+    Dataset = recode(Dataset,
+                     "gpw_UN" = "GPW-V4",
+                     "ghsl" = "GHS-POP",
+                     "wp_uc" = "WorldPop Unconstrained",
+                     "wp_c" = "WorldPop Constrained")
+  )
+
+# Define colorblind-friendly palette for easy visualization
+dataset_colors <- c(
+  "GPW-V4" = "#e9724d",               # pink
+  "GHS-POP" = "#d6d727",              # turquise
+  "WorldPop Unconstrained" = "#92cad1", # majenta
+  "WorldPop Constrained" = "#868686"   #skybleu Orange
+)
+
+# Create a scatterplot with improved aesthetics
+form_scatterplot_ls10000 <- ggplot(formal_camps_ls10000_long, 
+                           aes(x = as.numeric(N_INDVI), 
+                               y = as.numeric(Estimated_Population), 
+                               color = Dataset)) +
+  geom_jitter(size = 0.8, alpha = 0.7) +  # Scatter points with jitter
+  geom_smooth(method = "lm", se = FALSE) +  # Fit lines for each dataset
+  geom_abline(intercept = 0, slope = 1, 
+              linetype = "dashed", color = "black", linewidth = 0.7) +  # 1:1 reference line
+  scale_color_manual(values = dataset_colors) +  # Apply custom colors
+  labs(
+    title = "Comparison of Population Estimates for Formal Camps with population<10000",
+    x = "Survey Population",
+    y = "Estimated Population",
+    color = "Dataset"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    legend.position = "bottom"
+  )
+
+# Print the plot
+print(form_scatterplot_ls10000)
+
+# Save the plot as a high-resolution PNG
+ggsave("Plots/form_scatterplot_ls10000 .png", plot = form_scatterplot_ls10000 , 
+       width = 8, height = 6, dpi = 400)
+```
+
+#_th formal scatterplot>10000 allinone
+```{r}
+library(ggplot2)
+library(tidyr)
+
+# Filter for formal camps with N_INDVI < 10,000
+formal_camps_gt10000 <- camps[camps$Sit_Stt == "Formal" & camps$N_INDVI > 10000, ]
+
+formal_camps_gt10000_long <- formal_camps_gt10000  %>%
+  pivot_longer(
+    cols = c("gpw_UN", "ghsl", "wp_uc", "wp_c"),
+    names_to = "Dataset",
+    values_to = "Estimated_Population"
+  ) %>%
+  mutate(
+    Dataset = recode(Dataset,
+                     "gpw_UN" = "GPW-V4",
+                     "ghsl" = "GHS-POP",
+                     "wp_uc" = "WorldPop Unconstrained",
+                     "wp_c" = "WorldPop Constrained")
+  )
+
+# Define colorblind-friendly palette for easy visualization
+dataset_colors <- c(
+  "GPW-V4" = "#e9724d",               # pink
+  "GHS-POP" = "#d6d727",              # turquise
+  "WorldPop Unconstrained" = "#92cad1", # majenta
+  "WorldPop Constrained" = "#868686"   #skybleu Orange
+)
+
+# Create a scatterplot with improved aesthetics
+form_scatterplot_gt10000 <- ggplot(formal_camps_gt10000_long, 
+                           aes(x = as.numeric(N_INDVI), 
+                               y = as.numeric(Estimated_Population), 
+                               color = Dataset)) +
+  geom_jitter(size = 0.8, alpha = 0.7) +  # Scatter points with jitter
+  geom_smooth(method = "lm", se = FALSE) +  # Fit lines for each dataset
+  geom_abline(intercept = 0, slope = 1, 
+              linetype = "dashed", color = "black", linewidth = 0.7) +  # 1:1 reference line
+  scale_color_manual(values = dataset_colors) +
+  
+    labs(
+    title = "Comparison of Population Estimates for Formal Camps with population>10000",
+    x = "Survey Population",
+    y = "Estimated Population",
+    color = "Dataset"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    legend.position = "bottom"
+  )
+
+# Print the plot
+print(form_scatterplot_gt10000)
+
+# Save the plot as a high-resolution PNG
+ggsave("Plots/form_scatterplot_gt10000 .png", plot = form_scatterplot_gt10000 , 
+       width = 8, height = 6, dpi = 400)
+```
+
+
+
+
+```{r}
+library(ggplot2)
+
+# Filter for formal camps only
+informal_camps <- camps[camps$Sit_Stt == "Informal", ]
+
+# Combine the datasets into a long format for easier plotting
+library(tidyr)
+
+informal_camps_long <- informal_camps %>%
+  pivot_longer(
+    cols = c("gpw_UN", "ghsl", "wp_c", "wp_uc"),
+    names_to = "Dataset",
+    values_to = "Estimated_Population"
+  )
+
+# Create a scatterplot with different colored lines for each dataset
+ggplot(informal_camps_long, aes(y = as.numeric(Estimated_Population), x = as.numeric(N_INDVI), color = Dataset)) +
+  geom_jitter(size = 0.6, alpha = 0.8) +  # Scatter points
+  geom_smooth(method = "lm", se = FALSE) +  # Add fit lines for each dataset
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Diagonal line
+  labs(
+    title = "Comparison of Population Estimates for Informal Camps",
+    y = "Estimated Population",
+    x = "Survey Population",
+    color = "Dataset"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"))
+
+```
+
+#-the informal sca allinone
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(tidyr)
+library(dplyr)
+
+# Filter for formal camps only
+informal_camps <- camps %>% filter(Sit_Stt == "Informal")
+
+# Combine the datasets into a long format for easier plotting
+informal_camps_long <- informal_camps %>%
+  pivot_longer(
+    cols = c("gpw_UN", "ghsl", "wp_uc", "wp_c"),
+    names_to = "Dataset",
+    values_to = "Estimated_Population"
+  ) %>%
+  mutate(
+    Dataset = recode(Dataset,
+                     "gpw_UN" = "GPW-V4",
+                     "ghsl" = "GHS-POP",
+                     "wp_uc" = "WorldPop Unconstrained",
+                     "wp_c" = "WorldPop Constrained")
+  )
+
+# Define colorblind-friendly palette for easy visualization
+dataset_colors <- c(
+  "GPW-V4" = "#e9724d",               # pink
+  "GHS-POP" = "#d6d727",              # turquise
+  "WorldPop Unconstrained" = "#92cad1", # majenta
+  "WorldPop Constrained" = "#868686"   #skybleu Orange
+)
+
+# Create a scatterplot with improved aesthetics
+inform_scatterplot <- ggplot(informal_camps_long, 
+                           aes(x = as.numeric(N_INDVI), 
+                               y = as.numeric(Estimated_Population), 
+                               color = Dataset)) +
+  geom_jitter(size = 0.8, alpha = 0.7) +  # Scatter points with jitter
+  geom_smooth(method = "lm", se = FALSE) +  # Fit lines for each dataset
+  geom_abline(intercept = 0, slope = 1, 
+              linetype = "dashed", color = "black", linewidth = 0.7) +  # 1:1 reference line
+  scale_color_manual(values = dataset_colors) +  # Apply custom colors
+  labs(
+    title = "Comparison of Population Estimates for Formal Camps",
+    x = "Survey Population",
+    y = "Estimated Population",
+    color = "Dataset"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    legend.position = "bottom"
+  )
+
+# Print the plot
+print(inform_scatterplot)
+
+# Save the plot as a high-resolution PNG
+ggsave("Plots/inform_scatterplot.png", plot = inform_scatterplot, 
+       width = 8, height = 6, dpi = 400)
+```
+#_the informal <10000 all in one
+
+```{r}
+library(ggplot2)
+library(tidyr)
+
+# Filter for formal camps with N_INDVI < 10,000
+informal_camps_ls10000 <- camps[camps$Sit_Stt == "Informal" & camps$N_INDVI < 10000, ]
+
+informal_camps_ls10000_long <- informal_camps_ls10000  %>%
+  pivot_longer(
+    cols = c("gpw_UN", "ghsl", "wp_uc", "wp_c"),
+    names_to = "Dataset",
+    values_to = "Estimated_Population"
+  ) %>%
+  mutate(
+    Dataset = recode(Dataset,
+                     "gpw_UN" = "GPW-V4",
+                     "ghsl" = "GHS-POP",
+                     "wp_uc" = "WorldPop Unconstrained",
+                     "wp_c" = "WorldPop Constrained")
+  )
+
+# Define colorblind-friendly palette for easy visualization
+dataset_colors <- c(
+  "GPW-V4" = "#e9724d",               # pink
+  "GHS-POP" = "#d6d727",              # turquise
+  "WorldPop Unconstrained" = "#92cad1", # majenta
+  "WorldPop Constrained" = "#868686"   #skybleu Orange
+)
+
+# Create a scatterplot with improved aesthetics
+inform_scatterplot_ls10000 <- ggplot(informal_camps_ls10000_long, 
+                           aes(x = as.numeric(N_INDVI), 
+                               y = as.numeric(Estimated_Population), 
+                               color = Dataset)) +
+  geom_jitter(size = 0.8, alpha = 0.7) +  # Scatter points with jitter
+  geom_smooth(method = "lm", se = FALSE) +  # Fit lines for each dataset
+  geom_abline(intercept = 0, slope = 1, 
+              linetype = "dashed", color = "black", linewidth = 0.7) +  # 1:1 reference line
+  scale_color_manual(values = dataset_colors) +  # Apply custom colors
+  labs(
+    title = "Comparison of Population Estimates for Informal Camps with population<10000",
+    x = "Survey Population",
+    y = "Estimated Population",
+    color = "Dataset"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    legend.position = "bottom"
+  )
+
+# Print the plot
+print(inform_scatterplot_ls10000)
+
+# Save the plot as a high-resolution PNG
+ggsave("Plots/inform_scatterplot_ls10000.png", plot = inform_scatterplot_ls10000 , 
+       width = 8, height = 6, dpi = 400)
+
+
+
+```
+
+#_the informal>10000 all inone
+```{r}
+library(ggplot2)
+library(tidyr)
+
+# Filter for formal camps with N_INDVI < 10,000
+informal_camps_gt10000 <- camps[camps$Sit_Stt == "Informal" & camps$N_INDVI > 10000, ]
+
+informal_camps_gt10000_long <- informal_camps_gt10000  %>%
+  pivot_longer(
+    cols = c("gpw_UN", "ghsl", "wp_uc", "wp_c"),
+    names_to = "Dataset",
+    values_to = "Estimated_Population"
+  ) %>%
+  mutate(
+    Dataset = recode(Dataset,
+                     "gpw_UN" = "GPW-V4",
+                     "ghsl" = "GHS-POP",
+                     "wp_uc" = "WorldPop Unconstrained",
+                     "wp_c" = "WorldPop Constrained")
+  )
+
+# Define colorblind-friendly palette for easy visualization
+dataset_colors <- c(
+  "GPW-V4" = "#e9724d",               # pink
+  "GHS-POP" = "#d6d727",              # turquise
+  "WorldPop Unconstrained" = "#92cad1", # majenta
+  "WorldPop Constrained" = "#868686"   #skybleu Orange
+)
+
+# Create a scatterplot with improved aesthetics
+inform_scatterplot_gt10000 <- ggplot(informal_camps_gt10000_long, 
+                           aes(x = as.numeric(N_INDVI), 
+                               y = as.numeric(Estimated_Population), 
+                               color = Dataset)) +
+  geom_jitter(size = 0.8, alpha = 0.7) +  # Scatter points with jitter
+  geom_smooth(method = "lm", se = FALSE) +  # Fit lines for each dataset
+  geom_abline(intercept = 0, slope = 1, 
+              linetype = "dashed", color = "black", linewidth = 0.7) +  # 1:1 reference line
+  scale_color_manual(values = dataset_colors) +  # Apply custom colors
+  labs(
+    title = "Comparison of Population Estimates for Informal Camps with population>10000",
+    x = "Survey Population",
+    y = "Estimated Population",
+    color = "Dataset"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 14),
+    legend.position = "bottom"
+  )
+
+# Print the plot
+print(inform_scatterplot_gt10000)
+
+# Save the plot as a high-resolution PNG
+ggsave("Plots/inform_scatterplot_gt10000.png", plot = inform_scatterplot_gt10000 , 
+       width = 8, height = 6, dpi = 400)
+```
+
+
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(dplyr)
+
+# Assuming 'camps' is your dataframe containing the relevant data
+# and 'Sit_Stt' indicates the camp type (Formal or Informal)
+
+# Gather the data into a long format for faceting
+camps_long <- camps %>%
+  select(Sit_Stt, N_INDVI, gpw_UN, ghsl, wp_uc, wp_c) %>%
+  pivot_longer(cols = c(gpw_UN, ghsl, wp_uc, wp_c),
+               names_to = "Dataset",
+               values_to = "Estimated_Population")
+
+# Create the faceted scatter plot
+ggplot(camps_long, aes(x = N_INDVI, y = Estimated_Population, color = Sit_Stt)) +
+  geom_point(alpha = 0.6) +
+  geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +
+  facet_wrap(~ Dataset, scales = "free") +
+  labs(title = "Survey vs. Estimated Population by Dataset and Camp Type",
+       x = "Survey Population",
+       y = "Estimated Population",
+       color = "Camp Type") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+        legend.position = "bottom")
+
+```
+
+
+# Thesis used y=x corrected coordinate flipped
+```{r}
+# Revised scatter plot function
+create_scatter_plot_residual <- function(data, y_var, title, min_y, max_y) {
+  ggplot(data, aes_string(x = "N_INDVI", y = y_var, color = "Sit_Stt")) +
+    geom_jitter(size = 0.6, alpha = 0.8) +  # Add points
+    geom_smooth(method = "lm", se = FALSE) +  # Add regression line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add 1:1 line
+    labs(title = title,
+         x = "Survey Population",
+         y = "Estimated Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          legend.position = "none") +
+    scale_y_continuous(limits = c(min_y, max_y))  # Set y-axis limits
+}
+
+# Find min and max for consistency across all datasets
+min_value <- min(c(camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN), na.rm = TRUE)
+max_value <- max(c(camps$wp_c, camps$wp_uc, camps$ghsl, camps$gpw_UN), na.rm = TRUE)
+
+# Create individual plots
+scatter_gpw_resid <- create_scatter_plot_residual(camps, "gpw_UN", "GPW", min_value, max_value)
+scatter_ghsl_resid <- create_scatter_plot_residual(camps, "ghsl", "GHS-POP", min_value, max_value)
+scatter_wp_uncon_resid <- create_scatter_plot_residual(camps, "wp_uc", "WorldPop Unconstrained", min_value, max_value)
+scatter_wp_con_resid <- create_scatter_plot_residual(camps, "wp_c", "WorldPop Constrained", min_value, max_value)
+
+# Combine all plots into a 2x2 grid
+combined_plot_residual <- grid.arrange(
+  scatter_gpw_resid, scatter_ghsl_resid,
+  scatter_wp_uncon_resid, scatter_wp_con_resid,
+  nrow = 2, ncol = 2
+)
+
+# Display the combined plot
+print(combined_plot_residual)
+
+```
+
+
 #heatmap plot
 
 ```{r}
@@ -3398,6 +4040,15 @@ print(combined_heatmap)
 ```{r}
 ggsave("Plots/combined_plot_smooth_line_switch.png", plot = combined_plot_smooth_line_switch, width = 8, height = 6, dpi = 400)
 ```
+```{r}
+# Density plot for survey population
+ggplot(camps, aes(x = N_INDVI, fill = Sit_Stt)) +
+  geom_density(alpha = 0.5) +
+  labs(x = "Survey Population", y = "Density")
+
+```
+
+
 #flip coordinate
 ```{r}
 library(ggplot2)
@@ -3823,6 +4474,86 @@ campsgt10000 <- subset(camps, N_INDVI > 10000)
 campls10000 <- subset(camps, N_INDVI < 10000)
 ```
 #population <10000
+
+
+```{r}
+# Revised scatter plot function
+create_scatter_plot_residual <- function(data, y_var, title, min_y, max_y) {
+  ggplot(data, aes_string(x = "N_INDVI", y = y_var, color = "Sit_Stt")) +
+    geom_jitter(size = 0.6, alpha = 0.8) +  # Add points
+    geom_smooth(method = "lm", se = FALSE) +  # Add regression line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add 1:1 line
+    labs(title = title,
+         x = "Survey Population",
+         y = "Estimated Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          legend.position = "none") +
+    scale_y_continuous(limits = c(min_y, max_y))  # Set y-axis limits
+}
+
+# Find min and max for consistency across all datasets
+min_value <- min(c(campls10000 $wp_c, campls10000 $wp_uc, campls10000 $ghsl, campls10000 $gpw_UN), na.rm = TRUE)
+max_value <- max(c(campls10000 $wp_c, campls10000 $wp_uc, campls10000 $ghsl, campls10000 $gpw_UN), na.rm = TRUE)
+
+# Create individual plots
+scatter_gpw_resid <- create_scatter_plot_residual(campsgt10000, "gpw_UN", "GPW", min_value, max_value)
+scatter_ghsl_resid <- create_scatter_plot_residual(campsgt10000, "ghsl", "GHS-POP", min_value, max_value)
+scatter_wp_uncon_resid <- create_scatter_plot_residual(campsgt10000, "wp_uc", "WorldPop Unconstrained", min_value, max_value)
+scatter_wp_con_resid <- create_scatter_plot_residual(campsgt10000, "wp_c", "WorldPop Constrained", min_value, max_value)
+
+# Combine all plots into a 2x2 grid
+combined_plot_residual_gt10000 <- grid.arrange(
+  scatter_gpw_resid, scatter_ghsl_resid,
+  scatter_wp_uncon_resid, scatter_wp_con_resid,
+  nrow = 2, ncol = 2
+)
+
+# Display the combined plot
+print(combined_plot_residual_gt10000)
+```
+
+#population less than 10000
+
+```{r}
+# Revised scatter plot function
+create_scatter_plot_residual <- function(data, y_var, title, min_y, max_y) {
+  ggplot(data, aes_string(x = "N_INDVI", y = y_var, color = "Sit_Stt")) +
+    geom_jitter(size = 0.6, alpha = 0.8) +  # Add points
+    geom_smooth(method = "lm", se = FALSE) +  # Add regression line
+    geom_abline(intercept = 0, slope = 1, linetype = "dashed", color = "black") +  # Add 1:1 line
+    labs(title = title,
+         x = "Survey Population",
+         y = "Estimated Population") +
+    theme_minimal() +
+    theme(plot.title = element_text(hjust = 0.5, face = "bold"),
+          legend.position = "none") +
+    scale_y_continuous(limits = c(min_y, max_y))  # Set y-axis limits
+}
+
+# Find min and max for consistency across all datasets
+min_value <- min(c(campsgt10000$wp_c, campsgt10000$wp_uc, campsgt10000$ghsl, campsgt10000$gpw_UN), na.rm = TRUE)
+max_value <- max(c(campsgt10000$wp_c, campsgt10000$wp_uc, campsgt10000$ghsl, campsgt10000$gpw_UN), na.rm = TRUE)
+
+# Create individual plots
+scatter_gpw_resid <- create_scatter_plot_residual(campsgt10000, "gpw_UN", "GPW", min_value, max_value)
+scatter_ghsl_resid <- create_scatter_plot_residual(campsgt10000, "ghsl", "GHS-POP", min_value, max_value)
+scatter_wp_uncon_resid <- create_scatter_plot_residual(campsgt10000, "wp_uc", "WorldPop Unconstrained", min_value, max_value)
+scatter_wp_con_resid <- create_scatter_plot_residual(campsgt10000, "wp_c", "WorldPop Constrained", min_value, max_value)
+
+# Combine all plots into a 2x2 grid
+combined_plot_residual_gt10000 <- grid.arrange(
+  scatter_gpw_resid, scatter_ghsl_resid,
+  scatter_wp_uncon_resid, scatter_wp_con_resid,
+  nrow = 2, ncol = 2
+)
+
+# Display the combined plot
+print(combined_plot_residual_gt10000)
+
+```
+
+
 ```{r}
 # Find the minimum and maximum values of the estimated population variable across all datasets
 min_value <- min(c(min( campls10000 $wp_c, campls10000 $wp_uc, campls10000 $ghsl, campls10000 $gpw_UN)))
@@ -4428,6 +5159,7 @@ print(paste("gpw_UN:",corr_gpw_UN_pl))
 # [1] "gpw_UN: 0.0711666429556592"
 
 ```
+
 
 ```{r}
 # Create a matrix of correlation coefficients
