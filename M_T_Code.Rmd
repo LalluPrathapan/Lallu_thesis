@@ -1,0 +1,108 @@
+---
+title: "M_T_extraction_statistics"
+author: "Lallu Nikerthil Prathapan"
+date: "1/5/2025"
+output: html_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Packages install
+```{r}
+install.packages("D:/EAGLE/Master_Thesis_Hannes/1/R/packages/exactextractr_0.10.0.tar.gz", repos = NULL, type = "source")
+```
+
+
+```{r}
+# List of packages to install
+packages_to_install <- c("cowplot")
+
+# Install the packages
+install.packages(packages_to_install)
+```
+#Packages library
+
+```{r}
+library(sf)
+library(vctrs)
+library(ggplot2)
+library(raster)
+library(exactextractr)
+library(terra)
+library(dplyr)
+library(gridExtra)
+library(tidyr)
+library(units)
+library(viridis)
+library(hrbrthemes)
+library(corrplot)
+library(cowplot)
+library(reshape2)
+library(leaflet)
+library(orca)
+```
+
+#______________________________________________
+
+# Loading the dataset
+```{r}
+build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camps_EO/camps_eo2/camps_eo2.shp")
+camps<-st_read(build_stat_path2)
+
+str(camps)
+```
+#converting as.numeric for the columns required
+
+```{r}
+camps$wp_c_df<-as.numeric(camps$wp_c_df)
+camps$g_d_75_to_<-as.numeric(camps$g_d_75_to_)
+camps$g_c_70_to_<-as.numeric(camps$g_c_70_to_)
+camps$vida_b_a<-as.numeric(camps$vida_b_a)
+camps$vida_b_c<-as.numeric(camps$vida_b_c)
+camps$vida_b_d<-as.numeric(camps$vida_b_d)
+camps$g_d_70_to_<-as.numeric(camps$g_d_70_to_)
+camps$g_c_75_to_<-as.numeric(camps$g_c_75_to_)
+camps$ms_b_a<-as.numeric(camps$ms_b_a)
+camps$ms_b_c<-as.numeric(camps$ms_b_c)
+camps$osm_b_d<-as.numeric(camps$osm_b_d)
+camps$osm_b_c<-as.numeric(camps$osm_b_c)
+camps$ms_b_d<-as.numeric(camps$ms_b_d)
+camps$gpwU_df<-as.numeric(camps$gpwU_df)
+camps$osm_b_a<-as.numeric(camps$osm_b_a)
+camps$g_b_a<-as.numeric(camps$g_b_a)
+camps$N_HH<-as.numeric(camps$N_HH)
+camps$wrld_p_<-as.numeric(camps$wrld_p_)
+camps$g_b_c<-as.numeric(camps$g_b_c)
+camps$g_b_d<-as.numeric(camps$g_b_d)
+camps$g_d_65_to_<-as.numeric(camps$g_d_65_to_)
+camps$ghsl_df<-as.numeric(camps$ghsl_df)
+camps$ghsl<-as.numeric(camps$ghsl)
+camps$wp_c<-as.numeric(camps$wp_c)
+camps$wp_uc_df<-as.numeric(camps$wp_uc_df)
+camps$Site_Ar<-as.numeric(camps$Site_Ar)
+camps$st_pp_d<-as.numeric(camps$st_pp_d)
+camps$g_c_65_to_<-as.numeric(camps$g_c_65_to_)
+camps$Ar_diff<-as.numeric(camps$Ar_diff)
+camps$gpw_dff<-as.numeric(camps$gpw_dff)
+camps$N_INDVI<-as.numeric(camps$N_INDVI)
+camps$gpw_UN<-as.numeric(camps$gpw_UN)
+camps$g_a_75_to_<-as.numeric(camps$g_a_75_to_)
+camps$cl_Shp_a<-as.numeric(camps$cl_Shp_a)
+camps$wp_uc<-as.numeric(camps$wp_uc)
+camps$g_a_70_to_<-as.numeric(camps$g_a_70_to_)
+camps$g_a_65_to_<-as.numeric(camps$g_a_65_to_)
+
+```
+
+#Do not run
+#removing the camp with less area and high population("BO_S294")
+
+```{r}
+# Assuming your dataset is named 'data'
+# Subset the data to exclude the row with name "BO_S294"
+camps<- subset(camps, Name != "BO_S294")
+head(data)
+```
