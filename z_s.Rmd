@@ -9,7 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-#Packages install
+#Packages install of exactextracter 
 ```{r}
 install.packages("D:/EAGLE/Master_Thesis_Hannes/1/R/packages/exactextractr_0.10.0.tar.gz", repos = NULL, type = "source")
 ```
@@ -33,7 +33,7 @@ library(exactextractr)
 library(terra)
 library(dplyr)
 library(gridExtra)
-library(tidyr)
+#library(tidyr)
 library(units)
 library(viridis)
 library(hrbrthemes)
@@ -46,14 +46,14 @@ library(orca)
 
 #______________________________________________
 
-
+# Loading the dataset
 ```{r}
 build_stat_path2<-("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/all_pop_output/camps_EO/camps_eo2/camps_eo2.shp")
 camps<-st_read(build_stat_path2)
 
 str(camps)
 ```
-#converting as.numeric for many columns
+#converting as.numeric for the columns required
 
 ```{r}
 camps$wp_c_df<-as.numeric(camps$wp_c_df)
@@ -79,7 +79,9 @@ camps$g_b_d<-as.numeric(camps$g_b_d)
 camps$g_d_65_to_<-as.numeric(camps$g_d_65_to_)
 camps$ghsl_df<-as.numeric(camps$ghsl_df)
 camps$ghsl<-as.numeric(camps$ghsl)
-camps$wp_c<-as.numeric(camps$wp_c)
+camps$w_c<-as.numeric(camps$w_c)
+camps$wp_c<-as.numeric(camps$w_c)
+camps$wp_uc<-as.numeric(camps$w_uc)
 camps$wp_uc_df<-as.numeric(camps$wp_uc_df)
 camps$Site_Ar<-as.numeric(camps$Site_Ar)
 camps$st_pp_d<-as.numeric(camps$st_pp_d)
@@ -94,15 +96,6 @@ camps$wp_uc<-as.numeric(camps$wp_uc)
 camps$g_a_70_to_<-as.numeric(camps$g_a_70_to_)
 camps$g_a_65_to_<-as.numeric(camps$g_a_65_to_)
 
-```
-
-#removing the camp with less area and high population("BO_S294")
-
-```{r}
-# Assuming your dataset is named 'data'
-# Subset the data to exclude the row with name "BO_S294"
-camps<- subset(camps, Name != "BO_S294")
-head(data)
 ```
 
 
@@ -226,10 +219,6 @@ print(dig_ar)
 
 ```
 
-
-
-
-
 #visualising the above summary stats
 ```{r}
 library(ggplot2)
@@ -268,7 +257,7 @@ ggsave("Plots/area_box_plot.png", plot = r, width = 8, height = 6, dpi = 400)
 ```
 
 
-#subsetting the camps higher than 10000 square meter area
+#Subsetting the camps higher than 10000 square meter area
 
 ```{r}
 # Subset the data
@@ -285,7 +274,7 @@ print(st_sub_camps)
 #Simple feature collection with 147 features 
 ```
 
-#subsetting the camps less than 10000 square meter area
+#Subsetting the camps less than 10000 square meter area
 
 ```{r}
 # Subset the data
@@ -299,7 +288,7 @@ print(subset_data_2)
 st_sub_camps_2<-summary(as.numeric(subset_data$cl_Shp_a))
 print(st_sub_camps_2)
 
-#Simple feature collection with 64 features and 
+
 ```
 
 
@@ -310,7 +299,7 @@ surv_sta<-summary(as.numeric(camps$N_INDVI))
 print(surv_sta)
 ```
 
-#box plot of the population column
+#Box plot of the population column
 
 ```{r}
 # Summary statistics
@@ -344,12 +333,8 @@ variance_N_INDVI <- var(camps$N_INDVI)
 print(variance_N_INDVI)
 
 ```
-#Analysis about the data N_INDVI
 
-
-
-
-# bar plot formal camps with area greater than 10000
+# Bar plot formal camps with area greater than 10000
 
 ```{r}
 library(ggplot2)
@@ -418,9 +403,6 @@ bar_plot_combined_in_f_gs_ls <- ggplot(combined_data, aes(x = Type, fill = Sit_S
 # Print the combined bar plot
 print(bar_plot_combined_in_f_gs_ls)
 
-
-
-
 ```
 
 ```{r}
@@ -463,7 +445,7 @@ print(bar_plot_combined)
 ```{r}
 ggsave("Plots/formal_informal_areagsls.png", plot =bar_plot_combined_in_f_gs_ls, width = 8, height = 6, dpi = 400)
 ```
-#bar plot formal /informal population wise
+#Bar plot formal /informal population wise
 
 ```{r}
 library(ggplot2)
@@ -540,6 +522,7 @@ print(bar_plot_combined_f_if_plg)
 ```{r}
 ggsave("Plots/bar_plot_combined_f_if_plg.png", plot =bar_plot_combined_f_if_plg, width = 8, height = 6, dpi = 400)
 ```
+#Do not run, the dataset provided already has extracted value
 #______________________________________________
 #$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
 #ZONAL STATISTICS for each of the global EO population datasets
@@ -580,13 +563,13 @@ extract_sum  <-  function(raster, polygon, field){
 
   x <- do.call("rbind",v.exact)
 
-  x[,"gpw"] <- x[, "value"] * x$coverage_fraction
+  x[,"w_c"] <- x[, "value"] * x$coverage_fraction
 
   x_sum <- x %>%
 
     dplyr::group_by(id_tmp)%>%
 
-    dplyr::summarise_at("gpw", sum, na.rm = TRUE)
+    dplyr::summarise_at("w_c", sum, na.rm = TRUE)
 
 polygon <- polygon %>%
 
@@ -654,9 +637,6 @@ ghsl_surv<-ggplot(camps, aes(y = ghsl, x = N_INDVI, color = Sit_Stt)) +
   theme_minimal()+scale_x_continuous(expand = c(0,0))  # Adjust axis scale to start from zero
   print(ghsl_surv)
 ```
-#Analysis:
-!!!(not sure)It can be found that the informal with lowere population has more correlation than the formal camps with higher population
-
 
 
 #correlation GHSL and N_INDVI
@@ -679,9 +659,6 @@ print(corr_ghsl_pop)
 # [1] 0.6700698
 
 ```
-
-#Analysis
-The correlation coefficient is 0.6701, indicating a moderate positive correlation between N_INDVI and ghsl.
 
 
 #2.(Informal)Subset the informal camps and plot the estimate  vs calc
@@ -801,11 +778,6 @@ print(corr_ghsl_als)
 ```
 
 
-
-
-
-
-
 #Linear regression
 
 ```{r}
@@ -870,10 +842,6 @@ print(cor_ghsl_gt10000)
 cor_ghsl_ls10000<-cor(campls10000 $N_INDVI,campls10000$ghsl )
 print(cor_ghsl_ls10000)
 ```
-#Analysis : most of the formal camps have population greated than 10,000 and for informal camps the popualtion is mostly under 5000.
-
-
-Considering the camps having the survey population less than or equal to 10,000. it can be seen that varies sites having the population estimate higher than tht of the survey population. 
 
 
 #8.(POP<500)splitting the population less than 500
@@ -941,9 +909,6 @@ ghsl_st_cl<-ggplot(camps, aes(y = as.numeric(ghsl), x = as.numeric(N_INDVI), col
   theme_minimal()
 print(ghsl_st_cl)
 ```
-# Analysis
-
-There are only 2 planned settlement with high population
 
 
 #11.(N_HHvsN_INDVI)The plots with Number of Households and survey population +ghsl population
@@ -1037,7 +1002,6 @@ ggsave("Plots/hh_ghsl_c.png", plot =hh_ghsl_c, width = 8, height = 6, dpi = 400)
 #_______GHS PLOT END_______
 
 
-
 #A.Correlation between houshold and population(both survey and estimated GHSL)
 
 ```{r}
@@ -1085,9 +1049,6 @@ print(ghs_dff_stats)
 
 Seeing that the mean in the difference in population between the ghsl and the surveyed population is overestimation by 2954.9, which is a pretty big overestimation 
 
-What could be the reason for this????
-
-
 
 #C.absolute diff/percentage diff/RMSE/mean absolute/percentage error
 
@@ -1130,13 +1091,9 @@ cat("Percentage error:",percentage_error)
 
 ```
 
-
-
-
 ```{r}
 library(ggplot2)
 
-# Assuming ghsl_df is a data frame with a single column named ghsl
 # Create a boxplot for ghsl_df
 boxplot <- ggplot(camps, aes(x=Sit_Stt,y = ghsl_df)) +
   geom_boxplot() +geom_jitter(aes(x=Sit_Stt, y =ghsl_df), size = 0.2, alpha = 0.9,show.legend = FALSE) +coord_flip()
@@ -1156,7 +1113,7 @@ print(boxplot)
 
 ```{r}
 World_pop_uc <- rast('D:/EAGLE/Master_Thesis_Hannes/1/world_pop/nga_ppp_2020.tif')
-print(World_pop)
+print(World_pop_uc)
 ```
 
 
@@ -1169,12 +1126,10 @@ camps <- extract_sum(World_pop_uc,camps,"Name")
 ```
 #Difference in the survery_population and world_pop unconstrained
 ```{r}
-# Assuming you have a column named "N_INDVID" in the polygon_camps data frame
-# Adjust the column name if needed
 
 # Subtract N_INDVID from ras_name
 #!!!!!! careful different dataset
-camp_final$wp_uc_df <- as.numeric(camp_final$N_INDVI) - as.numeric(camp_final$wp_uc)
+camps$wp_uc_df <- as.numeric(camps$N_INDVI) - as.numeric(camps$w_uc)
 
 # View the resulting data frame with the new "difference" column
 print(camps)
@@ -1460,7 +1415,6 @@ print(sl_cls_wp_uc)
 ```
 
 
-
 #11.(N_HHvsN_INDVI)The plots with Number of Households and survey population +ghsl population
 
 
@@ -1601,20 +1555,20 @@ print(wp_uc_dff_stats)
 
 ```{r}
 # Convert variables to numeric if necessary
-camps$wp_uc <- as.numeric(camps$wp_uc)
+camps$wp_uc <- as.numeric(camps$w_uc)
 camps$N_INDVI <- as.numeric(camps$N_INDVI)
 
 # Calculate absolute difference
 absolute_difference_wp_uc<- abs(camps$wp_uc - camps$N_INDVI)
 
 # Calculate percentage difference
-percentage_difference_wp_uc <- abs((camps$wp_uc - camps$N_INDVI) / camps$N_INDVI) * 100
+percentage_difference_wp_uc <- abs((camps$w_uc - camps$N_INDVI) / camps$N_INDVI) * 100
 
 # Calculate root mean square error (RMSE)
 rmse_wp_uc<- sqrt(mean((camps$wp_uc - camps$N_INDVI)^2))
 
 # Calculate mean absolute percentage error (MAPE)
-mape_uc <- mean(percentage_difference, na.rm = TRUE)
+mape_uc <- mean(percentage_difference_wp_uc, na.rm = TRUE)
 
 # Calculate absolute error
 absolute_error_wp_uc <- mean(abs(as.numeric(camps$wp_uc) - as.numeric(camps$N_INDVI)))
@@ -1651,19 +1605,17 @@ print(World_pop_constr)
 ```{r}
 # Call function
 
-camps <- extract_sum(World_pop_constr,camps,"Name")
+camps_wp_uc <- extract_sum(World_pop_constr,camps,"Name")
 
 ```
 
 #Difference in the survery_population and world_pop  constrained
 ```{r}
-
-
 # Subtract N_INDVID from ras_name
-camp_final$wp_c_df <- camps$N_INDVI - camp_final$wp_c
+camps$wp_c_df <- camps$N_INDVI - camps$wp_c
 
 # View the resulting data frame with the new "difference" column
-print(camps)
+print(camps$wp_c_df)
 ```
 
 #for camps dataset correcting differences
@@ -1798,8 +1750,6 @@ print(corr_wp_c_ath)
 #[1] 0.5065452
   
 ```
-
-
 
 # 6.(Area_wise<10000)now considering the area wise plots for area only camps having area less than 10000 square meter area
 
@@ -1976,9 +1926,6 @@ WP_c_N_HH <- ggplot(camps, aes(y = as.numeric(N_HH), x = as.numeric(wp_c), color
 print(WP_c_N_HH )
 ```
 
-
-
-
 #ALL WORLDPOP CO PLOT SAVE
 
 ```{r}
@@ -2026,7 +1973,7 @@ ggsave("Plots/WP_c_N_HH .png", plot =WP_c_N_HH , width = 8, height = 6, dpi = 40
 
 
 
-#___WORLD_POP_UC END________________________
+#___WORLD_POP_C END________________________
 #____________________________________________
 #A.Correlation between houshold and population(both survey and estimated WP_UC)
 
@@ -2076,25 +2023,26 @@ camps$wp_c <- as.numeric(camps$wp_c)
 camps$N_INDVI <- as.numeric(camps$N_INDVI)
 
 # Calculate absolute difference
-absolute_difference_wp_c <- abs(camps$wp_c - camps$N_INDVI)
+absolute_difference_wp_c <- abs(camps$w_c - camps$N_INDVI)
 
 # Calculate percentage difference
-percentage_difference_wp_c <- abs((camps$wp_c - camps$N_INDVI) / camps$N_INDVI) * 100
+percentage_difference_wp_c <- abs((camps$w_c - camps$N_INDVI) / camps$N_INDVI) * 100
 
 # Calculate root mean square error (RMSE)
-rmse_wp_c <- sqrt(mean((camps$wp_c - camps$N_INDVI)^2))
+rmse_w_c <- sqrt(mean((camps$w_c - camps$N_INDVI)^2))
 
+rmse_w_c<-sqrt(mean((camps$w_c - camps$N_INDVI)^2))
 # Calculate mean absolute percentage error (MAPE)
 mape_wp_c <- mean(percentage_difference_wp_c, na.rm = TRUE)
 
 # Calculate absolute error
-absolute_error_wp_c <- mean(abs(as.numeric(camps$wp_c) - as.numeric(camps$N_INDVI)))
+absolute_error_wp_c <- mean(abs(as.numeric(camps$w_c) - as.numeric(camps$N_INDVI)))
 
 # Print the result
 print(absolute_error_wp_c)
 
 # Calculate percentage error
-percentage_error_wp_c <- mean(abs(as.numeric(camps$wp_c) - as.numeric(camps$N_INDVI)) / as.numeric(camps$N_INDVI)) * 100
+percentage_error_wp_c <- mean(abs(as.numeric(camps$w_c) - as.numeric(camps$N_INDVI)) / as.numeric(camps$N_INDVI)) * 100
 
 # Print the result
 print(percentage_error_wp_c)
@@ -2102,16 +2050,12 @@ print(percentage_error_wp_c)
 # Print results
 cat("Absolute Difference:", mean(absolute_difference_wp_c), "\n")
 cat("Percentage Difference:", mean(percentage_difference_wp_c), "%\n")
-cat("RMSE:", rmse_wp_c, "\n")
+cat("RMSE:", rmse_w_c, "\n")
 cat("MAPE:", mape_wp_c, "%\n")
 cat("Absolute error:",absolute_error_wp_c,"\n")
 cat("Percentage error:",percentage_error_wp_c)
 
 ```
-
-#Analysis 
-A percentage difference of 92.51982% signifies that, on average, the estimated population is 92.51982% higher than the surveyed population across the 223 sites. In other words, the estimated population is, on average, nearly twice as high as the surveyed population. This indicates a substantial overestimation in the estimated population compared to the surveyed population.
-
 
 #____________________________________________
 #$$$$$$$$$$$$$$$$#%%%%WORLDPOP C PLOTS END %%%%%%%%%%%%%%%%%%%%%%%%%%%$$$$$$$$$$$$$$$$$$$$$$$$$$
@@ -2295,16 +2239,6 @@ print(corr_gpw_als)
 #correlation result
 #[1] 0.05922067
 ```
-
-
-
-
-
-
-
-
-
-
 
 # splitting the population estimates for <10000 and > 10000
 
@@ -2598,12 +2532,17 @@ cat("Percentage error:",percentage_error_gpw)
 #_______________________________________________
 
 
-
-
-
 ```{r}
 gpw_UN <- rast('D:/EAGLE/Master_Thesis_Hannes/1/gpw/gpw_UNadj/gpw-v4-population-count-adjusted-to-2015-unwpp-country-totals-rev11_2020_30_sec_tif/gpw_v4_population_count_adjusted_to_2015_unwpp_country_totals_rev11_2020_30_sec.tif')
 print(gpw_UN)
+```
+#resampling gpw_UN
+
+```{r}
+# Resample the 1 km resolution raster to 100 m resolution (using bilinear interpolation)
+gpw_resampled <-  rast('D:/EAGLE/Master_Thesis_Hannes/1/1/thesisused-gpw.tif')
+
+# Now you can compare this resampled GPW raster with the WorldPop raster
 ```
 
 #!!!!!!The extract function!!!!!!!!!!!!!!!
@@ -2621,13 +2560,13 @@ extract_sum  <-  function(raster, polygon, field){
 
   x <- do.call("rbind",v.exact)
 
-  x[,"gpw_UN"] <- x[, "value"] * x$coverage_fraction
+  x[,"gpw_UN_re"] <- x[, "value"] * x$coverage_fraction
 
   x_sum <- x %>%
 
     dplyr::group_by(id_tmp)%>%
 
-    dplyr::summarise_at("gpw_UN", sum, na.rm = TRUE)
+    dplyr::summarise_at("gpw_UN_re", sum, na.rm = TRUE)
 
 polygon <- polygon %>%
 
@@ -2645,6 +2584,10 @@ polygon <- polygon %>%
 
 ```{r}
 camps <- extract_sum(gpw_UN, camps,"Name")
+```
+
+```{r}
+camps <- extract_sum(gpw_resampled, camps,"Name")
 ```
 
 #comparing GPW and GPW_UN adjusted extracted population values
@@ -2832,15 +2775,6 @@ print(corr_gpw_UN_als)
 #correlation result
 #[1] 0.0590567
 ```
-
-
-
-
-
-
-
-
-
 
 
 # splitting the population estimates for <10000 and > 10000
@@ -3569,7 +3503,19 @@ ggsave("Plots/form_scatterplot.png", plot = form_scatterplot,
        width = 8, height = 6, dpi = 400)
 
 ```
+#formal scatterplot with rsquared
 ```{r}
+# Calculate R² values for each dataset
+r_squared_values <- formal_camps_long %>%
+  group_by(Dataset) %>%
+  summarise(
+    r_squared = cor(as.numeric(N_INDVI), as.numeric(Estimated_Population), use = "complete.obs")^2
+  )
+
+# Print R² values
+print(r_squared_values)
+
+
 
 ```
 
@@ -3665,7 +3611,7 @@ dataset_colors <- c(
 
 # Create a scatterplot with improved aesthetics
 form_scatterplot_gt10000 <- ggplot(formal_camps_gt10000_long, 
-                           aes(x = as.numeric(N_INDVI), 
+                           aes(x = logas.numeric(N_INDVI), 
                                y = as.numeric(Estimated_Population), 
                                color = Dataset)) +
   geom_jitter(size = 0.8, alpha = 0.7) +  # Scatter points with jitter
@@ -3774,7 +3720,7 @@ inform_scatterplot <- ggplot(informal_camps_long,
               linetype = "dashed", color = "black", linewidth = 0.7) +  # 1:1 reference line
   scale_color_manual(values = dataset_colors) +  # Apply custom colors
   labs(
-    title = "Comparison of Population Estimates for Formal Camps",
+    title = "Comparison of Population Estimates for Informal Camps",
     x = "Survey Population",
     y = "Estimated Population",
     color = "Dataset"
@@ -3792,6 +3738,26 @@ print(inform_scatterplot)
 ggsave("Plots/inform_scatterplot.png", plot = inform_scatterplot, 
        width = 8, height = 6, dpi = 400)
 ```
+
+#r squared
+```{r}
+
+
+# Calculate R² values for informal camps
+r_squared_values_informal <- informal_camps_long %>%
+  group_by(Dataset) %>%
+  summarise(
+    r_squared = cor(as.numeric(N_INDVI), as.numeric(Estimated_Population), use = "complete.obs")^2
+  )
+
+# Print R² values for informal camps
+print(r_squared_values_informal)
+
+
+```
+
+
+
 #_the informal <10000 all in one
 
 ```{r}
@@ -5138,13 +5104,14 @@ campls10000$wp_c <- as.numeric(campls10000$wp_c)
 campls10000$wp_uc<- as.numeric(campls10000$wp_uc)
 campls10000$gpw <- as.numeric(campls10000$gpw_UN)
 
-
+formal_camps <- campls10000[campls10000$Sit_stt == "Formal", ]
+informal_camps <- campls10000[campls10000$Sit_stt == "Informal", ]
 # Calculate correlation coefficients
-corr_ghsl_pl <- cor(campls10000$N_INDVI,campls10000$ghsl)
-corr_wp_c_pl <-cor(campls10000$N_INDVI,campls10000$wp_c)
-corr_wp_uc_pl <-cor(campls10000$N_INDVI,campls10000$wp_uc)
+corr_ghsl_pl <- cor(formal_camps$N_INDVI,formal_camps$ghsl,method=("pearson"))
+corr_wp_c_pl <-cor(formal_camps$N_INDVI,formal_camps$wp_c)
+corr_wp_uc_pl <-cor(formal_camps$N_INDVI,formal_camps$wp_uc)
 # corr_gpw_pl <-cor(campls10000$N_INDVI,campls10000$gpw)
-corr_gpw_UN_pl <-cor(campls10000$N_INDVI,campls10000$gpw_UN)
+corr_gpw_UN_pl <-cor(formal_camps$N_INDVI,formal_camps$gpw_UN)
 # View correlation coefficients
 
 print(paste("GHSL:",corr_ghsl_pl))
@@ -5160,6 +5127,44 @@ print(paste("gpw_UN:",corr_gpw_UN_pl))
 
 ```
 
+```{r}
+# Ensure variables are numeric
+campls10000$N_INDVI <- as.numeric(campls10000$N_INDVI)
+campls10000$ghsl <- as.numeric(campls10000$ghsl)
+campls10000$wp_c <- as.numeric(campls10000$wp_c)
+campls10000$wp_uc <- as.numeric(campls10000$wp_uc)
+campls10000$gpw_UN <- as.numeric(campls10000$gpw_UN)
+
+# Subset data for formal and informal camps
+formal_camps <- campls10000[campls10000$Sit_Stt == "Formal", ]
+informal_camps <- campls10000[campls10000$Sit_Stt == "Informal", ]
+
+# Function to calculate correlations
+calculate_correlation <- function(data) {
+  list(
+    corr_ghsl = cor(data$N_INDVI, data$ghsl, method = "pearson"),
+    corr_wp_c = cor(data$N_INDVI, data$wp_c, method = "pearson"),
+    corr_wp_uc = cor(data$N_INDVI, data$wp_uc, method = "pearson"),
+    corr_gpw_UN = cor(data$N_INDVI, data$gpw_UN, method = "pearson")
+  )
+}
+
+# Correlations for formal camps (population <10,000)
+formal_camps_subset <- formal_camps[formal_camps$N_INDVI < 10000, ]
+formal_corr <- calculate_correlation(formal_camps_subset)
+
+# Correlations for informal camps (population <10,000)
+informal_camps_subset <- informal_camps[informal_camps$N_INDVI < 10000, ]
+informal_corr <- calculate_correlation(informal_camps_subset)
+
+# Print correlation results
+print("Formal Camps Correlations:")
+print(formal_corr)
+
+print("Informal Camps Correlations:")
+print(informal_corr)
+
+```
 
 ```{r}
 # Create a matrix of correlation coefficients
@@ -5959,6 +5964,22 @@ ggsave("Plots/bar_plot_error_rmse.png", plot =bar_plot_error_rmse, width = 8, he
 ```
 
 #__RATIOS OF ERROR____
+
+#swapping columns to make sure wp_c and wp_uc have correct values
+
+```{r}
+# Save the column names of camps_wp_uc and camps_wp_c
+temp_colnames_wp_uc <- colnames(camps$wp_uc)
+temp_colnames_wp_c <- colnames(camps$wp_c)
+
+# Swap the column names
+colnames(camps$wp_uc) <- temp_colnames_wp_c
+colnames(camps$wp_c) <- temp_colnames_wp_uc
+
+```
+
+
+
 #ratio of error for EO datasets 
 ```{r}
 # Calculate the ratio of the difference to the surveyed population
@@ -6024,11 +6045,12 @@ library(plotly)
 difference_data$ratio <- difference_data$Population_Difference / camps$N_INDVI
 
 # Aggregate mean ratio values
-mean_ratio_values <- aggregate(ratio ~ Dataset, data = difference_data, mean)
+mean_ratio_values <- aggregate(ratio ~ Dataset, data = difference_data, median)
 
 # Create an interactive box plot for the ratios
 boxplot_ratio_interactive <- plot_ly(difference_data, x = ~Dataset, y = ~ratio, type = "box") %>%
-  add_markers(text = ~paste("Dataset:", Dataset, "<br>Name:", camps$Name, "<br>Sit_Stt:", camps$Sit_Stt, "<br>cl_Shp_a:", camps$cl_Shp_a, "<br>Ratio:", ratio)) %>%
+  add_markers(text = ~paste("Dataset:", Dataset, "<br>Name:", camps$Name, "<br>Sit_Stt:", camps$Sit_Stt, "<br>cl_Shp_a:", camps$cl_Shp_a,
+   "<br>campname:", camps$Site_nm,                         "<br>Ratio:", ratio)) %>%
   add_markers(data = mean_ratio_values, x = ~Dataset, y = ~ratio, mode = "markers", color = I("red"), 
               text = ~paste("Mean Ratio:", round(ratio, digits = 2)))
  
@@ -6039,9 +6061,10 @@ boxplot_ratio_interactive
 
 
 ```
-# thesis used
+# ___thesis used
 # Create the box plot while zooming in on the range of interest and ensuring all data is considered
 ```{r}
+library(stringr)
 # Create the box plot while zooming in on the range of interest and ensuring all data is considered
 boxplot_ratio <- ggplot(difference_data, aes(x = Dataset, y = -ratio)) +
   geom_boxplot(fill = "lightblue", color = "black", outlier.color = "lightgray") +
@@ -6051,7 +6074,7 @@ boxplot_ratio <- ggplot(difference_data, aes(x = Dataset, y = -ratio)) +
   stat_summary(fun = median, geom = "text", aes(label = round(..y.., digits = 2)), 
                vjust = -0.5, size = 3, color = 'black') +
   labs(
-       x = "Dataset", y = "Ratio of Difference to Survey Population") +
+       x = "Dataset", y = "Ratio of Difference of estimate to Survey Population") +
   theme_minimal() +
   theme(
     axis.text.x = element_text(angle = 0, hjust = 0.5)
@@ -6064,7 +6087,7 @@ print(boxplot_ratio)
 
 ```{r}
 # Save the plot to a file
-ggsave("Plots/boxplot_ratio.png", plot =boxplot_ratio, width = 8, height = 6, dpi = 400)
+ggsave("Plots/boxplot_ratio.png", plot =boxplot_ratio, width = 8, height = 5, dpi = 400)
 ```
 
 
@@ -6138,11 +6161,636 @@ boxplot_ratio_stat <- ggplot(difference_data_stt, aes(x = Dataset, y = -ratio, f
 print(boxplot_ratio_stat)
 
 ```
+#percentage of underestimation, overestimation
+```{r}
+# Overall underestimation and overestimation
+underestimation_count <- sum(difference_data_stt$ratio < 0, na.rm = TRUE)
+overestimation_count <- sum(difference_data_stt$ratio > 0, na.rm = TRUE)
+total_count <- nrow(difference_data_stt)
+
+# Overall percentages
+underestimation_percentage <- (underestimation_count / total_count) * 100
+overestimation_percentage <- (overestimation_count / total_count) * 100
+
+# Print overall results
+cat("Overall Results:\n")
+cat("Percentage of data that underestimates the surveyed population:", underestimation_percentage, "%\n")
+cat("Percentage of data that overestimates the surveyed population:", overestimation_percentage, "%\n\n")
+
+# Per-dataset underestimation and overestimation
+library(dplyr)
+
+dataset_stats <- difference_data_stt %>%
+  group_by(Dataset) %>%
+  summarise(
+    Underestimation_Count = sum(ratio < 0, na.rm = TRUE),
+    Overestimation_Count = sum(ratio > 0, na.rm = TRUE),
+    Total_Count = n(),
+    Underestimation_Percentage = (Underestimation_Count / Total_Count) * 100,
+    Overestimation_Percentage = (Overestimation_Count / Total_Count) * 100,
+    .groups = "drop"
+  )
+
+# Print per-dataset results
+cat("Results Per Dataset:\n")
+print(dataset_stats)
+
+```
+#thesis percentatge of under or overestimation of formal and informal
+
+```{r}
+# Create a function to calculate underestimation and overestimation percentages
+calculate_estimation_stats <- function(data) {
+  underestimation_count <- sum(data$ratio < 0, na.rm = TRUE)
+  overestimation_count <- sum(data$ratio > 0, na.rm = TRUE)
+  total_count <- nrow(data)
+  
+  underestimation_percentage <- (underestimation_count / total_count) * 100
+  overestimation_percentage <- (overestimation_count / total_count) * 100
+  
+  return(data.frame(
+    Underestimation_Percentage = underestimation_percentage,
+    Overestimation_Percentage = overestimation_percentage,
+    Total_Count = total_count
+  ))
+}
+
+# Split data by Dataset and Site Status
+library(dplyr)
+
+estimation_stats <- difference_data_stt %>%
+  group_by(Dataset, Sit_Stt) %>%
+  summarise(
+    Underestimation_Percentage = sum(ratio < 0, na.rm = TRUE) / n() * 100,
+    Overestimation_Percentage = sum(ratio > 0, na.rm = TRUE) / n() * 100,
+    Total_Count = n(),
+    .groups = "drop"
+  )
+
+# Print the results
+print(estimation_stats)
+
+write.csv(estimation_stats, "Plots/estimation_stats_formala_inf.csv", row.names = FALSE)
+
+
+```
+
+
+
+
+```{r}
+library(ggplot2)
+library(plotly)
+
+# Create the base ggplot (same as the static version)
+boxplot_ratio_stat <- ggplot(difference_data_stt, aes(x = Dataset, y = -ratio, fill = Sit_Stt)) +
+  geom_boxplot(color = "black", outlier.color = "lightgray") +  # Box plot with outlier color
+  stat_summary(
+    fun = median, 
+    geom = "point", 
+    aes(group = Sit_Stt), 
+    shape = 23, 
+    size = 1.5, 
+    color = "red", 
+    fill = "yellow", 
+    position = position_dodge(width = 0.75)  # Dodge to separate Formal and Informal
+  ) +
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = Sit_Stt), 
+    position = position_dodge(width = 0.75), 
+    vjust = -0.5, 
+    size = 3, 
+    color = 'black'
+  ) +
+  labs(
+    x = "Dataset", 
+    y = "Ratio of Difference to Survey Population", 
+    fill = "Site Status"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),  # No rotation, centered
+    plot.title = element_text(size = 10)
+  ) +
+  coord_cartesian(ylim = c(-1.5, 0.5)) +  # Focus on a specific range without altering data
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 7))  # Wrap x-axis labels to width of 7
+
+# Convert the ggplot to an interactive plot using ggplotly
+interactive_plot <- ggplotly(boxplot_ratio_stat)
+
+# Display the interactive plot
+interactive_plot
+
+```
+
+
 save ratio error formnal-informal plot
 
 ```{r}
 # Save the plot to a file
 ggsave("Plots/boxplot_ratio_stat.png", plot =boxplot_ratio_stat, width = 8, height = 6, dpi = 400)
+```
+
+```{r}
+# Combine all population difference columns into one data frame
+difference_data_stt <- data.frame(
+  Dataset = rep(c("GPW-v4", "GHS-POP", "WorldPop_unconstrained", "WorldPop_constrained"), each = nrow(camps)),
+  Population_Difference_stt = c(as.numeric(camps$gpwU_df), as.numeric(camps$ghsl_df), as.numeric(camps$wp_uc_df), as.numeric(camps$wp_c_df)),
+  Shlt_ty = camps$Shlt_ty  # Adding Sit_Stt column
+)
+
+# Ensure the correct order of the factors for the Dataset variable
+difference_data_stt$Dataset <- factor(
+  difference_data_stt$Dataset, 
+  levels = c("GPW-v4", "GHS-POP", "WorldPop_unconstrained", "WorldPop_constrained")
+)
+
+# Calculate the ratio of the difference to the surveyed population
+difference_data_stt$ratio <- difference_data_stt$Population_Difference_stt / camps$N_INDVI
+
+# Create the boxplot
+boxplot_ratio_stat <- ggplot(difference_data_stt, aes(x = Dataset, y = -ratio, fill =  Shlt_ty)) +
+  geom_boxplot(color = "black", outlier.color = "lightgray") +  # Box plot with outlier color
+  # Add a point for the median
+  
+  stat_summary(
+    fun = median, 
+    geom = "point", 
+    aes(group = Shlt_ty), 
+    shape = 23, 
+    size = 1.5, 
+    color = "red", 
+    fill = "yellow", 
+    position = position_dodge(width = 0.75)  # Dodge to separate Formal and Informal
+  )+
+  # Add the median value as text for Formal and Informal
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = Shlt_ty), 
+    position = position_dodge(width = 0.5), 
+    vjust = -0.5, 
+    size = 2, 
+    color = 'black '
+  ) +
+  labs(
+    #title = "Ratio of Difference to Survey Population by EO Population Data Products and Site Status",
+    x = "Dataset", 
+    y = "Ratio of Difference to Survey Population", 
+    fill = "Site shelter"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5),  # No rotation, centered
+    plot.title = element_text(size = 10)
+  ) +
+  coord_cartesian(ylim = c(-1.5, 1.5)) +  # Focus on a specific range without altering data
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 7))  # Wrap x-axis labels to width of 7
+
+# Print the adjusted box plot
+print(boxplot_ratio_stat)
+```
+
+```{r}
+# Refined Boxplot Code
+library(ggplot2)
+library(stringr)
+
+# Create the boxplot with refinements
+refined_boxplot <- ggplot(difference_data_stt, aes(x = Dataset, y = -ratio, fill = Shlt_ty)) +
+  geom_boxplot(color = "black", outlier.size = 1, outlier.alpha = 0.6) +  # Adjust outlier size and transparency
+  stat_summary(
+    fun = median, 
+    geom = "point", 
+    aes(group = Shlt_ty), 
+    shape = 21, 
+    size = 1, 
+    color = "black", 
+    fill = "gold", 
+    position = position_dodge(width = 0.75)
+  ) +
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = Shlt_ty), 
+    position = position_dodge(width = 0.75), 
+    vjust = -0.7, 
+    size = 1.5, 
+    color = "black"
+  ) +
+  scale_fill_brewer(palette = "Set2") +  # Use a colorblind-friendly palette
+  labs(
+    title = "Comparison of Population Estimate Errors Across Shelter Types",
+    subtitle = "Analyzing ratio of differences between estimated and survey populations",
+    x = "Dataset", 
+    y = "Ratio of Population Estimate Difference to Survey Population", 
+    fill = "Shelter Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+    axis.title = element_text(size = 11),
+    plot.title = element_text(size = 12, face = "bold"),
+    plot.subtitle = element_text(size = 10, margin = margin(b = 10)),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  ) +
+  coord_cartesian(ylim = c(-1.5, 1.5)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))  # Adjust label width
+
+# Print the refined boxplot
+print(refined_boxplot)
+
+```
+#thesis shelter type boxplot
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(stringr)
+library(dplyr)
+
+# Filter out 'Collective Settlement/Centre' from the data
+filtered_data <- difference_data_stt %>%
+  filter(Shlt_ty != "Collective Settlement/Centre")
+
+# Create the boxplot with refinements
+refined_boxplot <- ggplot(filtered_data, aes(x = Dataset, y = -ratio, fill = Shlt_ty)) +
+  geom_boxplot(color = "black", outlier.size = 1, outlier.alpha = 0.6) +  # Adjust outlier size and transparency
+  stat_summary(
+    fun = median, 
+    geom = "point", 
+    aes(group = Shlt_ty), 
+    shape = 21, 
+    size = 1, 
+    color = "black", 
+    fill = "gold", 
+    position = position_dodge(width = 0.75)
+  ) +
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = Shlt_ty), 
+    position = position_dodge(width = 0.75), 
+    vjust = -0.7, 
+    size = 1.5, 
+    color = "black"
+  ) +
+  scale_fill_brewer(palette = "Set2") +  # Use a colorblind-friendly palette
+  labs(
+    title = "Comparison of Population Estimate Errors Across Shelter Types",
+    subtitle = "Analyzing ratio of differences between estimated and survey populations",
+    x = "Dataset", 
+    y = "Ratio of Population Estimate Difference to Survey Population", 
+    fill = "Shelter Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+    axis.title = element_text(size = 11),
+    plot.title = element_text(size = 12, face = "bold"),
+    plot.subtitle = element_text(size = 10, margin = margin(b = 10)),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  ) +
+  coord_cartesian(ylim = c(-1.3, 1)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))  # Adjust label width
+
+# Print the refined boxplot
+print(refined_boxplot)
+
+```
+
+
+```{r}
+# Load necessary libraries
+library(ggplot2)
+library(stringr)
+library(dplyr)
+
+# Filter out 'Collective Settlement/Centre' from the data
+filtered_data <- difference_data_stt %>%
+  filter(Shlt_ty != "Collective Settlement/Centre")
+
+# Create the boxplot arranged by shelter type
+refined_boxplot_by_shelter <- ggplot(filtered_data, aes(x = Shlt_ty, y = -ratio, fill = Dataset)) +
+  geom_boxplot(color = "black", outlier.size = 1, outlier.alpha = 0.6, position = position_dodge(width = 0.75)) +
+  stat_summary(
+    fun = median, 
+    geom = "point", 
+    aes(group = Dataset), 
+    shape = 21, 
+    size = 1.5, 
+    color = "black", 
+    fill = "gold", 
+    position = position_dodge(width = 0.75)
+  ) +
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = Dataset), 
+    position = position_dodge(width = 0.75), 
+    vjust = -0.7, 
+    size = 2.5, 
+    color = "black"
+  ) +
+  scale_fill_brewer(palette = "Set2") +  # Use a colorblind-friendly palette
+  labs(
+    title = "Comparison of Population Estimate Errors by Shelter Type",
+    subtitle = "Analyzing ratio of differences between estimated and surveyed populations",
+    x = "Shelter Type", 
+    y = "Ratio of Population Estimate Difference to Survey Population", 
+    fill = "Dataset"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle =0, hjust = 1, size = 10),
+    axis.title = element_text(size = 10),
+    plot.title = element_text(size = 10, face = "bold"),
+    plot.subtitle = element_text(size = 10, margin = margin(b = 7)),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  ) +
+  coord_cartesian(ylim = c(-1.3, 1)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 5))  # Adjust label width
+
+# Print the refined boxplot
+print(refined_boxplot_by_shelter)
+
+```
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/refined_boxplot_by_shelter.png", plot =refined_boxplot_by_shelter, width = 10, height = 6, dpi = 500)
+```
+
+# percentage underestimation and overesteimation or correct for shelter type
+```{r}
+# Calculate underestimation, overestimation, and correct estimation by Shelter Type
+shelter_type_stats <- filtered_data %>%
+  group_by(Shlt_ty) %>%
+  summarise(
+    Underestimation_Count = sum(ratio < 0, na.rm = TRUE),
+    Overestimation_Count = sum(ratio > 0, na.rm = TRUE),
+    Correct_Estimation_Count = sum(ratio == 0, na.rm = TRUE),
+    Total_Count = n(),
+    Underestimation_Percentage = (Underestimation_Count / Total_Count) * 100,
+    Overestimation_Percentage = (Overestimation_Count / Total_Count) * 100,
+    Correct_Estimation_Percentage = (Correct_Estimation_Count / Total_Count) * 100,
+    .groups = "drop"
+  )
+
+# Print the results
+print(shelter_type_stats)
+
+```
+# pecentage under/over estim shelter type
+```{r}
+# Define a function to calculate estimation stats for a dataset
+calculate_stats <- function(data, dataset_name) {
+  data %>%
+    group_by(Shlt_ty) %>%
+    summarise(
+      Dataset = dataset_name,
+      Underestimation_Count = sum(ratio < 0, na.rm = TRUE),
+      Overestimation_Count = sum(ratio > 0, na.rm = TRUE),
+      Correct_Estimation_Count = sum(ratio == 0, na.rm = TRUE),
+      Total_Count = n(),
+      Underestimation_Percentage = (Underestimation_Count / Total_Count) * 100,
+      Overestimation_Percentage = (Overestimation_Count / Total_Count) * 100,
+      Correct_Estimation_Percentage = (Correct_Estimation_Count / Total_Count) * 100,
+      .groups = "drop"
+    )
+}
+
+# Calculate statistics for each dataset
+shelter_stats_ghs <- calculate_stats(filtered_data_ghs, "GHS-POP")
+shelter_stats_wpc <- calculate_stats(filtered_data_wpc, "WorldPop Constrained")
+shelter_stats_wpuc <- calculate_stats(filtered_data_wpuc, "WorldPop Unconstrained")
+shelter_stats_gpw <- calculate_stats(filtered_data_gpw, "GPW")
+
+# Combine results from all datasets
+all_shelter_stats <- bind_rows(shelter_stats_ghs, shelter_stats_wpc, shelter_stats_wpuc, shelter_stats_gpw)
+
+# View results
+print(all_shelter_stats)
+
+```
+
+#radar chart try
+```{r}
+# Required libraries
+library(dplyr)
+library(ggplot2)
+library(fmsb)
+library(tidyr)
+
+# Calculate statistics for each shelter type
+shelter_type_stats <- filtered_data %>%
+  group_by(Shlt_ty) %>%
+  summarise(
+    Underestimation_Count = sum(ratio < 0, na.rm = TRUE),
+    Overestimation_Count = sum(ratio > 0, na.rm = TRUE),
+    Correct_Estimation_Count = sum(ratio == 0, na.rm = TRUE),
+    Total_Count = n(),
+    Underestimation_Percentage = (Underestimation_Count / Total_Count) * 100,
+    Overestimation_Percentage = (Overestimation_Count / Total_Count) * 100,
+    Correct_Estimation_Percentage = (Correct_Estimation_Count / Total_Count) * 100,
+    .groups = "drop"
+  )
+
+# Filter only numeric columns (exclude any spatial or non-numeric data)
+radar_data <- shelter_type_stats %>%
+  select(Shlt_ty, Underestimation_Percentage, Overestimation_Percentage, Correct_Estimation_Percentage)
+
+# Ensure all percentage columns are numeric (explicit conversion)
+radar_data <- radar_data %>%
+  mutate(
+    Underestimation_Percentage = as.numeric(Underestimation_Percentage),
+    Overestimation_Percentage = as.numeric(Overestimation_Percentage),
+    Correct_Estimation_Percentage = as.numeric(Correct_Estimation_Percentage)
+  )
+
+# Check for any NA values in the numeric columns
+if(any(is.na(radar_data[,2:4]))) {
+  print("There are NA values in the radar chart data.")
+  print(radar_data)  # Inspect the data to see which rows contain NA
+  stop("NA values detected.")
+}
+
+# Reshape data to long format for radar chart
+radar_data_long <- radar_data %>%
+  gather(key = "Estimation_Type", value = "Percentage", -Shlt_ty)
+
+# Prepare data for the radar chart using pivot_wider instead of spread()
+radar_data_ready <- radar_data_long %>%
+  pivot_wider(names_from = Estimation_Type, values_from = Percentage)
+
+# Add a row with maximum values to scale the radar chart
+max_values <- data.frame(
+  Shlt_ty = "Max",
+  Underestimation_Percentage = 100,
+  Overestimation_Percentage = 100,
+  Correct_Estimation_Percentage = 100
+)
+
+# Append the max values row
+radar_data_ready <- bind_rows(radar_data_ready, max_values)
+
+# Ensure all data is numeric before creating the radar chart
+radar_data_ready[,2:4] <- lapply(radar_data_ready[,2:4], as.numeric)
+
+# Check if there are any NA values left before plotting
+if(any(is.na(radar_data_ready[,2:4]))) {
+  print("There are still NA values in the radar chart data.")
+  print(radar_data_ready)  # Inspect the final dataset
+  stop("NA values detected.")
+}
+
+# Create radar chart using fmsb package
+radarchart(radar_data_ready, axistype = 1,
+           pcol = rgb(0.2, 0.5, 0.5, 0.9), pfcol = rgb(0.2, 0.5, 0.5, 0.5), plwd = 4, plty = 1,
+           axislabcol = "gray", cglcol = "gray", cglty = 1, cglwd = 0.8,
+           vlcex = 0.8)
+
+# Adding title
+title(main = "Estimation Accuracy by Shelter Type", cex.main = 1.5)
+
+```
+
+```{r}
+# Calculate underestimation, overestimation, and correct estimation for each dataset and shelter type
+dataset_shelter_stats <- filtered_data %>%
+  group_by(Dataset, Shlt_ty) %>%
+  summarise(
+    Underestimation_Count = sum(ratio < 0, na.rm = TRUE),
+    Overestimation_Count = sum(ratio > 0, na.rm = TRUE),
+    Correct_Estimation_Count = sum(ratio == 0, na.rm = TRUE),
+    Total_Count = n(),
+    Underestimation_Percentage = (Underestimation_Count / Total_Count) * 100,
+    Overestimation_Percentage = (Overestimation_Count / Total_Count) * 100,
+    Correct_Estimation_Percentage = (Correct_Estimation_Count / Total_Count) * 100,
+    .groups = "drop"
+  )
+
+# Print the results
+print(dataset_shelter_stats)
+write.csv(dataset_shelter_stats, "Plots/shelter_type_stats.csv", row.names = FALSE)
+
+
+```
+
+```{r}
+# Filter data for "Emergency Shelter" and "Self-made/Makeshift Shelter"
+filtered_data <- subset(difference_data_stt, Shlt_ty %in% c("Emergency Shelter", "Self-made/Makeshift Shelter"))
+
+# Create the boxplot with refinements
+refined_boxplot <- ggplot(filtered_data, aes(x = Dataset, y = -ratio, fill = Shlt_ty)) +
+  geom_boxplot(color = "black", outlier.size = 1, outlier.alpha = 0.6) +  # Adjust outlier size and transparency
+  stat_summary(
+    fun = median, 
+    geom = "point", 
+    aes(group = Shlt_ty), 
+    shape = 21, 
+    size = 1, 
+    color = "black", 
+    fill = "gold", 
+    position = position_dodge(width = 0.75)
+  ) +
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = Shlt_ty), 
+    position = position_dodge(width = 0.75), 
+    vjust = -0.7, 
+    size = 1.5, 
+    color = "black"
+  ) +
+  scale_fill_brewer(palette = "Set2") +  # Use a colorblind-friendly palette
+  labs(
+    title = "Comparison of Population Estimate Errors for Specific Shelter Types",
+    subtitle = "Analyzing ratio of differences between estimated and survey populations",
+    x = "Dataset", 
+    y = "Ratio of Population Estimate Difference to Survey Population", 
+    fill = "Shelter Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+    axis.title = element_text(size = 11),
+    plot.title = element_text(size = 12, face = "bold"),
+    plot.subtitle = element_text(size = 10, margin = margin(b = 10)),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  ) +
+  coord_cartesian(ylim = c(-1.5, 1.5)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))  # Adjust label width
+
+# Print the refined boxplot
+print(refined_boxplot)
+
+
+```
+```{r}
+# Filter data for "Emergency Shelter" and "Self-made/Makeshift Shelter"
+filtered_data <- subset(difference_data_stt, Shlt_ty %in% c("Emergency Shelter", "Self-made/Makeshift Shelter"))
+
+# Custom color palette for the selected shelter types
+custom_colors <- c("Emergency Shelter" = "#7A4B9C",  # Blue for Emergency Shelter
+                   "Self-made/Makeshift Shelter" = "#FFCC00")  # Green for Makeshift Shelter
+
+# Create the boxplot with refinements
+refined_boxplot <- ggplot(filtered_data, aes(x = Dataset, y = -ratio, fill = Shlt_ty)) +
+  geom_boxplot(color = "black", outlier.size = 1, outlier.alpha = 0.6) +  # Adjust outlier size and transparency
+  stat_summary(
+    fun = median, 
+    geom = "point", 
+    aes(group = Shlt_ty), 
+    shape = 21, 
+    size = 1, 
+    color = "black", 
+    fill = "gold", 
+    position = position_dodge(width = 0.75)
+  ) +
+  stat_summary(
+    fun = median, 
+    geom = "text", 
+    aes(label = round(..y.., digits = 2), group = Shlt_ty), 
+    position = position_dodge(width = 0.75), 
+    vjust = -0.7, 
+    size = 1.5, 
+    color = "red"
+  ) +
+  scale_fill_manual(values = custom_colors) +  # Apply custom colors
+  labs(
+    title = "Comparison of Population Estimate Errors for Specific Shelter Types",
+    subtitle = "Analyzing ratio of differences between estimated and survey populations",
+    x = "Dataset", 
+    y = "Ratio of Population Estimate Difference to Survey Population", 
+    fill = "Shelter Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 0, hjust = 0.5, size = 10),
+    axis.title = element_text(size = 11),
+    plot.title = element_text(size = 12, face = "bold"),
+    plot.subtitle = element_text(size = 10, margin = margin(b = 10)),
+    legend.title = element_text(size = 10),
+    legend.text = element_text(size = 9)
+  ) +
+  coord_cartesian(ylim = c(-1.5, 1.5)) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10))  # Adjust label width
+
+# Print the refined boxplot
+print(refined_boxplot)
+
+```
+
+
+```{r}
+# Save the plot to a file
+ggsave("Plots/refined_boxplot_with_c.png", plot =refined_boxplot, width = 10, height = 6, dpi = 500)
 ```
 
 # underestimation and overestimation plots
@@ -7734,7 +8382,7 @@ print(rsquared_osm_b_c_hh)
 # Convert the correlation matrix to a dataframe
 corr_matrix_b <- correlation_matrix_building
 # Assign row and column names
-rownames(corr_matrix_b) <- colnames(corr_matrix_b) <- c("N_INDVI","N_HH","g_b_c","ms_b_c","vida_b_c","osm_b_c")
+rownames(corr_matrix_b) <- colnames(corr_matrix_b) <- c("Survey Population","Survey Household","Google building count","Microsoft building count","VIDA building count","OSM building count")
 # Convert the correlation matrix to long format
 corr_matrix_long_b <- melt(corr_matrix_b)
 
@@ -7752,6 +8400,170 @@ heat_map_corr_b <- ggplot(data = corr_matrix_long_b, aes(x = Var1, y = Var2, fil
 print(heat_map_corr_b)
 
 ```
+#------correlation with building count-area and nindvi nhh
+
+```{r}
+# Calculate correlation coefficients
+correlations <- data.frame(
+  Metric = rep(c("N_INDVI", "N_HH"), each = 8),
+  Variable = c(
+    "ms_b_c", "g_b_c", "vida_b_c", "osm_b_c", "ms_b_a", "g_b_a", "vida_b_a", "osm_b_a",
+    "ms_b_c", "g_b_c", "vida_b_c", "osm_b_c", "ms_b_a", "g_b_a", "vida_b_a", "osm_b_a"
+  ),
+  Correlation = c(
+    # Correlations with N_INDVI
+    cor(camps$N_INDVI, camps$ms_b_c, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$g_b_c, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$vida_b_c, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$osm_b_c, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$ms_b_a, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$g_b_a, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$vida_b_a, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$osm_b_a, use = "complete.obs"),
+    # Correlations with N_HH
+    cor(camps$N_HH, camps$ms_b_c, use = "complete.obs"),
+    cor(camps$N_HH, camps$g_b_c, use = "complete.obs"),
+    cor(camps$N_HH, camps$vida_b_c, use = "complete.obs"),
+    cor(camps$N_HH, camps$osm_b_c, use = "complete.obs"),
+    cor(camps$N_HH, camps$ms_b_a, use = "complete.obs"),
+    cor(camps$N_HH, camps$g_b_a, use = "complete.obs"),
+    cor(camps$N_HH, camps$vida_b_a, use = "complete.obs"),
+    cor(camps$N_HH, camps$osm_b_a, use = "complete.obs")
+  )
+)
+
+# Convert to wide format for heatmap
+library(tidyr)
+heatmap_data <- correlations %>%
+  pivot_wider(names_from = Variable, values_from = Correlation)
+
+# Set the rownames manually
+rownames(heatmap_data) <- heatmap_data$Metric
+heatmap_data <- heatmap_data[, -1]  # Remove the Metric column after setting rownames
+
+# Plot heatmap
+library(ggplot2)
+library(reshape2)
+heatmap_long <- melt(as.matrix(heatmap_data))
+
+ggplot(heatmap_long, aes(x = Var2, y = Var1, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(
+    low = "blue", high = "red", mid = "white",
+    midpoint = 0, limit = c(-1, 1), space = "Lab",
+    name = "Correlation"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Building Data Variables",
+    y = "Metrics",
+    title = "Correlation Heatmap",
+    subtitle = "Correlation of N_INDVI and N_HH with Building Counts and Areas"
+  )
+
+
+```
+
+```{r}
+# Calculate correlation coefficients for N_INDVI and N_HH with building counts and areas
+correlations <- data.frame(
+  Metric = c(
+    "ms_b_c", "g_b_c", "vida_b_c", "osm_b_c", "ms_b_a", "g_b_a", "vida_b_a", "osm_b_a"
+  ),
+  N_INDVI = c(
+    cor(camps$N_INDVI, camps$ms_b_c, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$g_b_c, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$vida_b_c, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$osm_b_c, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$ms_b_a, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$g_b_a, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$vida_b_a, use = "complete.obs"),
+    cor(camps$N_INDVI, camps$osm_b_a, use = "complete.obs")
+  ),
+  N_HH = c(
+    cor(camps$N_HH, camps$ms_b_c, use = "complete.obs"),
+    cor(camps$N_HH, camps$g_b_c, use = "complete.obs"),
+    cor(camps$N_HH, camps$vida_b_c, use = "complete.obs"),
+    cor(camps$N_HH, camps$osm_b_c, use = "complete.obs"),
+    cor(camps$N_HH, camps$ms_b_a, use = "complete.obs"),
+    cor(camps$N_HH, camps$g_b_a, use = "complete.obs"),
+    cor(camps$N_HH, camps$vida_b_a, use = "complete.obs"),
+    cor(camps$N_HH, camps$osm_b_a, use = "complete.obs")
+  )
+)
+
+# Rename columns to avoid duplication
+names(correlations) <- c("Building_Variable", "N_INDVI", "N_HH")
+
+# Reshape the data to long format
+library(tidyr)
+heatmap_data <- correlations %>%
+  pivot_longer(cols = c("N_INDVI", "N_HH"), names_to = "Metric", values_to = "Correlation")
+
+ggplot(heatmap_data, aes(x = Metric, y = Building_Variable, fill = Correlation)) +
+  geom_tile() +
+  geom_text(aes(label = round(Correlation, 2)), color = "black") +  # Add correlation values
+  scale_fill_gradient2(
+    low = "blue", high = "red", mid = "white",
+    midpoint = 0, limit = c(-1, 1), space = "Lab",
+    name = "Correlation"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  labs(
+    x = "Metrics",
+    y = "Building Data Variables",
+    title = "Correlation Heatmap",
+    subtitle = "Correlation of N_INDVI and N_HH with Building Counts and Areas"
+  )
+
+```
+
+```{r}
+# Reorder the levels of Building_Variable and rename them
+heatmap_data$Building_Variable <- factor(heatmap_data$Building_Variable,
+                                          levels = c("g_b_c","ms_b_c",  "vida_b_c", "osm_b_c", 
+                                                      "g_b_a","ms_b_a", "vida_b_a", "osm_b_a"))
+
+# Rename the variables for better clarity
+heatmap_data$Building_Variable <- recode(heatmap_data$Building_Variable,
+                                          "ms_b_c" = "microsoft_count",
+                                          "g_b_c" = "google_count",
+                                          "vida_b_c" = "vida_count",
+                                          "osm_b_c" = "osm_count",
+                                          "ms_b_a" = "microsoft_area",
+                                          "g_b_a" = "google_area",
+                                          "vida_b_a" = "vida_area",
+                                          "osm_b_a" = "osm_area")
+
+# Rename the Metric column
+heatmap_data$Metric <- recode(heatmap_data$Metric,
+                              "N_INDVI" = "survey_population",
+                              "N_HH" = "survey_household")
+
+# Plot heatmap with correlation values
+h<-ggplot(heatmap_data, aes(x = Metric, y = Building_Variable, fill = Correlation)) +
+  geom_tile() +
+  geom_text(aes(label = round(Correlation, 2)), color = "black", size = 4) +  # Add correlation values
+  scale_fill_gradient2(
+    low = "blue", high = "red", mid = "white",
+    midpoint = 0, limit = c(0.2, 1), space = "Lab",
+    name = "Correlation"
+  ) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 0, hjust = 1)) +
+  labs(
+    x = "Metrics",
+    y = "Building Data Variables",
+    title = "Correlation Heatmap",
+    subtitle = "Correlation of Survey Population and Survey Household with Building Counts and Areas"
+  )
+print(h)
+# Save the plot to a file
+ggsave("Plots/building_count_bar.png", plot =h , width = 8, height = 6, dpi = 500)
+```
+
 
 ```{r}
 # Convert the correlation matrix to a dataframe
@@ -9563,17 +10375,55 @@ ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/boxplot_ratio_error
 library(sf)
 
 # Convert camp_final to an sf object if it is not already
-camp_final_sf <- st_as_sf(camp_final)
 
+camp_final_sf <- st_as_sf(camp_final)
+camps_wp_uc_sf<-st_as_sf(camps_wp_uc)
 # Define the file path for saving
 output_directory <- "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/"  
-output_file <- paste0(output_directory, "camp_final_data.shp")
+output_file <- paste0(output_directory, "camp_uncons.shp")
 
 # Save the shapefile
-st_write(camp_final_sf, output_file, delete_dsn = TRUE) 
+st_write(camps_wp_uc_sf, dsn = output_directory, layer = "camp_uncons", driver = "ESRI Shapefile", delete_dsn = TRUE)
+
 ```
 
+```{r}
+#install.packages("writexl")
+library(writexl)
+library(writexl)
 
+# Define the file path for saving
+output_file <- "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/camps.xlsx"
+
+# Save the data as an Excel file
+write_xlsx(camps, output_file)
+
+```
+
+#CAMPS SAVING
+
+```{r}
+# Ensure camp_final is an sf object
+if (!inherits(camps, "sf")) {
+  campssf <- st_as_sf(camps)
+} else {
+  campssf <- camps
+}
+
+# Define the output directory and file name
+output_directory <- "D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/"
+output_file <- paste0(output_directory, "camps.shp")
+
+# Save the shapefile
+st_write(campssf, dsn = output_directory, layer = "camps", driver = "ESRI Shapefile", delete_dsn = TRUE)
+
+```
+
+```{r}
+library(rgdal)
+writeOGR(campssf, dsn = "C:/temp/", layer = "camps", driver = "ESRI Shapefile")
+
+```
 
 #__________________________________________
 #ANALYSIS TO FIND STORY
@@ -10209,6 +11059,7 @@ print(coverage_boxplot)
 
 
 ```
+
 ```{r}
 library(sf)
 library(ggplot2)
@@ -10474,5 +11325,480 @@ print(gpw_boxplot)
 ```{r}
 # Save the plot as an image file
 ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/gpw_boxplot.png", plot = gpw_boxplot, width = 8, height = 6, dpi = 300)
+```
+#building area summary
+```{r}
+summarized_data <- camps %>%
+  summarise(Google = sum(g_b_a, na.rm = TRUE),
+            OSM = sum(osm_b_a, na.rm = TRUE),
+            Microsoft = sum(ms_b_a, na.rm = TRUE),
+            VIDA = sum(vida_b_a, na.rm = TRUE))
+print(summarized_data)
+
+summarized_data <- data.frame(
+  source = c("Google", "OSM", "Microsoft", "VIDA"),
+  building_count = c(3989102,1276338, 2602683, 4425513)
+)
+
+# Plotting
+bar_plot <- ggplot(summarized_data, aes(x = source, y = building_count, fill = source)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = building_count), vjust = -0.5) +  # Add text labels above the bars
+  labs(x = "Data Source", y = "Building Count", title = "Total Building Area by Data Source") +
+  scale_fill_manual(values = c("Google" = "skyblue", "OSM" = "pink", "Microsoft" = "lightgreen", "VIDA" = "coral")) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+# Show the plot
+print(bar_plot)
+```
+#correlation of building count and areas
+```{r}
+# Summarizing building areas and counts
+summarized_data <- camps %>%
+  summarise(
+    Google_area = sum(g_b_a, na.rm = TRUE),
+    Google_count = sum(g_b_c, na.rm = TRUE),
+    OSM_area = sum(osm_b_a, na.rm = TRUE),
+    OSM_count = sum(osm_b_c, na.rm = TRUE),
+    Microsoft_area = sum(ms_b_a, na.rm = TRUE),
+    Microsoft_count = sum(ms_b_c, na.rm = TRUE),
+    VIDA_area = sum(vida_b_a, na.rm = TRUE),
+    VIDA_count = sum(vida_b_c, na.rm = TRUE)
+  )
+
+# Creating a data frame with the summarized values
+correlation_data <- data.frame(
+  source = c("Google", "OSM", "Microsoft", "VIDA"),
+  building_area = c(
+    summarized_data$Google_area,
+    summarized_data$OSM_area,
+    summarized_data$Microsoft_area,
+    summarized_data$VIDA_area
+  ),
+  building_count = c(
+    summarized_data$Google_count,
+    summarized_data$OSM_count,
+    summarized_data$Microsoft_count,
+    summarized_data$VIDA_count
+  )
+)
+
+# Calculating correlation
+correlation <- cor(correlation_data$building_area, correlation_data$building_count, use = "complete.obs")
+print(paste("Correlation between building area and building count:", round(correlation, 2)))
+
+# Visualizing the relationship
+scatter_plot <- ggplot(correlation_data, aes(x = building_area, y = building_count, color = source)) +
+  geom_point(size = 4) +
+  geom_smooth(method = "lm", se = FALSE, color = "black", linetype = "dashed") +  # Linear regression line
+  labs(
+    x = "Total Building Area",
+    y = "Building Count",
+    title = "Relationship Between Building Area and Building Count",
+    subtitle = paste("Correlation:", round(correlation, 2))
+  ) +
+  theme_minimal()
+
+# Show the scatter plot
+print(scatter_plot)
+
+```
+
+```{r}
+# Scatter plot with separate lm lines for each dataset
+scatter_plot <- ggplot(correlation_data, aes(x = building_area, y = building_count, color = source)) +
+  geom_point(size = 4) +
+  geom_smooth(method = "lm", se = FALSE, aes(group = source)) +  # Separate lm lines for each source
+  labs(
+    x = "Total Building Area",
+    y = "Building Count",
+    title = "Relationship Between Building Area and Building Count",
+    subtitle = "Separate Linear Regression Lines for Each Dataset"
+  ) +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+# Show the scatter plot
+print(scatter_plot)
+
+```
+
+```{r}
+# Reshape the data for long format to make it easier to facet by dataset
+long_data <- camps %>%
+  select(camp_id, g_b_a, g_b_c, osm_b_a, osm_b_c, ms_b_a, ms_b_c, vida_b_a, vida_b_c) %>%
+  pivot_longer(
+    cols = -camp_id,
+    names_to = c("source", "type"),
+    names_sep = "_b_",
+    values_to = "value"
+  ) %>%
+  pivot_wider(
+    names_from = type,
+    values_from = value
+  ) %>%
+  mutate(
+    source = case_when(
+      source == "g" ~ "Google",
+      source == "osm" ~ "OSM",
+      source == "ms" ~ "Microsoft",
+      source == "vida" ~ "VIDA"
+    )
+  )
+
+# Plot scatterplot with geom_smooth for each dataset
+scatter_plot <- ggplot(long_data, aes(x = a, y = c, color = source)) +
+  geom_point(alpha = 0.6) +
+  geom_smooth(method = "lm", se = FALSE) +
+  labs(
+    x = "Building Area",
+    y = "Building Count",
+    title = "Building Count vs Building Area for Each Dataset",
+    subtitle = "Linear Regression Lines for Each Dataset"
+  ) +
+  facet_wrap(~source) +
+  theme_minimal() +
+  theme(legend.position = "none")  # Legend is not necessary as datasets are separated in facets
+
+# Show the plot
+print(scatter_plot)
+
+
+```
+
+#building area by shelter type
+```{r}
+
+# Load necessary libraries
+library(dplyr)
+library(ggplot2)
+
+
+# Convert the sf object to a data frame
+camps_df <- as.data.frame(camps)
+
+# Reshape the data to long format for easier plotting
+data_long <- camps_df %>%
+  dplyr::select(Shlt_ty, g_b_a, ms_b_a, vida_b_a, osm_b_a, Site_Ar) %>%
+  pivot_longer(cols = c(g_b_a, ms_b_a, vida_b_a, osm_b_a, Site_Ar), 
+               names_to = "Variable", 
+               values_to = "Value")
+
+# Aggregate the data to get summed values by Shelter Type and Variable
+data_aggregated <- data_long %>%
+  group_by(Shlt_ty, Variable) %>%
+  summarize(Aggregated_Value = sum(Value, na.rm = TRUE))
+print(data_aggregated)
+# Plotting a grouped bar plot with aggregated values on the bars
+plot <- ggplot(data_aggregated, aes(x = Shlt_ty, y = Aggregated_Value, fill = Variable)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  geom_text(aes(label = Aggregated_Value), 
+            position = position_dodge(width = 0.8), 
+            vjust = -0.2, size = 2) +  # Adjust 'vjust' and 'size' for text positioning
+  labs(x = "Shelter Type", y = "Area", title = "Aggregated area of Buildings and Survey Households by Shelter Type and Source") +
+  theme_minimal() +
+  theme(legend.position = "top", axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Print the plot
+print(plot)
+```
+```{r}
+
+# Install and load necessary libraries if not already installed
+if (!requireNamespace("ggplot2", quietly = TRUE)) install.packages("ggplot2")
+if (!requireNamespace("reshape2", quietly = TRUE)) install.packages("reshape2")
+
+# Load libraries
+library(ggplot2)
+library(reshape2)
+
+# Calculate the correlation matrix for survey population (N_INDVI) and building counts
+correlation_data <- camps_data_nogeom[, c("N_INDVI","N_HH", "g_b_c", "ms_b_c", "vida_b_c", "osm_b_c")]
+
+# Calculate the correlation matrix
+correlation_matrix <- cor(correlation_data, use = "complete.obs", method = "pearson")
+
+# Print the correlation matrix
+print(correlation_matrix)
+
+# Reshape the correlation matrix into long format
+correlation_melt <- melt(correlation_matrix)
+# Initialize a list to store correlation results for each shelter type
+shelter_correlation_results <- list()
+
+# Unique shelter types
+shelter_types <- unique(camps_data_nogeom$Shlt_ty)
+
+# Loop through each shelter type
+for (shelter in shelter_types) {
+  # Filter data for the current shelter type
+  shelter_data <- camps_data_nogeom[camps_data_nogeom$Shlt_ty == shelter, 
+                                    c("N_INDVI", "N_HH", "g_b_c", "ms_b_c", "vida_b_c", "osm_b_c")]
+  
+  # Calculate correlations of N_HH and N_INDVI with the datasets
+  correlation_matrix <- cor(shelter_data[, c("N_INDVI", "N_HH")], 
+                            shelter_data[, c("g_b_c", "ms_b_c", "vida_b_c", "osm_b_c")], 
+                            use = "complete.obs", 
+                            method = "pearson")
+  
+  # Melt the correlation matrix for plotting
+  correlation_melt <- melt(correlation_matrix, varnames = c("Survey_Variable", "Building_Dataset"))
+  
+  # Add shelter type information
+  correlation_melt$Shelter_Type <- shelter
+  
+  # Store the results
+  shelter_correlation_results[[shelter]] <- correlation_melt
+}
+
+# Combine all results into a single data frame
+combined_correlation_results <- do.call(rbind, shelter_correlation_results)
+
+# Create a heatmap for each shelter type
+heatmap_plots <- list()
+for (shelter in shelter_types) {
+  # Filter data for current shelter type
+  shelter_correlation_data <- combined_correlation_results[combined_correlation_results$Shelter_Type == shelter, ]
+  
+  # Create the heatmap
+  heatmap_plot <- ggplot(data = shelter_correlation_data, aes(x = Building_Dataset, y = Survey_Variable, fill = value)) +
+    geom_tile(color = "white") +
+    scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, 
+                         limit = c(-1, 1), space = "Lab", 
+                         name = "Pearson\nCorrelation") +
+    geom_text(aes(label = round(value, 2)), color = "black", size = 4) +
+    theme_minimal() +
+    theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+    labs(x = "Building Dataset", y = "Survey Variable", 
+         title = paste("Correlation Heatmap for Shelter Type:", shelter))
+  
+  # Store the plot
+  heatmap_plots[[shelter]] <- heatmap_plot
+}
+
+# Print all heatmaps
+for (shelter in shelter_types) {
+  print(heatmap_plots[[shelter]])
+}
+
+
+# Print the combined table of correlations
+print(combined_correlation_results)
+
+# Save the correlation table as a CSV file
+write.csv(combined_correlation_results, D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots, "correlation_results.csv"), row.names = FALSE)
+
+```
+
+```{r}
+# Initialize a list to store correlation results for each shelter type
+shelter_correlation_results <- list()
+
+# Unique shelter types
+shelter_types <- unique(camps_data_nogeom$Shlt_ty)
+
+# Loop through each shelter type
+for (shelter in shelter_types) {
+  # Filter data for the current shelter type
+  shelter_data <- camps_data_nogeom[camps_data_nogeom$Shlt_ty == shelter, 
+                                    c("N_HH", "g_b_c", "ms_b_c", "vida_b_c", "osm_b_c")]
+  
+  # Calculate correlations of N_HH with the datasets
+  correlation_matrix <- cor(shelter_data[, c("N_HH")], 
+                            shelter_data[, c("g_b_c", "ms_b_c", "vida_b_c", "osm_b_c")], 
+                            use = "complete.obs", 
+                            method = "pearson")
+  
+  # Melt the correlation matrix for plotting
+  correlation_melt <- melt(correlation_matrix, varnames = c("Survey_Variable", "Building_Dataset"))
+  
+  # Add shelter type information
+  correlation_melt$Shelter_Type <- shelter
+  
+  # Store the results
+  shelter_correlation_results[[shelter]] <- correlation_melt
+}
+
+# Combine all results into a single data frame
+combined_correlation_results <- do.call(rbind, shelter_correlation_results)
+
+# Create a single correlation plot for all shelters, focusing on N_HH correlation
+correlation_plot <- ggplot(data = combined_correlation_results, aes(x = Building_Dataset, y = Shelter_Type, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, 
+                       limit = c(-1, 1), space = "Lab", 
+                       name = "Pearson\nCorrelation") +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 4) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  labs(x = "Building Dataset", y = "Shelter Type", title = "Correlation of Survey Household Counts (N_HH) with Building counts for different shelter types")
+
+# Print the correlation plot
+print(correlation_plot)
+
+# Print the combined correlation table (optional)
+print(combined_correlation_results)
+
+
+
+```
+```{r}
+# Initialize a list to store correlation results for each shelter type
+shelter_correlation_results <- list()
+
+# Unique shelter types
+shelter_types <- unique(camps_data_nogeom$Shlt_ty)
+
+# Loop through each shelter type
+for (shelter in shelter_types) {
+  # Filter data for the current shelter type
+  shelter_data <- camps_data_nogeom[camps_data_nogeom$Shlt_ty == shelter, 
+                                    c("N_HH", "g_b_c", "ms_b_c", "vida_b_c", "osm_b_c")]
+  
+  # Calculate correlations of N_HH with the datasets
+  correlation_matrix <- cor(shelter_data[, c("N_HH")], 
+                            shelter_data[, c("g_b_c", "ms_b_c", "vida_b_c", "osm_b_c")], 
+                            use = "complete.obs", 
+                            method = "pearson")
+  
+  # Melt the correlation matrix for plotting
+  correlation_melt <- melt(correlation_matrix, varnames = c("Survey_Variable", "Building_Dataset"))
+  
+  # Replace the dataset names with more descriptive labels
+  correlation_melt$Building_Dataset <- recode(correlation_melt$Building_Dataset,
+                                              "g_b_c" = "Google",
+                                              "ms_b_c" = "Microsoft",
+                                              "vida_b_c" = "VIDA",
+                                              "osm_b_c" = "OSM")
+  
+  # Add shelter type information
+  correlation_melt$Shelter_Type <- shelter
+  
+  # Store the results
+  shelter_correlation_results[[shelter]] <- correlation_melt
+}
+
+# Combine all results into a single data frame
+combined_correlation_results <- do.call(rbind, shelter_correlation_results)
+
+# Create a single correlation plot for all shelters, focusing on N_HH correlation
+correlation_plot <- ggplot(data = combined_correlation_results, aes(x = Building_Dataset, y = Shelter_Type, fill = value)) +
+  geom_tile(color = "white") +
+  scale_fill_gradient2(low = "blue", high = "red", mid = "white", midpoint = 0, 
+                       limit = c(-1, 1), space = "Lab", 
+                       name = "Pearson\nCorrelation") +
+  geom_text(aes(label = round(value, 2)), color = "black", size = 2) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1)) +
+  labs(x = "Building Dataset", y = "Shelter Type", title = "Correlation of Household Counts (N_HH) with Building Datasets")
+
+# Print the correlation plot
+print(correlation_plot)
+
+
+
+# Print the combined correlation table (optional)
+print(combined_correlation_results)
+
+
+
+```
+```{r}
+#heat map save
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/correlation_plot.png", plot = correlation_plot, width = 8, height = 6, dpi = 300)
+```
+#normalized building count
+```{r}
+bu
+
+```
+
+```{r}
+# Step 1: Calculate coverage areas for each dataset (if not already done)
+camps$google_area <- camps$g_b_a / camps$Site_Ar * 100  # Google building area coverage percentage
+camps$osm_area <- camps$osm_b_a / camps$Site_Ar * 100      # OSM building area coverage percentage
+camps$ms_area <- camps$ms_b_a / camps$Site_Ar * 100        # Microsoft building area coverage percentage
+camps$vida_area <- camps$vida_b_a / camps$Site_Ar * 100    # VIDA building area coverage percentage
+
+# Step 2: Prepare data for visualization with shelter type included
+coverage_data <- data.frame(
+  Dataset = rep(c("Google", "OSM", "Microsoft", "VIDA"), each = nrow(camps)),
+  Coverage_Percentage = c(camps$google_area, camps$osm_area, camps$ms_area, camps$vida_area),
+  Site_Status = camps$Sit_Stt,  # Formal/Informal site status
+  Shelter_Type = rep(camps$Shlt_ty, 4)  # Shelter type repeated for each dataset
+)
+
+# Ensure Dataset is a factor with the correct order
+coverage_data$Dataset <- factor(coverage_data$Dataset, levels = c("Google", "Microsoft", "VIDA", "OSM"))
+
+# Step 3: Visualization - Violin plot grouped by shelter type
+coverage_violin_plot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Percentage, fill = Shelter_Type)) +
+  geom_violin(trim = FALSE, alpha = 0.7) +
+  stat_summary(
+    aes(color = Shelter_Type),
+    fun = median, geom = "point", size = 3, position = position_dodge(width = 0.9)
+  ) +
+  stat_summary(
+    aes(label = round(..y.., 1), color = Shelter_Type),
+    fun = median, geom = "text", position = position_dodge(width = 0.9), vjust = -0.5, size = 3
+  ) +
+  scale_fill_brewer(palette = "Set3", name = "Shelter Type") +  # Use a palette for clear distinctions
+  scale_color_manual(values = c("blue", "black", "red", "green")) +  # Adjust colors as needed
+  labs(
+    title = "Building Area Coverage (%) of Refugee Settlement Boundary Area by Shelter Type",
+    x = "Dataset",
+    y = "Coverage Percentage (%)",
+    fill = "Shelter Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(size = 12, face = "bold"),
+    legend.position = "top"
+  ) +
+  coord_cartesian(ylim = c(0, 100))  # Adjust y-axis range if needed
+
+# Print the violin plot
+print(coverage_violin_plot)
+
+
+```
+```{r}
+# Automatically generate a palette that accommodates all shelter types
+coverage_violin_plot <- ggplot(coverage_data, aes(x = Dataset, y = Coverage_Percentage, fill = Shelter_Type)) +
+  geom_violin(trim = FALSE, alpha = 0.7) +
+  stat_summary(
+    aes(color = Shelter_Type),
+    fun = median, geom = "point", size = 3, position = position_dodge(width = 0.9)
+  ) +
+  stat_summary(
+    aes(label = round(..y.., 1), color = Shelter_Type),
+    fun = median, geom = "text", position = position_dodge(width = 0.9), vjust = -0.5, size = 3
+  ) +
+  scale_fill_brewer(palette = "Set3", name = "Shelter Type") +  # Automatically adjusts for all categories
+  labs(
+    title = "Building Area Coverage (%) of Refugee Settlement Boundary Area by Shelter Type",
+    x = "Dataset",
+    y = "Coverage Percentage (%)",
+    fill = "Shelter Type"
+  ) +
+  theme_minimal() +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    plot.title = element_text(size = 12, face = "bold"),
+    legend.position = "top"
+  ) +
+  coord_cartesian(ylim = c(0, 100))  # Adjust y-axis range if needed
+
+# Print the violin plot
+print(coverage_violin_plot)
+
+```
+```{r}
+# Save the plot as an image file
+ggsave("D:/EAGLE/Master_Thesis_Hannes/1/R/Lallu_thesis/Plots/coverage_violin_plot.png", plot = coverage_violin_plot, width = 15, height = 6, dpi = 300)
 ```
 
