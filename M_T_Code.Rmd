@@ -103,6 +103,6 @@ camps$g_a_65_to_<-as.numeric(camps$g_a_65_to_)
 ```{r}
 # Assuming your dataset is named 'data'
 # Subset the data to exclude the row with name "BO_S294"
-camps<- subset(camps, Name != "BO_S294")
+camps<- subset(camps, Name != "BO_S294")w
 head(data)
 ```
